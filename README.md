@@ -5,7 +5,7 @@
 ![npm-typescript]
 [![License][github-license]][github-license-url]
 
-Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego™ brick for Cosmos dApps.
+Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego™ brick for Cosmos Dapps.
 
 ## Docs
 
