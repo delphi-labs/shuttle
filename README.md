@@ -22,10 +22,10 @@ npm install @delphilabs/shuttle
 ### Setup
 
 ```tsx
-import { ShuttleContextProvider } from "@delphilabs/shuttle";
+import { ShuttleProvider } from "@delphilabs/shuttle";
 
 function App() {
-  return <ShuttleContextProvider
+  return <ShuttleProvider
     providers={[
       // ...
     ]}
@@ -34,7 +34,7 @@ function App() {
     persistent
   >
     <Component />
-  </ShuttleContextProvider>
+  </ShuttleProvider>
 }
 ```
 
