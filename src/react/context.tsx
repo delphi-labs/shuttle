@@ -35,7 +35,7 @@ type ShuttleContextType =
 
 export const ShuttleContext = createContext<ShuttleContextType>(undefined);
 
-export const ShuttleContextProvider = ({
+export const ShuttleProvider = ({
   persistent = false,
   persistentKey = "shuttle",
   providers = [],
@@ -168,7 +168,7 @@ export const useShuttle = () => {
   const context = useContext(ShuttleContext);
 
   if (context === undefined) {
-    throw new Error("Please wrap your component with ShuttleContextProvider to call: useShuttle");
+    throw new Error("Please wrap your component with ShuttleProvider to call: useShuttle");
   }
 
   return context;
