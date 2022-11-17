@@ -9,7 +9,7 @@ Shuttle is open-source npm package designed to turn wallet connections into a pl
 
 ## Docs
 
-You can check out the [documentation](https://docs.delphilabs.io/shuttle/) for more information.
+You can check out the [documentation](https://shuttle.delphilabs.io/) for more information.
 
 ## How to get started
 
