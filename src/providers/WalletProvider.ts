@@ -57,6 +57,7 @@ export type BroadcastMessage = {
   sender: string;
   contract: string;
   msg: any;
+  funds?: { amount: string; denom: string }[];
 };
 
 export type BroadcastResult = {

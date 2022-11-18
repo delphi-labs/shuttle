@@ -136,7 +136,6 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
         const { type, ...rest } = message;
         return JSON.stringify({
           "@type": message.type,
-          funds: [],
           ...rest,
         });
       });
@@ -208,7 +207,6 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       const { type, ...rest } = message;
       return JSON.stringify({
         "@type": message.type,
-        funds: [],
         ...rest,
       });
     });

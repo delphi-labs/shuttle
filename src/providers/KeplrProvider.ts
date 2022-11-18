@@ -163,6 +163,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
           sender: message.sender,
           contract: message.contract,
           msg: toUtf8(JSON.stringify(message.msg)),
+          funds: message.funds,
         },
       };
     });
@@ -221,6 +222,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
           sender: message.sender,
           contract: message.contract,
           msg: toUtf8(JSON.stringify(message.msg)),
+          funds: message.funds,
         },
       };
     });
