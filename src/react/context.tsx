@@ -12,6 +12,7 @@ type ShuttleContextType =
   | {
       providers: WalletProvider[];
       connect: (providerId: string, chainId: string) => Promise<void>;
+      wallets: WalletConnection[];
       getWallets: (providerId?: string, chainId?: string) => WalletConnection[];
       recentWallet: WalletConnection | null;
       disconnect: (providerId?: string, chainId?: string) => void;
@@ -72,6 +73,10 @@ export const ShuttleProvider = ({
       store?.restore(walletConnections);
     }
   }, [walletConnections, internalStore, store]);
+
+  const getWallets = useMemo(() => {
+    return store?.getWallets || internalStore.getWallets;
+  }, [store, internalStore]);
 
   const providerInterface = useMemo(() => {
     const connect = async (providerId: string, chainId: string) => {
@@ -152,14 +157,15 @@ export const ShuttleProvider = ({
     return {
       providers,
       connect,
-      getWallets: store?.getWallets || internalStore.getWallets,
+      wallets: store?.wallets || internalStore.wallets,
+      getWallets,
       recentWallet: store?.recentWallet || internalStore.recentWallet,
       disconnect,
       disconnectWallet: store?.removeWallet || internalStore.removeWallet,
       broadcast,
       sign,
     };
-  }, [providers, availableProviders, store, internalStore, persistent, setWalletConnections]);
+  }, [providers, availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
 };
