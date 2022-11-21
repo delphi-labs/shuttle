@@ -82,16 +82,16 @@ export interface WalletProvider {
   broadcast(
     messages: BroadcastMessage[],
     wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
+    feeAmount?: string | null,
+    gasLimit?: string | null,
+    memo?: string | null,
   ): Promise<BroadcastResult>;
   sign(
     messages: BroadcastMessage[],
     wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
+    feeAmount?: string | null,
+    gasLimit?: string | null,
+    memo?: string | null,
   ): Promise<SigningResult>;
 }
 

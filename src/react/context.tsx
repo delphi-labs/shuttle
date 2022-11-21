@@ -19,16 +19,16 @@ type ShuttleContextType =
       disconnectWallet: (wallet: WalletConnection) => void;
       broadcast: (options: {
         messages: BroadcastMessage[];
-        feeAmount?: string;
-        gasLimit?: string;
-        memo?: string;
+        feeAmount?: string | null;
+        gasLimit?: string | null;
+        memo?: string | null;
         wallet?: WalletConnection;
       }) => Promise<BroadcastResult>;
       sign: (options: {
         messages: BroadcastMessage[];
-        feeAmount?: string;
-        gasLimit?: string;
-        memo?: string;
+        feeAmount?: string | null;
+        gasLimit?: string | null;
+        memo?: string | null;
         wallet?: WalletConnection;
       }) => Promise<SigningResult>;
     }
@@ -108,9 +108,9 @@ export const ShuttleProvider = ({
       wallet,
     }: {
       messages: BroadcastMessage[];
-      feeAmount?: string;
-      gasLimit?: string;
-      memo?: string;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
       wallet?: WalletConnection;
     }) => {
       const walletToUse = wallet || store?.recentWallet || internalStore?.recentWallet;
@@ -135,9 +135,9 @@ export const ShuttleProvider = ({
       wallet,
     }: {
       messages: BroadcastMessage[];
-      feeAmount?: string;
-      gasLimit?: string;
-      memo?: string;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
       wallet?: WalletConnection;
     }) => {
       const walletToUse = wallet || store?.recentWallet || internalStore?.recentWallet;
