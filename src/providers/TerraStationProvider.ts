@@ -144,7 +144,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = JSON.stringify({
-        amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+        amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
         gas_limit: gasLimit || gas,
       });
 
