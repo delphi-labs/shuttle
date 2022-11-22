@@ -49,14 +49,19 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     if (this.initializing || this.initialized) {
       return;
     }
+
+    this.initializing = true;
+
     if (!window.keplr) {
+      this.initializing = false;
       throw new Error("Keplr is not available");
     }
+
     if (!window.keplr.experimentalSuggestChain) {
+      this.initializing = false;
       throw new Error("Keplr does not support chain suggestion");
     }
 
-    this.initializing = true;
     this.keplr = window.keplr;
     this.initialized = true;
     this.initializing = false;

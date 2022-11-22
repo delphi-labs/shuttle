@@ -50,20 +50,22 @@ export const ShuttleProvider = ({
   children?: React.ReactNode;
 }) => {
   const [availableProviders, setAvailableProviders] = useState<WalletProvider[]>([]);
-  const providersToInitialize = providers.filter((provider) => !provider.initializing || !provider.initialized);
+
   useEffect(() => {
-    providersToInitialize.forEach((provider) => {
-      const alreadyInitialized = availableProviders.some((p) => p.id === provider.id);
-      if (!provider.initializing && !provider.initialized && !alreadyInitialized) {
+    providers
+      .filter((provider) => !provider.initializing || !provider.initialized)
+      .forEach((provider) => {
         provider
           .init()
           .then(() => {
-            setAvailableProviders((prev) => [...prev, provider]);
+            setAvailableProviders((prev) => {
+              const rest = prev.filter((p) => p.id !== provider.id);
+              return [...rest, provider];
+            });
           })
-          .catch((e) => console.error(e));
-      }
-    });
-  }, [providersToInitialize, availableProviders]);
+          .catch((e) => console.error("Shuttle: ", e));
+      });
+  }, [providers]);
 
   const internalStore = useShuttleStore();
   const [walletConnections, setWalletConnections] = useLocalStorage<WalletConnection[]>(persistentKey || "shuttle", []);
@@ -155,7 +157,7 @@ export const ShuttleProvider = ({
     };
 
     return {
-      providers,
+      providers: availableProviders,
       connect,
       wallets: store?.wallets || internalStore.wallets,
       getWallets,
@@ -165,7 +167,7 @@ export const ShuttleProvider = ({
       broadcast,
       sign,
     };
-  }, [providers, availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
+  }, [availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
 };

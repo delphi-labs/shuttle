@@ -46,11 +46,14 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     if (this.initializing || this.initialized) {
       return;
     }
+
+    this.initializing = true;
+
     if (!window.isTerraExtensionAvailable) {
+      this.initializing = false;
       throw new Error("Terra Station is not available");
     }
 
-    this.initializing = true;
     this.terraExtension = new TerraExtension("station");
     await this.terraExtension.init();
     this.initialized = true;
