@@ -157,7 +157,7 @@ export const ShuttleProvider = ({
     };
 
     return {
-      providers: availableProviders,
+      providers,
       connect,
       wallets: store?.wallets || internalStore.wallets,
       getWallets,
@@ -167,7 +167,7 @@ export const ShuttleProvider = ({
       broadcast,
       sign,
     };
-  }, [availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
+  }, [providers, availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
 };
