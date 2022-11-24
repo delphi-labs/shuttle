@@ -1,8 +1,10 @@
 import { Network } from "./network";
 
+export type Algo = "secp256k1" | "ed25519" | "sr25519";
+
 export type Account = {
   address: string;
-  algo: "secp256k1" | "ed25519" | "sr25519";
+  algo: Algo;
   pubkey: string;
 };
 

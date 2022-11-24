@@ -1,3 +1,16 @@
+export type BIP44 = {
+  coinType: number;
+};
+
+export type Bech32Config = {
+  bech32PrefixAccAddr: string;
+  bech32PrefixAccPub: string;
+  bech32PrefixValAddr: string;
+  bech32PrefixValPub: string;
+  bech32PrefixConsAddr: string;
+  bech32PrefixConsPub: string;
+};
+
 export type NetworkCurrency = {
   coinDenom: string;
   coinMinimalDenom: string;
@@ -17,19 +30,10 @@ export type Network = {
   rpc: string;
   rest: string;
   gasPrice?: string;
-  bip44?: {
-    coinType: number;
-  };
+  bip44?: BIP44;
   defaultCurrency?: NetworkCurrency;
   stakeCurrency?: NetworkCurrency;
   feeCurrencies?: NetworkCurrency[];
   features?: string[];
-  bech32Config?: {
-    bech32PrefixAccAddr: string;
-    bech32PrefixAccPub: string;
-    bech32PrefixValAddr: string;
-    bech32PrefixValPub: string;
-    bech32PrefixConsAddr: string;
-    bech32PrefixConsPub: string;
-  };
+  bech32Config?: Bech32Config;
 };

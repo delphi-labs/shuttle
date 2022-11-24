@@ -1,7 +1,7 @@
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
 import { GasPrice } from "@cosmjs/stargate";
-import { Window as KeplrWindow, Keplr } from "@keplr-wallet/types";
+import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
@@ -9,7 +9,9 @@ import { Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, Fee, SigningResult } from "../internals/transaction";
 
 declare global {
-  interface Window extends KeplrWindow {}
+  interface Window {
+    keplr?: Keplr;
+  }
 }
 
 const DEFAULT_CHAIN_PREFIX = "cosmos";

@@ -1,7 +1,7 @@
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
 import { GasPrice } from "@cosmjs/stargate";
-import { Keplr } from "@keplr-wallet/types";
+import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";

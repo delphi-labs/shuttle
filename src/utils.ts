@@ -1,10 +1,12 @@
+import { Bech32Config } from "./internals";
+
 export function defaultBech32Config(
   mainPrefix = "cosmos",
   validatorPrefix = "val",
   consensusPrefix = "cons",
   publicPrefix = "pub",
   operatorPrefix = "oper",
-) {
+): Bech32Config {
   return {
     bech32PrefixAccAddr: mainPrefix,
     bech32PrefixAccPub: mainPrefix + publicPrefix,
