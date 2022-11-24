@@ -84,7 +84,7 @@ export default class TerraExtension {
     return this.request("sign", { msgs: messages, prugeQueue: true, memo, fee });
   }
 
-  private request(type: string, data: any = {}, options: { timeout?: number } = { timeout: 60 }): Promise<any> {
+  private request(type: string, data: any = {}, options: { timeout?: number } = { timeout: 30 }): Promise<any> {
     return new Promise((resolve, reject) => {
       let promiseData: any = null;
       const onMessage = (event: any) => {
