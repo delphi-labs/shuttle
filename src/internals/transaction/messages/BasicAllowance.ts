@@ -3,7 +3,7 @@ import TransactionMsg from "./TransactionMsg";
 
 export type BasicAllowanceValue = {
   spend_limit: Coin[];
-  expiration: string;
+  expiration?: string;
 };
 
 export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
