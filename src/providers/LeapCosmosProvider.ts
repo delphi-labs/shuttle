@@ -1,16 +1,12 @@
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { toBase64, toUtf8 } from "@cosmjs/encoding";
+import { toBase64 } from "@cosmjs/encoding";
 import { GasPrice } from "@cosmjs/stargate";
 import { Keplr } from "@keplr-wallet/types";
-import WalletProvider, {
-  BroadcastMessage,
-  BroadcastResult,
-  Fee,
-  Network,
-  SigningResult,
-  WalletConnection,
-} from "./WalletProvider";
 import { defaultBech32Config, nonNullable } from "../utils";
+import WalletProvider from "./WalletProvider";
+import { WalletConnection } from "../internals/wallet";
+import { Network } from "../internals/network";
+import { TransactionMsg, BroadcastResult, Fee, SigningResult } from "../internals/transaction";
 
 declare global {
   interface Window {
@@ -136,7 +132,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
   }
 
   async broadcast(
-    messages: BroadcastMessage[],
+    messages: TransactionMsg[],
     wallet: WalletConnection,
     feeAmount?: string,
     gasLimit?: string,
@@ -163,17 +159,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
 
-    const processedMessages = messages.map((message) => {
-      return {
-        typeUrl: message.type,
-        value: {
-          sender: message.sender,
-          contract: message.contract,
-          msg: toUtf8(JSON.stringify(message.msg)),
-          funds: message.funds,
-        },
-      };
-    });
+    const processedMessages = messages.map((message) => message.toCosmosMsg());
 
     let fee: "auto" | Fee = "auto";
     if (feeAmount && feeAmount != "auto") {
@@ -195,7 +181,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
   }
 
   async sign(
-    messages: BroadcastMessage[],
+    messages: TransactionMsg[],
     wallet: WalletConnection,
     feeAmount?: string,
     gasLimit?: string,
@@ -222,17 +208,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
 
-    const processedMessages = messages.map((message) => {
-      return {
-        typeUrl: message.type,
-        value: {
-          sender: message.sender,
-          contract: message.contract,
-          msg: toUtf8(JSON.stringify(message.msg)),
-          funds: message.funds,
-        },
-      };
-    });
+    const processedMessages = messages.map((message) => message.toCosmosMsg());
 
     const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);

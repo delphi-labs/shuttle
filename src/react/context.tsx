@@ -1,10 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import WalletProvider, {
-  WalletConnection,
-  BroadcastMessage,
-  BroadcastResult,
-  SigningResult,
-} from "../providers/WalletProvider";
+import { WalletProvider } from "../providers/WalletProvider";
+import { WalletConnection } from "../internals/wallet";
+import { TransactionMsg, BroadcastResult, SigningResult } from "../internals/transaction";
 import { ShuttleStore, useShuttleStore } from "./store";
 import useLocalStorage from "./useLocalStorage";
 
@@ -18,14 +15,14 @@ type ShuttleContextType =
       disconnect: (providerId?: string, chainId?: string) => void;
       disconnectWallet: (wallet: WalletConnection) => void;
       broadcast: (options: {
-        messages: BroadcastMessage[];
+        messages: TransactionMsg[];
         feeAmount?: string | null;
         gasLimit?: string | null;
         memo?: string | null;
         wallet?: WalletConnection;
       }) => Promise<BroadcastResult>;
       sign: (options: {
-        messages: BroadcastMessage[];
+        messages: TransactionMsg[];
         feeAmount?: string | null;
         gasLimit?: string | null;
         memo?: string | null;
@@ -109,7 +106,7 @@ export const ShuttleProvider = ({
       memo,
       wallet,
     }: {
-      messages: BroadcastMessage[];
+      messages: TransactionMsg[];
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -136,7 +133,7 @@ export const ShuttleProvider = ({
       memo,
       wallet,
     }: {
-      messages: BroadcastMessage[];
+      messages: TransactionMsg[];
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;

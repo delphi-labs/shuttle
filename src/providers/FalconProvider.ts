@@ -2,13 +2,10 @@ import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { GasPrice } from "@cosmjs/stargate";
 import TerraExtension from "../extensions/TerraExtension";
-import WalletProvider, {
-  BroadcastMessage,
-  BroadcastResult,
-  Network,
-  SigningResult,
-  WalletConnection,
-} from "./WalletProvider";
+import WalletProvider from "./WalletProvider";
+import { WalletConnection } from "../internals/wallet";
+import { Network } from "../internals/network";
+import { BroadcastResult, SigningResult, TransactionMsg } from "../internals/transaction";
 
 declare global {
   interface Window {
@@ -110,7 +107,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
   }
 
   async broadcast(
-    messages: BroadcastMessage[],
+    messages: TransactionMsg[],
     wallet: WalletConnection,
     feeAmount?: string,
     gasLimit?: string,
@@ -135,13 +132,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         throw new Error("Wallet not connected");
       }
 
-      const processedMessages = messages.map((message) => {
-        const { type, ...rest } = message;
-        return JSON.stringify({
-          "@type": message.type,
-          ...rest,
-        });
-      });
+      const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
       const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
       const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
@@ -184,7 +175,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
   }
 
   async sign(
-    messages: BroadcastMessage[],
+    messages: TransactionMsg[],
     wallet: WalletConnection,
     feeAmount?: string,
     gasLimit?: string,
@@ -206,13 +197,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
       throw new Error("Wallet not connected");
     }
 
-    const processedMessages = messages.map((message) => {
-      const { type, ...rest } = message;
-      return JSON.stringify({
-        "@type": message.type,
-        ...rest,
-      });
-    });
+    const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
     const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
