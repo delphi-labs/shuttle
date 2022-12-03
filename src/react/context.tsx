@@ -73,8 +73,16 @@ export const ShuttleProvider = ({
     }
   }, [walletConnections, internalStore, store]);
 
+  const wallets = useMemo(() => {
+    return store?.wallets || internalStore.wallets;
+  }, [store, internalStore]);
+
   const getWallets = useMemo(() => {
     return store?.getWallets || internalStore.getWallets;
+  }, [store, internalStore]);
+
+  const recentWallet = useMemo(() => {
+    return store?.recentWallet || internalStore.recentWallet;
   }, [store, internalStore]);
 
   const providerInterface = useMemo(() => {
@@ -112,7 +120,7 @@ export const ShuttleProvider = ({
       memo?: string | null;
       wallet?: WalletConnection;
     }) => {
-      const walletToUse = wallet || store?.recentWallet || internalStore?.recentWallet;
+      const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
         throw new Error("No wallet to broadcast with");
       }
@@ -139,7 +147,7 @@ export const ShuttleProvider = ({
       memo?: string | null;
       wallet?: WalletConnection;
     }) => {
-      const walletToUse = wallet || store?.recentWallet || internalStore?.recentWallet;
+      const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
         throw new Error("No wallet to sign with");
       }
@@ -156,15 +164,25 @@ export const ShuttleProvider = ({
     return {
       providers,
       connect,
-      wallets: store?.wallets || internalStore.wallets,
+      wallets,
       getWallets,
-      recentWallet: store?.recentWallet || internalStore.recentWallet,
+      recentWallet,
       disconnect,
       disconnectWallet: store?.removeWallet || internalStore.removeWallet,
       broadcast,
       sign,
     };
-  }, [providers, availableProviders, store, internalStore, getWallets, persistent, setWalletConnections]);
+  }, [
+    providers,
+    availableProviders,
+    store,
+    internalStore,
+    wallets,
+    getWallets,
+    recentWallet,
+    persistent,
+    setWalletConnections,
+  ]);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
 };
