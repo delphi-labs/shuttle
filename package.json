@@ -43,6 +43,7 @@
     "@cosmjs/encoding": "^0.29.2",
     "@cosmjs/launchpad": "^0.27.1",
     "@cosmjs/stargate": "^0.29.2",
+    "tslib": "^2.4.0",
     "zustand": "^4.1.2"
   },
   "devDependencies": {
@@ -63,7 +64,6 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "ts-jest": "^29.0.3",
-    "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   }
 }
