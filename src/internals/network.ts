@@ -36,4 +36,7 @@ export type Network = {
   feeCurrencies?: NetworkCurrency[];
   features?: string[];
   bech32Config?: Bech32Config;
+  evm?: {
+    deriveCosmosAddress: (address: string) => string;
+  };
 };
