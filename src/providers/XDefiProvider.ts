@@ -1,11 +1,12 @@
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
-import { GasPrice } from "@cosmjs/stargate";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import TerraExtension from "../extensions/TerraExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
-import { Network } from "../internals/network";
-import { TransactionMsg, BroadcastResult, SigningResult } from "../internals/transaction";
+import { DEFAULT_GAS_MULTIPLIER, Network } from "../internals/network";
+import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
   interface Window {
@@ -104,6 +105,48 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       },
       network,
     };
+  }
+
+  async simulate(messages: TransactionMsg[], wallet: WalletConnection): Promise<SimulateResult> {
+    if (!this.terraExtension) {
+      throw new Error("XDefi is not available");
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const connect = await this.connect(wallet.network.chainId);
+
+    if (connect.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    const processedMessages = messages.map((message) => message.toCosmosMsg());
+
+    try {
+      const signer = new FakeOfflineSigner(wallet);
+      const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(network.rpc || "", signer);
+
+      const gasEstimation = await signingCosmWasmClient.simulate(wallet.account.address, processedMessages, "");
+
+      const fee = calculateFee(
+        Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
+        network.gasPrice || DEFAULT_GAS_PRICE,
+      );
+
+      return {
+        success: true,
+        fee,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error?.message,
+      };
+    }
   }
 
   async broadcast(

@@ -1,8 +1,16 @@
+import { StdFee } from "@cosmjs/amino";
+
 export * from "./messages";
 
 export type Fee = {
   amount: { amount: string; denom: string }[];
   gas: string;
+};
+
+export type SimulateResult = {
+  success: boolean;
+  error?: string | null;
+  fee?: StdFee | null;
 };
 
 export type BroadcastResult = {

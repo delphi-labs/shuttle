@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { WalletProvider } from "../providers/WalletProvider";
 import { WalletConnection } from "../internals/wallet";
-import { TransactionMsg, BroadcastResult, SigningResult } from "../internals/transaction";
+import { TransactionMsg, SimulateResult, BroadcastResult, SigningResult } from "../internals/transaction";
 import { ShuttleStore, useShuttleStore } from "./store";
 import useLocalStorage from "./useLocalStorage";
 
@@ -14,19 +14,20 @@ type ShuttleContextType =
       recentWallet: WalletConnection | null;
       disconnect: (providerId?: string, chainId?: string) => void;
       disconnectWallet: (wallet: WalletConnection) => void;
+      simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
       broadcast: (options: {
         messages: TransactionMsg[];
         feeAmount?: string | null;
         gasLimit?: string | null;
         memo?: string | null;
-        wallet?: WalletConnection;
+        wallet?: WalletConnection | null;
       }) => Promise<BroadcastResult>;
       sign: (options: {
         messages: TransactionMsg[];
         feeAmount?: string | null;
         gasLimit?: string | null;
         memo?: string | null;
-        wallet?: WalletConnection;
+        wallet?: WalletConnection | null;
       }) => Promise<SigningResult>;
     }
   | undefined;
@@ -107,6 +108,21 @@ export const ShuttleProvider = ({
       }
     };
 
+    const simulate = async ({ messages, wallet }: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => {
+      const walletToUse = wallet || recentWallet;
+      if (!walletToUse) {
+        throw new Error("No wallet to simulate with");
+      }
+
+      const provider = availableProviders.find((provider) => provider.id === walletToUse.providerId);
+
+      if (!provider) {
+        throw new Error(`Provider ${walletToUse.providerId} not found`);
+      }
+
+      return provider.simulate(messages, walletToUse);
+    };
+
     const broadcast = async ({
       messages,
       feeAmount,
@@ -118,7 +134,7 @@ export const ShuttleProvider = ({
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
-      wallet?: WalletConnection;
+      wallet?: WalletConnection | null;
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -145,7 +161,7 @@ export const ShuttleProvider = ({
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
-      wallet?: WalletConnection;
+      wallet?: WalletConnection | null;
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -169,6 +185,7 @@ export const ShuttleProvider = ({
       recentWallet,
       disconnect,
       disconnectWallet: store?.removeWallet || internalStore.removeWallet,
+      simulate,
       broadcast,
       sign,
     };

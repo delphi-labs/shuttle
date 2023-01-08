@@ -37,3 +37,18 @@ export type Network = {
   features?: string[];
   bech32Config?: Bech32Config;
 };
+
+export function isInjectiveNetwork(chainId: string): boolean {
+  return chainId === "injective-1" || chainId === "injective-888";
+}
+
+export const DEFAULT_CHAIN_PREFIX = "cosmos";
+export const DEFAULT_BIP44_COIN_TYPE = 118;
+export const DEFAULT_CURRENCY = {
+  coinDenom: "ATOM",
+  coinMinimalDenom: "uatom",
+  coinDecimals: 6,
+  coinGeckoId: "cosmos",
+};
+export const DEFAULT_GAS_PRICE = `0.2${DEFAULT_CURRENCY.coinDenom}`;
+export const DEFAULT_GAS_MULTIPLIER = 1.3;

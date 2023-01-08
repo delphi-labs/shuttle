@@ -1,28 +1,41 @@
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
-import { GasPrice } from "@cosmjs/stargate";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
-import { Network } from "../internals/network";
-import { TransactionMsg, BroadcastResult, Fee, SigningResult } from "../internals/transaction";
+import {
+  DEFAULT_BIP44_COIN_TYPE,
+  DEFAULT_CHAIN_PREFIX,
+  DEFAULT_CURRENCY,
+  DEFAULT_GAS_MULTIPLIER,
+  DEFAULT_GAS_PRICE,
+  isInjectiveNetwork,
+  Network,
+} from "../internals/network";
+import {
+  TransactionMsg,
+  BroadcastResult,
+  Fee,
+  SigningResult,
+  SimulateResult,
+  MsgExecuteContract,
+} from "../internals/transaction";
+import {
+  BaseAccount,
+  ChainRestAuthApi,
+  createTransactionAndCosmosSignDoc,
+  createTxRawFromSigResponse,
+  MsgExecuteContract as InjMsgExecuteContract,
+  TxRestApi,
+} from "@injectivelabs/sdk-ts";
 
 declare global {
   interface Window {
     keplr?: Keplr;
   }
 }
-
-const DEFAULT_CHAIN_PREFIX = "cosmos";
-const DEFAULT_BIP44_COIN_TYPE = 118;
-const DEFAULT_CURRENCY = {
-  coinDenom: "ATOM",
-  coinMinimalDenom: "uatom",
-  coinDecimals: 6,
-  coinGeckoId: "cosmos",
-};
-const DEFAULT_GAS_PRICE = `0.2${DEFAULT_CURRENCY.coinDenom}`;
 
 export const KeplrProvider = class KeplrProvider implements WalletProvider {
   id: string = "keplr";
@@ -131,6 +144,97 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     };
   }
 
+  async simulate(messages: TransactionMsg[], wallet: WalletConnection): Promise<SimulateResult> {
+    if (!this.keplr) {
+      throw new Error("Keplr is not available");
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const connect = await this.connect(network.chainId);
+
+    if (connect.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    if (isInjectiveNetwork(network.chainId)) {
+      const chainRestAuthApi = new ChainRestAuthApi(network.rest);
+      const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
+      const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
+
+      const preparedMessages = messages.map((msg) => {
+        const execMsg = msg as MsgExecuteContract;
+
+        return InjMsgExecuteContract.fromJSON({
+          sender: execMsg.value.sender,
+          contractAddress: execMsg.value.contract,
+          msg: execMsg.value.msg,
+          funds: execMsg.value.funds,
+        });
+      });
+
+      const preparedTx = await createTransactionAndCosmosSignDoc({
+        pubKey: wallet.account.pubkey || "",
+        chainId: wallet.network.chainId,
+        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        sequence: baseAccount.sequence,
+        accountNumber: baseAccount.accountNumber,
+      });
+
+      const txRestApi = new TxRestApi(wallet.network.rest);
+      const txRaw = preparedTx.txRaw;
+      txRaw.setSignaturesList([new Uint8Array(0)]);
+      const txClientSimulateResponse = await txRestApi.simulate(txRaw);
+
+      try {
+        const fee = calculateFee(
+          Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
+          network.gasPrice || "0.0004uinj",
+        );
+
+        return {
+          success: true,
+          fee,
+        };
+      } catch (error: any) {
+        return {
+          success: false,
+          error: error?.message,
+        };
+      }
+    } else {
+      const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
+
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+      const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+
+      const processedMessages = messages.map((message) => message.toCosmosMsg());
+
+      try {
+        const gasEstimation = await client.simulate(wallet.account.address, processedMessages, "");
+
+        const fee = calculateFee(
+          Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
+          network.gasPrice || DEFAULT_GAS_PRICE,
+        );
+
+        return {
+          success: true,
+          fee,
+        };
+      } catch (error: any) {
+        return {
+          success: false,
+          error: error?.message,
+        };
+      }
+    }
+  }
+
   async broadcast(
     messages: TransactionMsg[],
     wallet: WalletConnection,
@@ -155,29 +259,74 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     }
 
     const offlineSigner = this.keplr.getOfflineSigner(wallet.network.chainId);
-
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
 
-    const processedMessages = messages.map((message) => message.toCosmosMsg());
+    if (isInjectiveNetwork(network.chainId)) {
+      const chainRestAuthApi = new ChainRestAuthApi(wallet.network.rest);
+      const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
+      const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-    let fee: "auto" | Fee = "auto";
-    if (feeAmount && feeAmount != "auto") {
-      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-      const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-      fee = {
-        amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
-        gas: gasLimit || gas,
+      const preparedMessages = messages.map((msg) => {
+        const execMsg = msg as MsgExecuteContract;
+
+        return InjMsgExecuteContract.fromJSON({
+          sender: execMsg.value.sender,
+          contractAddress: execMsg.value.contract,
+          msg: execMsg.value.msg,
+          funds: execMsg.value.funds,
+        });
+      });
+
+      let fee: Fee | undefined = undefined;
+      if (feeAmount && feeAmount != "auto") {
+        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+        fee = {
+          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          gas: gasLimit || gas,
+        };
+      }
+
+      const preparedTx = await createTransactionAndCosmosSignDoc({
+        pubKey: wallet.account.pubkey || "",
+        chainId: wallet.network.chainId,
+        fee,
+        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        sequence: baseAccount.sequence,
+        accountNumber: baseAccount.accountNumber,
+      });
+
+      const directSignResponse = await offlineSigner.signDirect(wallet.account.address, preparedTx.cosmosSignDoc);
+      const txRaw = createTxRawFromSigResponse(directSignResponse);
+      const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+
+      return {
+        hash: broadcast.transactionHash,
+        rawLogs: broadcast.rawLog || "",
+        response: broadcast,
+      };
+    } else {
+      const processedMessages = messages.map((message) => message.toCosmosMsg());
+
+      let fee: "auto" | Fee = "auto";
+      if (feeAmount && feeAmount != "auto") {
+        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+        fee = {
+          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          gas: gasLimit || gas,
+        };
+      }
+
+      const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo);
+
+      return {
+        hash: broadcast.transactionHash,
+        rawLogs: broadcast.rawLog || "",
+        response: broadcast,
       };
     }
-
-    const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo);
-
-    return {
-      hash: broadcast.transactionHash,
-      rawLogs: broadcast.rawLog || "",
-      response: broadcast,
-    };
   }
 
   async sign(
@@ -208,20 +357,64 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
 
-    const processedMessages = messages.map((message) => message.toCosmosMsg());
+    if (isInjectiveNetwork(network.chainId)) {
+      const chainRestAuthApi = new ChainRestAuthApi(wallet.network.rest);
+      const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
+      const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-    const fee = {
-      amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
-      gas: gasLimit || gas,
-    };
-    const signing = await client.sign(wallet.account.address, processedMessages, fee, memo || "");
+      const preparedMessages = messages.map((msg) => {
+        const execMsg = msg as MsgExecuteContract;
 
-    return {
-      signatures: signing.signatures,
-      response: signing,
-    };
+        return InjMsgExecuteContract.fromJSON({
+          sender: execMsg.value.sender,
+          contractAddress: execMsg.value.contract,
+          msg: execMsg.value.msg,
+          funds: execMsg.value.funds,
+        });
+      });
+
+      let fee: Fee | undefined = undefined;
+      if (feeAmount && feeAmount != "auto") {
+        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+        fee = {
+          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          gas: gasLimit || gas,
+        };
+      }
+
+      const preparedTx = await createTransactionAndCosmosSignDoc({
+        pubKey: wallet.account.pubkey || "",
+        chainId: wallet.network.chainId,
+        fee,
+        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        sequence: baseAccount.sequence,
+        accountNumber: baseAccount.accountNumber,
+      });
+
+      const directSignResponse = await offlineSigner.signDirect(wallet.account.address, preparedTx.cosmosSignDoc);
+      const signing = createTxRawFromSigResponse(directSignResponse);
+
+      return {
+        signatures: signing.getSignaturesList_asU8(),
+        response: signing,
+      };
+    } else {
+      const processedMessages = messages.map((message) => message.toCosmosMsg());
+
+      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+      const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+      const fee = {
+        amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+        gas: gasLimit || gas,
+      };
+      const signing = await client.sign(wallet.account.address, processedMessages, fee, memo || "");
+
+      return {
+        signatures: signing.signatures,
+        response: signing,
+      };
+    }
   }
 };
 

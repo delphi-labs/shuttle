@@ -1,4 +1,4 @@
-import { TransactionMsg, BroadcastResult, SigningResult } from "../internals/transaction";
+import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
 import { Network } from "../internals/network";
 import { WalletConnection } from "../internals/wallet";
 
@@ -10,6 +10,7 @@ export interface WalletProvider {
   initialized: boolean;
   init(): Promise<void>;
   connect(chainId: string): Promise<WalletConnection>;
+  simulate: (messages: TransactionMsg[], wallet: WalletConnection) => Promise<SimulateResult>;
   broadcast(
     messages: TransactionMsg[],
     wallet: WalletConnection,
