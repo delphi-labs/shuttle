@@ -193,7 +193,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       try {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
-          network.gasPrice || "0.0004uinj",
+          network.gasPrice || "0.0004inj",
         );
 
         return {
