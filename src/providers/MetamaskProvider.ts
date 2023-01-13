@@ -14,6 +14,7 @@ import {
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   SIGN_AMINO,
   TxRestApi,
+  DEFAULT_STD_FEE,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 import { fromRpcSig, ecrecover } from "ethereumjs-util";
@@ -134,6 +135,12 @@ export class MetamaskProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
+    const connect = await this.connect(network.chainId);
+
+    if (connect.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
     if (isInjectiveNetwork(network.chainId)) {
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
@@ -166,7 +173,7 @@ export class MetamaskProvider implements WalletProvider {
       try {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
-          network.gasPrice || "0.0004inj",
+          network.gasPrice || "0.0005inj",
         );
 
         return {
@@ -208,6 +215,12 @@ export class MetamaskProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
+    const connect = await this.connect(network.chainId);
+
+    if (connect.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
 
     if (isInjectiveNetwork(network.chainId)) {
@@ -236,6 +249,7 @@ export class MetamaskProvider implements WalletProvider {
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
         const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+        feeAmount = String(new BigNumberInBase(feeAmount).times(10 ** (feeCurrency.coinDecimals - 6)).toFixed(0));
         fee = {
           amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
           gas: gasLimit || gas,

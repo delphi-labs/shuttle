@@ -193,7 +193,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       try {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
-          network.gasPrice || "0.0004inj",
+          network.gasPrice || "0.0005inj",
         );
 
         return {
