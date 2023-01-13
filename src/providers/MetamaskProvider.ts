@@ -14,7 +14,6 @@ import {
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   SIGN_AMINO,
   TxRestApi,
-  DEFAULT_STD_FEE,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 import { fromRpcSig, ecrecover } from "ethereumjs-util";
