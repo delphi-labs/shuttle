@@ -1,4 +1,4 @@
-import { create, StateCreator } from "zustand";
+import create, { StateCreator } from "zustand";
 import { WalletConnection } from "../internals/wallet";
 
 export type ShuttleStore = {
@@ -57,4 +57,4 @@ export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
     }),
 });
 
-export const useShuttleStore = create<ShuttleStore>()(createShuttleStore);
+export const useShuttleStore = create<ShuttleStore>(createShuttleStore);
