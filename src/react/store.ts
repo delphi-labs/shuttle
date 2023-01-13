@@ -57,4 +57,4 @@ export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
     }),
 });
 
-export const useShuttleStore = create<ShuttleStore>(createShuttleStore);
+export const useShuttleStore = create<ShuttleStore>()(createShuttleStore);
