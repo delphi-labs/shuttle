@@ -1,5 +1,10 @@
-import { TextEncoder } from "util";
+import * as util from "util";
 
-if (typeof globalThis.TextEncoder === "undefined" || typeof globalThis.TextDecoder === "undefined") {
-  globalThis.TextEncoder = TextEncoder;
-}
+Object.defineProperty(window, "TextEncoder", {
+  writable: true,
+  value: util.TextEncoder,
+});
+Object.defineProperty(window, "TextDecoder", {
+  writable: true,
+  value: util.TextDecoder,
+});
