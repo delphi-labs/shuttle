@@ -6,3 +6,4 @@ export * from "./LeapTerraProvider";
 export * from "./XDefiProvider";
 export * from "./FalconProvider";
 export * from "./CosmostationProvider";
+export * from "./MetamaskProvider";
