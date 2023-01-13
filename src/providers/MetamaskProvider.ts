@@ -101,9 +101,6 @@ export class MetamaskProvider implements WalletProvider {
       throw new Error(`Network with chainId "${chainId}" is not an EVM compatible network`);
     }
 
-    // const chain = await this.metamask.request({ method: 'eth_chainId' });
-    // console.log("chain", chain)
-
     const accounts = (await this.metamask.request({
       method: "eth_requestAccounts",
     })) as string[];
@@ -288,14 +285,13 @@ export class MetamaskProvider implements WalletProvider {
       const txRestApi = new TxRestApi(wallet.network.rest);
 
       const broadcast = await txRestApi.broadcast(txRawEip712);
-      console.log("broadcast", broadcast);
+
       const response = await txRestApi.fetchTxPoll(broadcast.txHash);
-      console.log("response", response);
 
       return {
-        hash: broadcast.txHash,
-        rawLogs: broadcast.rawLog || "",
-        response: broadcast,
+        hash: response.txHash,
+        rawLogs: response.rawLog || "",
+        response: response,
       };
     }
 
