@@ -63,7 +63,8 @@ export const ShuttleProvider = ({
           })
           .catch((e) => console.error("Shuttle: ", e));
       });
-  }, [providers]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const internalStore = useShuttleStore();
   const [walletConnections, setWalletConnections] = useLocalStorage<WalletConnection[]>(persistentKey || "shuttle", []);
