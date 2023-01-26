@@ -1,5 +1,7 @@
+import { MsgGrantAllowance as CosmosMsgGrantAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/tx";
+
 import BasicAllowance from "./BasicAllowance";
-import TransactionMsg, { CosmosMsg } from "./TransactionMsg";
+import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
 
 export type MsgGrantAllowanceValue = {
   granter: string;
@@ -35,6 +37,14 @@ export class MsgGrantAllowance extends TransactionMsg<MsgGrantAllowanceValue> {
         ...this.value.allowance.value,
       },
     });
+  }
+
+  toProtoMsg(): ProtoMsg {
+    const cosmosMsg = this.toCosmosMsg();
+    return {
+      typeUrl: this.typeUrl,
+      value: CosmosMsgGrantAllowance.encode(CosmosMsgGrantAllowance.fromPartial(cosmosMsg.value)).finish(),
+    };
   }
 }
 

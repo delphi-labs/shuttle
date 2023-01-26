@@ -1,4 +1,6 @@
-import TransactionMsg from "./TransactionMsg";
+import { MsgRevokeAllowance as CosmosMsgRevokeAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/tx";
+
+import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
 
 export type MsgRevokeAllowanceValue = {
   granter: string;
@@ -11,6 +13,14 @@ export class MsgRevokeAllowance extends TransactionMsg<MsgRevokeAllowanceValue> 
       granter,
       grantee,
     });
+  }
+
+  toProtoMsg(): ProtoMsg {
+    const cosmosMsg = this.toCosmosMsg();
+    return {
+      typeUrl: this.typeUrl,
+      value: CosmosMsgRevokeAllowance.encode(CosmosMsgRevokeAllowance.fromPartial(cosmosMsg.value)).finish(),
+    };
   }
 }
 

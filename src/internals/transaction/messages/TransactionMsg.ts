@@ -3,6 +3,11 @@ export type CosmosMsg = {
   value: any;
 };
 
+export type ProtoMsg = {
+  typeUrl: string;
+  value: Uint8Array;
+};
+
 export class TransactionMsg<T = any> {
   constructor(public typeUrl: string, public value: T) {}
 
@@ -10,6 +15,13 @@ export class TransactionMsg<T = any> {
     return {
       typeUrl: this.typeUrl,
       value: this.value,
+    };
+  }
+
+  toProtoMsg(): ProtoMsg {
+    return {
+      typeUrl: this.typeUrl,
+      value: new Uint8Array(),
     };
   }
 

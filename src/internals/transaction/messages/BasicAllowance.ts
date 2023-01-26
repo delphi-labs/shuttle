@@ -1,5 +1,7 @@
 import { Coin } from "@cosmjs/stargate";
-import TransactionMsg from "./TransactionMsg";
+import { BasicAllowance as CosmosBasicAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/feegrant";
+
+import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
 
 export type BasicAllowanceValue = {
   spend_limit: Coin[];
@@ -12,6 +14,14 @@ export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
       spend_limit,
       expiration,
     });
+  }
+
+  toProtoMsg(): ProtoMsg {
+    const cosmosMsg = this.toCosmosMsg();
+    return {
+      typeUrl: this.typeUrl,
+      value: CosmosBasicAllowance.encode(CosmosBasicAllowance.fromPartial(cosmosMsg.value)).finish(),
+    };
   }
 }
 
