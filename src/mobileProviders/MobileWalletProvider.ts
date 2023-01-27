@@ -7,12 +7,14 @@ export interface MobileWalletProvider {
   id: string;
   name: string;
   networks: Map<string, Network>;
+  initializing: boolean;
+  initialized: boolean;
+  init(): Promise<void>;
   connect(options: {
     chainId: string;
     callback?: (walletConnection: WalletConnection) => void;
   }): Promise<MobileConnectResponse>;
   disconnect(options: { wallet: WalletConnection }): Promise<void>;
-  getWalletConnection(options: { chainId: string }): Promise<WalletConnection>;
   simulate(options: { messages: TransactionMsg[]; wallet: WalletConnection }): Promise<SimulateResult>;
   broadcast(options: {
     messages: TransactionMsg[];

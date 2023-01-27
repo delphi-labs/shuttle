@@ -60,6 +60,7 @@ export const ShuttleProvider = ({
   children?: React.ReactNode;
 }) => {
   const [availableProviders, setAvailableProviders] = useState<WalletProvider[]>([]);
+  const [availableMobileProviders, setAvailableMobileProviders] = useState<MobileWalletProvider[]>([]);
 
   useEffect(() => {
     providers
@@ -73,7 +74,21 @@ export const ShuttleProvider = ({
               return [...rest, provider];
             });
           })
-          .catch((e) => console.error("Shuttle: ", e));
+          .catch((e) => console.warn("Shuttle: ", e));
+      });
+
+    mobileProviders
+      .filter((mobileProvider) => !mobileProvider.initializing || !mobileProvider.initialized)
+      .forEach((mobileProvider) => {
+        mobileProvider
+          .init()
+          .then(() => {
+            setAvailableMobileProviders((prev) => {
+              const rest = prev.filter((p) => p.id !== mobileProvider.id);
+              return [...rest, mobileProvider];
+            });
+          })
+          .catch((e) => console.warn("Shuttle: ", e));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -109,7 +124,7 @@ export const ShuttleProvider = ({
       chainId: string;
       callback?: (walletConnection: WalletConnection) => void;
     }) => {
-      const mobileProvider = mobileProviders.find((mobileProvider) => mobileProvider.id === mobileProviderId);
+      const mobileProvider = availableMobileProviders.find((mobileProvider) => mobileProvider.id === mobileProviderId);
       if (!mobileProvider) {
         throw new Error(`Mobile provider ${mobileProviderId} not found`);
       }
@@ -144,7 +159,7 @@ export const ShuttleProvider = ({
       internalStore.getWallets(filters).forEach((wallet) => {
         const provider =
           availableProviders.find((provider) => provider.id === wallet.providerId) ||
-          mobileProviders.find((mobileProvider) => mobileProvider.id === wallet.providerId);
+          availableMobileProviders.find((mobileProvider) => mobileProvider.id === wallet.providerId);
         if (provider) {
           provider.disconnect({ wallet });
         }
@@ -165,7 +180,7 @@ export const ShuttleProvider = ({
 
       const provider =
         availableProviders.find((provider) => provider.id === walletToUse.providerId) ||
-        mobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
 
       if (!provider) {
         throw new Error(`Provider ${walletToUse.providerId} not found`);
@@ -194,7 +209,7 @@ export const ShuttleProvider = ({
 
       const provider =
         availableProviders.find((provider) => provider.id === walletToUse.providerId) ||
-        mobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
 
       if (!provider) {
         throw new Error(`Provider ${walletToUse.providerId} not found`);
@@ -223,7 +238,7 @@ export const ShuttleProvider = ({
 
       const provider =
         availableProviders.find((provider) => provider.id === walletToUse.providerId) ||
-        mobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
 
       if (!provider) {
         throw new Error(`Provider ${walletToUse.providerId} not found`);
@@ -250,6 +265,7 @@ export const ShuttleProvider = ({
     providers,
     mobileProviders,
     availableProviders,
+    availableMobileProviders,
     store,
     internalStore,
     wallets,
