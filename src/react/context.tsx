@@ -195,12 +195,14 @@ export const ShuttleProvider = ({
       gasLimit,
       memo,
       wallet,
+      mobile,
     }: {
       messages: TransactionMsg[];
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
       wallet?: WalletConnection | null;
+      mobile?: boolean;
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -215,7 +217,7 @@ export const ShuttleProvider = ({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo });
+      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile });
     };
 
     const sign = async ({
@@ -224,12 +226,14 @@ export const ShuttleProvider = ({
       gasLimit,
       memo,
       wallet,
+      mobile,
     }: {
       messages: TransactionMsg[];
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
       wallet?: WalletConnection | null;
+      mobile?: boolean;
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -244,7 +248,7 @@ export const ShuttleProvider = ({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo });
+      return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile });
     };
 
     return {
