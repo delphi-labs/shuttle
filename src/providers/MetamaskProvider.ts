@@ -216,6 +216,7 @@ export class MetamaskProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");
@@ -274,6 +275,7 @@ export class MetamaskProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");

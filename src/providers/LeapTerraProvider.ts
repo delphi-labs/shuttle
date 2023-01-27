@@ -170,6 +170,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
@@ -244,6 +245,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.terraExtension) {
       throw new Error("Leap Terra is not available");

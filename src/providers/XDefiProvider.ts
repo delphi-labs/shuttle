@@ -172,6 +172,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
@@ -246,6 +247,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.terraExtension) {
       throw new Error("XDefi is not available");

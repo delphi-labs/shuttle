@@ -257,6 +257,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.keplr) {
       throw new Error("Keplr is not available");
@@ -357,6 +358,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.keplr) {
       throw new Error("Keplr is not available");

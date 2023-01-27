@@ -257,6 +257,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.leap) {
       throw new Error("Leap is not available");
@@ -357,6 +358,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.leap) {
       throw new Error("Leap is not available");

@@ -257,6 +257,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");
@@ -357,6 +358,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");

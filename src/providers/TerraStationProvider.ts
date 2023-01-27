@@ -175,6 +175,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
@@ -254,6 +255,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     feeAmount?: string;
     gasLimit?: string;
     memo?: string;
+    mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.terraExtension) {
       throw new Error("Terra Station is not available");
