@@ -160,9 +160,9 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
@@ -194,7 +194,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         gas_limit: gasLimit || gas,
       });
 
-      const post = await this.terraExtension.post(processedMessages, fee, memo);
+      const post = await this.terraExtension.post(processedMessages, fee, memo || "");
 
       if (!post?.result?.txhash) {
         reject("Broadcast failed");
@@ -235,9 +235,9 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.terraExtension) {
@@ -266,7 +266,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
       gas_limit: gasLimit || gas,
     });
 
-    const signing = await this.terraExtension.sign(processedMessages, fee, memo);
+    const signing = await this.terraExtension.sign(processedMessages, fee, memo || "");
 
     return {
       signatures: signing?.result.signatures.map((signature) => fromBase64(signature)),

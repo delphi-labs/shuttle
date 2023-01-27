@@ -254,9 +254,9 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.leap) {
@@ -336,7 +336,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
         };
       }
 
-      const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo);
+      const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo || "");
 
       return {
         hash: broadcast.transactionHash,
@@ -355,9 +355,9 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.leap) {

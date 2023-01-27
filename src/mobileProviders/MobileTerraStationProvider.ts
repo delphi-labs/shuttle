@@ -296,11 +296,11 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     memo,
     mobile,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string | null | undefined;
-    gasLimit?: string | null | undefined;
-    memo?: string | null | undefined;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     return await new Promise(async (resolve, reject) => {
@@ -399,11 +399,11 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     memo,
     mobile,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string | null | undefined;
-    gasLimit?: string | null | undefined;
-    memo?: string | null | undefined;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {

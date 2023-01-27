@@ -213,9 +213,9 @@ export class MetamaskProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.metamask) {
@@ -272,9 +272,9 @@ export class MetamaskProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.metamask) {
@@ -355,7 +355,7 @@ export class MetamaskProvider implements WalletProvider {
 
       const preparedTx = createTransaction({
         message: preparedMessages.map((m) => m.toDirectSign()),
-        memo: memo,
+        memo: memo || "",
         signMode: SIGN_AMINO,
         fee,
         pubKey: publicKeyBase64,

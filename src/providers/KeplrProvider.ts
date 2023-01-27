@@ -254,9 +254,9 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.keplr) {
@@ -336,7 +336,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         };
       }
 
-      const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo);
+      const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo || "");
 
       return {
         hash: broadcast.transactionHash,
@@ -355,9 +355,9 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
-    feeAmount?: string;
-    gasLimit?: string;
-    memo?: string;
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.keplr) {
