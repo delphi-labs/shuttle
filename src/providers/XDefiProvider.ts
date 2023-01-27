@@ -28,6 +28,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+
   terraExtension?: TerraExtension;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
@@ -58,7 +59,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     this.initializing = false;
   }
 
-  async connect(chainId: string): Promise<WalletConnection> {
+  async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
     if (!this.terraExtension) {
       throw new Error("XDefi is not available");
     }
@@ -107,7 +108,17 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     };
   }
 
-  async simulate(messages: TransactionMsg[], wallet: WalletConnection): Promise<SimulateResult> {
+  async disconnect(): Promise<void> {
+    return;
+  }
+
+  async simulate({
+    messages,
+    wallet,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+  }): Promise<SimulateResult> {
     if (!this.terraExtension) {
       throw new Error("XDefi is not available");
     }
@@ -118,7 +129,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -149,13 +160,19 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     }
   }
 
-  async broadcast(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<BroadcastResult> {
+  async broadcast({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
         reject("XDefi is not available");
@@ -168,7 +185,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
         throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
       }
 
-      const connect = await this.connect(wallet.network.chainId);
+      const connect = await this.connect({ chainId: wallet.network.chainId });
 
       if (connect.account.address !== wallet.account.address) {
         reject("Wallet not connected");
@@ -217,13 +234,19 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     });
   }
 
-  async sign(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<SigningResult> {
+  async sign({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<SigningResult> {
     if (!this.terraExtension) {
       throw new Error("XDefi is not available");
     }
@@ -234,7 +257,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");

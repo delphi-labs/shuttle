@@ -78,7 +78,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     this.initializing = false;
   }
 
-  async connect(chainId: string): Promise<WalletConnection> {
+  async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
     if (!this.cosmostation) {
       throw new Error("Cosmostation is not available");
     }
@@ -144,7 +144,17 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     };
   }
 
-  async simulate(messages: TransactionMsg[], wallet: WalletConnection): Promise<SimulateResult> {
+  async disconnect(): Promise<void> {
+    return;
+  }
+
+  async simulate({
+    messages,
+    wallet,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+  }): Promise<SimulateResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");
     }
@@ -155,7 +165,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(network.chainId);
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -235,13 +245,19 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     }
   }
 
-  async broadcast(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<BroadcastResult> {
+  async broadcast({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<BroadcastResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");
     }
@@ -252,7 +268,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -329,13 +345,19 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     }
   }
 
-  async sign(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<SigningResult> {
+  async sign({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<SigningResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");
     }
@@ -346,7 +368,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
