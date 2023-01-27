@@ -61,6 +61,7 @@ export class MetamaskProvider implements WalletProvider {
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+
   metamask?: Ethereum;
 
   constructor({ id = "metamask", name = "Metamask", networks }: { id?: string; name?: string; networks: Network[] }) {
@@ -86,7 +87,7 @@ export class MetamaskProvider implements WalletProvider {
     this.initializing = false;
   }
 
-  async connect(chainId: string): Promise<WalletConnection> {
+  async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");
     }
@@ -119,7 +120,17 @@ export class MetamaskProvider implements WalletProvider {
     };
   }
 
-  async simulate(messages: TransactionMsg<any>[], wallet: WalletConnection): Promise<SimulateResult> {
+  async disconnect(): Promise<void> {
+    return;
+  }
+
+  async simulate({
+    messages,
+    wallet,
+  }: {
+    messages: TransactionMsg<any>[];
+    wallet: WalletConnection;
+  }): Promise<SimulateResult> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");
     }
@@ -134,7 +145,7 @@ export class MetamaskProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
-    const connect = await this.connect(network.chainId);
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -193,13 +204,19 @@ export class MetamaskProvider implements WalletProvider {
     };
   }
 
-  async broadcast(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<BroadcastResult> {
+  async broadcast({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<BroadcastResult> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");
     }
@@ -214,7 +231,65 @@ export class MetamaskProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
-    const connect = await this.connect(network.chainId);
+    const connect = await this.connect({ chainId: network.chainId });
+
+    if (connect.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    if (isInjectiveNetwork(network.chainId)) {
+      const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
+
+      if (signResult.response) {
+        const txRestApi = new TxRestApi(wallet.network.rest);
+
+        const broadcast = await txRestApi.broadcast(signResult.response);
+
+        const response = await txRestApi.fetchTxPoll(broadcast.txHash);
+
+        return {
+          hash: response.txHash,
+          rawLogs: response.rawLog || "",
+          response: response,
+        };
+      }
+    }
+
+    return {
+      hash: "",
+      rawLogs: "",
+      response: null,
+    };
+  }
+
+  async sign({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<SigningResult> {
+    if (!this.metamask) {
+      throw new Error("Metamask is not available");
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
+    }
+
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -295,28 +370,16 @@ export class MetamaskProvider implements WalletProvider {
       const txRawEip712 = createTxRawEIP712(preparedTx.txRaw, web3Extension);
       txRawEip712.setSignaturesList([signatureBuff]);
 
-      const txRestApi = new TxRestApi(wallet.network.rest);
-
-      const broadcast = await txRestApi.broadcast(txRawEip712);
-
-      const response = await txRestApi.fetchTxPoll(broadcast.txHash);
-
       return {
-        hash: response.txHash,
-        rawLogs: response.rawLog || "",
-        response: response,
+        signatures: txRawEip712.getSignaturesList_asU8(),
+        response: txRawEip712,
       };
     }
 
     return {
-      hash: "",
-      rawLogs: "",
+      signatures: [],
       response: null,
     };
-  }
-
-  sign(): Promise<SigningResult> {
-    throw new Error("Method not implemented.");
   }
 }
 

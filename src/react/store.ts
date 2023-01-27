@@ -7,8 +7,8 @@ export type ShuttleStore = {
   restore: (wallets: WalletConnection[]) => void;
   addWallet: (wallet: WalletConnection) => void;
   removeWallet: (wallet: WalletConnection) => void;
-  getWallets: (providerId?: string, chainId?: string) => WalletConnection[];
-  removeWallets: (providerId?: string, chainId?: string) => void;
+  getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
+  removeWallets: (filters?: { providerId?: string; chainId?: string }) => void;
 };
 export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
   recentWallet: null,
@@ -27,30 +27,34 @@ export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
       const wallets = state.wallets.filter((w) => w.id !== wallet.id);
       return { wallets, recentWallet: wallets[0] || null };
     }),
-  getWallets: (providerId?: string, chainId?: string) => {
+  getWallets: (filters?: { providerId?: string; chainId?: string }) => {
     let wallets = state().wallets;
-    if (providerId) {
-      wallets = wallets.filter((wallet) => wallet.providerId === providerId);
-    }
-    if (chainId) {
-      wallets = wallets.filter((wallet) => wallet.network.chainId === chainId);
+    if (filters) {
+      if (filters.providerId) {
+        wallets = wallets.filter((wallet) => wallet.providerId === filters.providerId);
+      }
+      if (filters.chainId) {
+        wallets = wallets.filter((wallet) => wallet.network.chainId === filters.chainId);
+      }
     }
     return wallets;
   },
-  removeWallets: (providerId?: string, chainId?: string) =>
+  removeWallets: (filters?: { providerId?: string; chainId?: string }) =>
     set((state) => {
-      if (!providerId && !chainId) {
+      if (!filters) {
         return { wallets: [], recentWallet: null };
       }
 
       let wallets = state.wallets;
 
-      if (providerId && chainId) {
-        wallets = wallets.filter((wallet) => wallet.providerId !== providerId || wallet.network.chainId !== chainId);
-      }
-
-      if (providerId && !chainId) {
-        wallets = wallets.filter((wallet) => wallet.providerId !== providerId);
+      if (filters.providerId && filters.chainId) {
+        wallets = wallets.filter(
+          (wallet) => wallet.providerId !== filters.providerId && wallet.network.chainId !== filters.chainId,
+        );
+      } else if (filters.providerId && !filters.chainId) {
+        wallets = wallets.filter((wallet) => wallet.providerId !== filters.providerId);
+      } else if (!filters.providerId && filters.chainId) {
+        wallets = wallets.filter((wallet) => wallet.network.chainId !== filters.chainId);
       }
 
       return { wallets, recentWallet: wallets[0] || null };

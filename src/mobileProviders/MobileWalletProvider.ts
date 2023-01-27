@@ -1,17 +1,21 @@
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
 import { Network } from "../internals/network";
 import { WalletConnection } from "../internals/wallet";
+import { MobileConnectResponse } from "../internals";
 
-export interface WalletProvider {
+export interface MobileWalletProvider {
   id: string;
   name: string;
   networks: Map<string, Network>;
   initializing: boolean;
   initialized: boolean;
   init(): Promise<void>;
-  connect(options: { chainId: string }): Promise<WalletConnection>;
+  connect(options: {
+    chainId: string;
+    callback?: (walletConnection: WalletConnection) => void;
+  }): Promise<MobileConnectResponse>;
   disconnect(options: { wallet: WalletConnection }): Promise<void>;
-  simulate: (options: { messages: TransactionMsg[]; wallet: WalletConnection }) => Promise<SimulateResult>;
+  simulate(options: { messages: TransactionMsg[]; wallet: WalletConnection }): Promise<SimulateResult>;
   broadcast(options: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -30,4 +34,4 @@ export interface WalletProvider {
   }): Promise<SigningResult>;
 }
 
-export default WalletProvider;
+export default MobileWalletProvider;

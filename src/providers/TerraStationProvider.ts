@@ -10,7 +10,7 @@ import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
   interface Window {
-    isTerraExtensionAvailable?: any[];
+    isTerraExtensionAvailable: boolean;
   }
 }
 
@@ -27,6 +27,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+
   terraExtension?: TerraExtension;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
@@ -57,7 +58,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     this.initializing = false;
   }
 
-  async connect(chainId: string): Promise<WalletConnection> {
+  async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
     if (!this.terraExtension) {
       throw new Error("Terra Station is not available");
     }
@@ -106,7 +107,17 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     };
   }
 
-  async simulate(messages: TransactionMsg[], wallet: WalletConnection): Promise<SimulateResult> {
+  async disconnect(): Promise<void> {
+    return;
+  }
+
+  async simulate({
+    messages,
+    wallet,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+  }): Promise<SimulateResult> {
     if (!this.terraExtension) {
       throw new Error("Terra Station is not available");
     }
@@ -117,10 +128,14 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
+    }
+
+    if (connect.network.chainId !== wallet.network.chainId) {
+      throw new Error(`Wallet not connected to the network with chainId "${wallet.network.chainId}"`);
     }
 
     const processedMessages = messages.map((message) => message.toCosmosMsg());
@@ -148,13 +163,19 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     }
   }
 
-  async broadcast(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<BroadcastResult> {
+  broadcast({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
         reject("Terra Station is not available");
@@ -167,11 +188,16 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
         throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
       }
 
-      const connect = await this.connect(wallet.network.chainId);
+      const connect = await this.connect({ chainId: wallet.network.chainId });
 
       if (connect.account.address !== wallet.account.address) {
         reject("Wallet not connected");
         throw new Error("Wallet not connected");
+      }
+
+      if (connect.network.chainId !== wallet.network.chainId) {
+        reject(`Wallet not connected to the network with chainId "${wallet.network.chainId}"`);
+        throw new Error(`Wallet not connected to the network with chainId "${wallet.network.chainId}"`);
       }
 
       const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
@@ -205,38 +231,42 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
           });
           return;
         }
-        if (tries > 300) {
+        if (tries > 150) {
           // 1 minute
           clearInterval(interval);
           reject("Broadcast time out");
           throw new Error("Broadcast time out");
         }
         tries++;
-      }, 200);
+      }, 400);
     });
   }
 
-  async sign(
-    messages: TransactionMsg[],
-    wallet: WalletConnection,
-    feeAmount?: string,
-    gasLimit?: string,
-    memo?: string,
-  ): Promise<SigningResult> {
+  async sign({
+    messages,
+    wallet,
+    feeAmount,
+    gasLimit,
+    memo,
+  }: {
+    messages: TransactionMsg[];
+    wallet: WalletConnection;
+    feeAmount?: string;
+    gasLimit?: string;
+    memo?: string;
+  }): Promise<SigningResult> {
     if (!this.terraExtension) {
       throw new Error("Terra Station is not available");
     }
 
-    const network = this.networks.get(wallet.network.chainId);
-
-    if (!network) {
-      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
-    }
-
-    const connect = await this.connect(wallet.network.chainId);
+    const connect = await this.connect({ chainId: wallet.network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
+    }
+
+    if (connect.network.chainId !== wallet.network.chainId) {
+      throw new Error(`Wallet not connected to the network with chainId "${wallet.network.chainId}"`);
     }
 
     const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
