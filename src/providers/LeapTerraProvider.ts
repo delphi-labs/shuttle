@@ -221,14 +221,14 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
           });
           return;
         }
-        if (tries > 300) {
+        if (tries > 150) {
           // 1 minute
           clearInterval(interval);
           reject("Broadcast time out");
           throw new Error("Broadcast time out");
         }
         tries++;
-      }, 200);
+      }, 400);
     });
   }
 
