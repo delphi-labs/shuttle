@@ -112,11 +112,6 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
 
     this.initializing = true;
 
-    if (!window.isTerraExtensionAvailable) {
-      this.initializing = false;
-      throw new Error("Terra Station is not available");
-    }
-
     const cachedSession = localStorage.getItem("walletconnect");
 
     const connectorOpts: IWalletConnectOptions = {
