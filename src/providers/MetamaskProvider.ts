@@ -246,11 +246,15 @@ export class MetamaskProvider implements WalletProvider {
 
         const broadcast = await txRestApi.broadcast(signResult.response);
 
+        if (broadcast.code !== 0) {
+          throw new Error(broadcast.rawLog);
+        }
+
         const response = await txRestApi.fetchTxPoll(broadcast.txHash);
 
         return {
           hash: response.txHash,
-          rawLogs: response.rawLog || "",
+          rawLogs: response.rawLog,
           response: response,
         };
       }
@@ -317,7 +321,7 @@ export class MetamaskProvider implements WalletProvider {
           sender: execMsg.value.sender,
           contractAddress: execMsg.value.contract,
           msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
+          funds: execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
         });
       });
 
