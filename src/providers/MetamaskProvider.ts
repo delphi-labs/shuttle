@@ -250,7 +250,7 @@ export class MetamaskProvider implements WalletProvider {
           throw new Error(broadcast.rawLog);
         }
 
-        const response = await txRestApi.fetchTxPoll(broadcast.txHash);
+        const response = await txRestApi.fetchTxPoll(broadcast.txHash, 15000);
 
         return {
           hash: response.txHash,
