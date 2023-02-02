@@ -40,6 +40,7 @@ export type Network = {
   bech32Config?: Bech32Config;
   evm?: {
     deriveCosmosAddress: (address: string) => string;
+    fromEthChainToCosmosChain: (chainId: number) => string;
   };
 };
 

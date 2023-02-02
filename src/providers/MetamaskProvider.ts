@@ -321,7 +321,7 @@ export class MetamaskProvider implements WalletProvider {
           sender: execMsg.value.sender,
           contractAddress: execMsg.value.contract,
           msg: execMsg.value.msg,
-          funds: execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
+          funds: execMsg.value.funds && execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
         });
       });
 

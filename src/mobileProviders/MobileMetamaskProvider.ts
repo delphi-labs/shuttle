@@ -31,24 +31,12 @@ import {
   DEFAULT_GAS_PRICE,
   DEFAULT_CURRENCY,
   isInjectiveNetwork,
-  fromInjectiveEthereumChainToCosmosChain,
   MsgExecuteContract,
   fromInjectiveCosmosChainToEthereumChain,
   Fee,
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
 import { recoverTypedSignaturePubKey } from "../providers";
-
-const mapToChainId = (chainNumber: number) => {
-  switch (chainNumber) {
-    case 0:
-      return "pisco-1";
-    case 1:
-      return "phoenix-1";
-    default:
-      throw new Error(`Invalid chain id: ${chainNumber}`);
-  }
-};
 
 export const MobileMetamaskProvider = class MobileMetamaskProvider implements MobileWalletProvider {
   id: string = "mobile-metamask";
@@ -88,9 +76,8 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
 
     const bech32Address = network.evm.deriveCosmosAddress(this.walletConnect.accounts[0]);
     const chainNumber = this.walletConnect.chainId;
-    const currentChainId = isInjectiveNetwork(chainId)
-      ? fromInjectiveEthereumChainToCosmosChain(chainNumber)
-      : mapToChainId(chainNumber);
+    const currentChainId = network.evm.fromEthChainToCosmosChain(chainNumber);
+
     if (currentChainId !== network.chainId) {
       this.walletConnect?.killSession();
       throw new Error(`Invalid network: ${network.chainId} doesn't match the expected network: ${currentChainId}`);
@@ -119,11 +106,9 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       bridge: "https://bridge.walletconnect.org",
     });
 
-    console.log("this.walletConnect", this.walletConnect);
     if (!this.walletConnect.connected) {
       await this.walletConnect.createSession();
     }
-    console.log("this.walletConnect", this.walletConnect);
 
     this.walletConnect.on("connect", async (error, payload) => {
       if (error) {
@@ -180,6 +165,10 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
 
     if (!network) {
       throw new Error(`Network with chainId "${chainId}" not found`);
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${chainId}" is not an EVM compatible network`);
     }
 
     this.connectCallback = callback;
@@ -406,7 +395,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
           sender: execMsg.value.sender,
           contractAddress: execMsg.value.contract,
           msg: execMsg.value.msg,
-          funds: execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
+          funds: execMsg.value.funds && execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
         });
       });
 
