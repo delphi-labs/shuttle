@@ -13,7 +13,6 @@ import {
   getEthereumAddress,
   hexToBase64,
   hexToBuff,
-  MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   SIGN_AMINO,
   TxRestApi,
 } from "@injectivelabs/sdk-ts";
@@ -31,9 +30,9 @@ import {
   DEFAULT_GAS_PRICE,
   DEFAULT_CURRENCY,
   isInjectiveNetwork,
-  MsgExecuteContract,
   fromInjectiveCosmosChainToEthereumChain,
   Fee,
+  prepareMessagesForInjective,
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
 import { recoverTypedSignaturePubKey } from "../providers";
@@ -228,17 +227,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContractCompat.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: wallet.network.chainId,
@@ -388,17 +377,6 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const latestHeight = latestBlock.header.height;
       const timeoutHeight = new BigNumberInBase(latestHeight).plus(DEFAULT_BLOCK_TIMEOUT_HEIGHT);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContractCompat.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds && execMsg.value.funds.length > 0 ? execMsg.value.funds : undefined,
-        });
-      });
-
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
@@ -410,6 +388,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
         };
       }
 
+      const preparedMessages = prepareMessagesForInjective(messages);
       const eip712TypedData = getEip712TypedData({
         msgs: preparedMessages,
         tx: {

@@ -1,5 +1,3 @@
-import { EthereumChainId } from "@injectivelabs/ts-types";
-
 export type BIP44 = {
   coinType: number;
 };
@@ -43,30 +41,6 @@ export type Network = {
     fromEthChainToCosmosChain: (chainId: number) => string;
   };
 };
-
-export function isInjectiveNetwork(chainId: string): boolean {
-  return chainId === "injective-1" || chainId === "injective-888";
-}
-
-export function fromInjectiveCosmosChainToEthereumChain(chainId: string): number {
-  if (chainId === "injective-1") {
-    return EthereumChainId.Mainnet;
-  } else if (chainId === "injective-888") {
-    return EthereumChainId.Goerli;
-  } else {
-    throw new Error(`Invalid Injective chainId: ${chainId}`);
-  }
-}
-
-export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): string {
-  if (chainNumber === EthereumChainId.Mainnet) {
-    return "injective-1";
-  } else if (chainNumber === EthereumChainId.Goerli) {
-    return "injective-888";
-  } else {
-    throw new Error(`Invalid Injective EVM chainId: ${chainNumber}`);
-  }
-}
 
 export const DEFAULT_CHAIN_PREFIX = "cosmos";
 export const DEFAULT_BIP44_COIN_TYPE = 118;

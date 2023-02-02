@@ -12,8 +12,10 @@ export type MsgExecuteContractValue = {
 };
 
 export class MsgExecuteContract extends TransactionMsg<MsgExecuteContractValue> {
+  static TYPE = "/cosmwasm.wasm.v1.MsgExecuteContract";
+
   constructor({ sender, contract, msg, funds }: MsgExecuteContractValue) {
-    super("/cosmwasm.wasm.v1.MsgExecuteContract", {
+    super(MsgExecuteContract.TYPE, {
       sender,
       contract,
       msg,

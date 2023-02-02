@@ -1,6 +1,15 @@
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
+import {
+  BaseAccount,
+  ChainRestAuthApi,
+  createTransactionAndCosmosSignDoc,
+  createTxRawFromSigResponse,
+  MsgExecuteContract as InjMsgExecuteContract,
+  TxRestApi,
+} from "@injectivelabs/sdk-ts";
+
 import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
@@ -11,7 +20,6 @@ import {
   DEFAULT_CURRENCY,
   DEFAULT_GAS_MULTIPLIER,
   DEFAULT_GAS_PRICE,
-  isInjectiveNetwork,
   Network,
 } from "../internals/network";
 import {
@@ -22,14 +30,7 @@ import {
   SimulateResult,
   MsgExecuteContract,
 } from "../internals/transaction";
-import {
-  BaseAccount,
-  ChainRestAuthApi,
-  createTransactionAndCosmosSignDoc,
-  createTxRawFromSigResponse,
-  MsgExecuteContract as InjMsgExecuteContract,
-  TxRestApi,
-} from "@injectivelabs/sdk-ts";
+import { isInjectiveNetwork } from "../internals/injective";
 
 declare global {
   interface Window {

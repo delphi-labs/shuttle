@@ -9,6 +9,8 @@ export type ProtoMsg = {
 };
 
 export class TransactionMsg<T = any> {
+  static TYPE: string;
+
   constructor(public typeUrl: string, public value: T) {}
 
   toCosmosMsg(): CosmosMsg {

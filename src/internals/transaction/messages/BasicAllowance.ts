@@ -9,8 +9,10 @@ export type BasicAllowanceValue = {
 };
 
 export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
+  static TYPE = "/cosmos.feegrant.v1beta1.BasicAllowance";
+
   constructor({ spendLimit, expiration }: BasicAllowanceValue) {
-    super("/cosmos.feegrant.v1beta1.BasicAllowance", {
+    super(BasicAllowance.TYPE, {
       spendLimit,
       expiration,
     });

@@ -16,6 +16,8 @@ export type MsgTransferValue = {
 };
 
 export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
+  static TYPE = "/ibc.applications.transfer.v1.MsgTransfer";
+
   constructor({
     sender,
     receiver,
@@ -25,7 +27,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
     timeoutHeight,
     timeoutTimestamp,
   }: MsgTransferValue) {
-    super("/ibc.applications.transfer.v1.MsgTransfer", {
+    super(MsgTransfer.TYPE, {
       sender,
       receiver,
       sourcePort,

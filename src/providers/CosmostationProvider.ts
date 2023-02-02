@@ -11,10 +11,10 @@ import {
   DEFAULT_CURRENCY,
   DEFAULT_GAS_MULTIPLIER,
   DEFAULT_GAS_PRICE,
-  isInjectiveNetwork,
   Network,
 } from "../internals/network";
 import { BroadcastResult, Fee, MsgExecuteContract, SigningResult, SimulateResult } from "../internals/transaction";
+import { isInjectiveNetwork } from "../internals/injective";
 import { TransactionMsg } from "../internals";
 import {
   BaseAccount,

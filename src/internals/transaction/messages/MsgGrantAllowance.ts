@@ -10,8 +10,10 @@ export type MsgGrantAllowanceValue = {
 };
 
 export class MsgGrantAllowance extends TransactionMsg<MsgGrantAllowanceValue> {
+  static TYPE = "/cosmos.feegrant.v1beta1.MsgGrantAllowance";
+
   constructor({ granter, grantee, allowance }: MsgGrantAllowanceValue) {
-    super("/cosmos.feegrant.v1beta1.MsgGrantAllowance", {
+    super(MsgGrantAllowance.TYPE, {
       granter,
       grantee,
       allowance,
