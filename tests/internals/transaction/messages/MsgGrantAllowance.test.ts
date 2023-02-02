@@ -6,7 +6,7 @@ describe("MsgGrantAllowance", () => {
       granter: "address1",
       grantee: "address2",
       allowance: new BasicAllowance({
-        spend_limit: [
+        spendLimit: [
           {
             amount: "100",
             denom: "uatom",
@@ -19,13 +19,13 @@ describe("MsgGrantAllowance", () => {
   });
 
   test("it converts to CosmosMsg", () => {
-    const spend_limit = [
+    const spendLimit = [
       {
         amount: "100",
         denom: "uatom",
       },
     ];
-    const allowance = new BasicAllowance({ spend_limit });
+    const allowance = new BasicAllowance({ spendLimit });
     const msg = new MsgGrantAllowance({
       granter: "address1",
       grantee: "address2",
@@ -45,13 +45,13 @@ describe("MsgGrantAllowance", () => {
   });
 
   test("it converts to TerraExtension string", () => {
-    const spend_limit = [
+    const spendLimit = [
       {
         amount: "100",
         denom: "uatom",
       },
     ];
-    const allowance = new BasicAllowance({ spend_limit });
+    const allowance = new BasicAllowance({ spendLimit });
     const msg = new MsgGrantAllowance({
       granter: "address1",
       grantee: "address2",
