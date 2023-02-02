@@ -14,7 +14,7 @@ export default class FakeOfflineSigner implements OfflineDirectSigner {
       {
         address: this.wallet?.account.address || "",
         algo: this.wallet?.account.algo || "secp256k1",
-        pubkey: fromBase64(this.wallet?.account.pubkey || ""),
+        pubkey: fromBase64(this.wallet?.account.pubkey || "A6AvMXexMnIxR12przvcF3nT4JU6+WeMwT3S/Zu0Nb/o"),
       },
     ];
   }
