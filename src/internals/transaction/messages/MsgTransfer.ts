@@ -3,7 +3,7 @@ import { MsgTransfer as CosmosMsgTransfer } from "cosmjs-types/ibc/applications/
 import { Height } from "cosmjs-types/ibc/core/client/v1/client";
 import Long from "long";
 
-import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
 
 export type MsgTransferValue = {
   sender: string;
@@ -25,7 +25,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
     timeoutHeight,
     timeoutTimestamp,
   }: MsgTransferValue) {
-    super("/cosmwasm.wasm.v1.MsgExecuteContract", {
+    super("/ibc.applications.transfer.v1.MsgTransfer", {
       sender,
       receiver,
       sourcePort,
@@ -44,16 +44,14 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
       source_port: this.value.sourcePort,
       source_channel: this.value.sourceChannel,
       token: this.value.token,
-      timeout_height: this.value.timeoutHeight,
+      timeout_height: this.value.timeoutHeight
+        ? {
+            revision_height: this.value.timeoutHeight.revisionHeight,
+            revision_number: this.value.timeoutHeight.revisionNumber,
+          }
+        : undefined,
       timeout_timestamp: this.value.timeoutTimestamp,
     });
-  }
-
-  toCosmosMsg(): CosmosMsg {
-    return {
-      typeUrl: this.typeUrl,
-      value: this.value,
-    };
   }
 
   toProtoMsg(): ProtoMsg {
