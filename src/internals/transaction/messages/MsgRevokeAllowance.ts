@@ -8,7 +8,7 @@ export type MsgRevokeAllowanceValue = {
 };
 
 export class MsgRevokeAllowance extends TransactionMsg<MsgRevokeAllowanceValue> {
-  constructor({ granter, grantee }: { granter: string; grantee: string }) {
+  constructor({ granter, grantee }: MsgRevokeAllowanceValue) {
     super("/cosmos.feegrant.v1beta1.MsgRevokeAllowance", {
       granter,
       grantee,

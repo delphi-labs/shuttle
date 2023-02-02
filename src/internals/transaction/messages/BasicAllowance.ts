@@ -4,15 +4,23 @@ import { BasicAllowance as CosmosBasicAllowance } from "cosmjs-types/cosmos/feeg
 import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
 
 export type BasicAllowanceValue = {
-  spend_limit: Coin[];
+  spendLimit: Coin[];
   expiration?: string;
 };
 
 export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
-  constructor({ spend_limit, expiration }: { spend_limit: Coin[]; expiration?: string }) {
+  constructor({ spendLimit, expiration }: BasicAllowanceValue) {
     super("/cosmos.feegrant.v1beta1.BasicAllowance", {
-      spend_limit,
+      spendLimit,
       expiration,
+    });
+  }
+
+  toTerraExtensionMsg(): string {
+    return JSON.stringify({
+      "@type": this.typeUrl,
+      spend_limit: this.value.spendLimit,
+      expiration: this.value.expiration,
     });
   }
 

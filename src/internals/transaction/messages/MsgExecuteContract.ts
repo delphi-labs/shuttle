@@ -8,11 +8,11 @@ export type MsgExecuteContractValue = {
   sender: string;
   contract: string;
   msg: any;
-  funds: Coin[];
+  funds?: Coin[];
 };
 
 export class MsgExecuteContract extends TransactionMsg<MsgExecuteContractValue> {
-  constructor({ sender, contract, msg, funds }: { sender: string; contract: string; msg: any; funds?: Coin[] }) {
+  constructor({ sender, contract, msg, funds }: MsgExecuteContractValue) {
     super("/cosmwasm.wasm.v1.MsgExecuteContract", {
       sender,
       contract,

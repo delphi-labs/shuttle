@@ -10,7 +10,7 @@ export type MsgGrantAllowanceValue = {
 };
 
 export class MsgGrantAllowance extends TransactionMsg<MsgGrantAllowanceValue> {
-  constructor({ granter, grantee, allowance }: { granter: string; grantee: string; allowance: BasicAllowance }) {
+  constructor({ granter, grantee, allowance }: MsgGrantAllowanceValue) {
     super("/cosmos.feegrant.v1beta1.MsgGrantAllowance", {
       granter,
       grantee,
