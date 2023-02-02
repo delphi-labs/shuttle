@@ -91,9 +91,11 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
 
     const defaultCurrency = network.defaultCurrency || DEFAULT_CURRENCY;
     const baseGasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+
     await this.leap.experimentalSuggestChain({
-      ...network,
+      chainId: network.chainId,
       chainName: network.name,
+      name: network.name,
       rpc: network.rpc,
       rest: network.rest,
       bip44: {
