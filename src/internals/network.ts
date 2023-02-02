@@ -57,6 +57,16 @@ export function fromInjectiveCosmosChainToEthereumChain(chainId: string): number
   }
 }
 
+export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): string {
+  if (chainNumber === EthereumChainId.Mainnet) {
+    return "injective-1";
+  } else if (chainNumber === EthereumChainId.Goerli) {
+    return "injective-888";
+  } else {
+    throw new Error(`Invalid Injective EVM chainId: ${chainNumber}`);
+  }
+}
+
 export const DEFAULT_CHAIN_PREFIX = "cosmos";
 export const DEFAULT_BIP44_COIN_TYPE = 118;
 export const DEFAULT_CURRENCY = {
