@@ -187,7 +187,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
 
     const url = `https://metamask.app.link/wc?uri=${encodeURIComponent(this.walletConnect.uri)}`;
     return {
-      walletconnectUrl: url,
+      walletconnectUrl: this.walletConnect.uri,
       iosUrl: url,
       androidUrl: url,
     };
