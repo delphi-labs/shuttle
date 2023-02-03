@@ -10,7 +10,7 @@ import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
   interface Window {
-    xfi?: any;
+    terraWallets?: { identifier: string }[];
   }
 }
 
@@ -46,7 +46,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
 
     this.initializing = true;
 
-    if (!window.xfi?.terra) {
+    if (!window.terraWallets || !window.terraWallets.find((wallet) => wallet.identifier === "leap-wallet")) {
       this.initializing = false;
       throw new Error("Leap Terra is not available");
     }
