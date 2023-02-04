@@ -189,13 +189,13 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
-        chainId: wallet.network.chainId,
+        chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
-      const txRestApi = new TxRestApi(wallet.network.rest);
+      const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
       txRaw.setSignaturesList([new Uint8Array(0)]);
       const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -269,18 +269,18 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect({ chainId: wallet.network.chainId });
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
     }
 
-    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(wallet.network.chainId);
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
+    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
 
     if (isInjectiveNetwork(network.chainId)) {
-      const chainRestAuthApi = new ChainRestAuthApi(wallet.network.rest);
+      const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
@@ -297,7 +297,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
-        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
         const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
         fee = {
           amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
@@ -307,7 +307,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
-        chainId: wallet.network.chainId,
+        chainId: network.chainId,
         fee,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
         sequence: baseAccount.sequence,
@@ -328,7 +328,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       let fee: "auto" | Fee = "auto";
       if (feeAmount && feeAmount != "auto") {
-        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
         const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
         fee = {
           amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
@@ -370,19 +370,19 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect({ chainId: wallet.network.chainId });
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
     }
 
-    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(wallet.network.chainId);
+    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
 
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(wallet.network.rpc, offlineSigner, { gasPrice });
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
 
     if (isInjectiveNetwork(network.chainId)) {
-      const chainRestAuthApi = new ChainRestAuthApi(wallet.network.rest);
+      const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
@@ -399,7 +399,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
-        const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+        const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
         const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
         fee = {
           amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
@@ -409,7 +409,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
-        chainId: wallet.network.chainId,
+        chainId: network.chainId,
         fee,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
         sequence: baseAccount.sequence,
@@ -426,7 +426,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     } else {
       const processedMessages = messages.map((message) => message.toCosmosMsg());
 
-      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
+      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = {
         amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],

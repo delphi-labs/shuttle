@@ -158,13 +158,13 @@ export class MetamaskProvider implements WalletProvider {
       const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
-        chainId: wallet.network.chainId,
+        chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
-      const txRestApi = new TxRestApi(wallet.network.rest);
+      const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
       txRaw.setSignaturesList([new Uint8Array(0)]);
       const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -231,7 +231,7 @@ export class MetamaskProvider implements WalletProvider {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
       if (signResult.response) {
-        const txRestApi = new TxRestApi(wallet.network.rest);
+        const txRestApi = new TxRestApi(network.rest);
 
         const broadcast = await txRestApi.broadcast(signResult.response);
 

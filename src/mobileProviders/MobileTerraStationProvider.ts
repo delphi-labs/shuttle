@@ -257,7 +257,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -316,15 +316,15 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
         throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
       }
 
-      const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+      const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
       if (currentWallet.account.address !== wallet.account.address) {
         reject("Wallet not connected");
         throw new Error("Wallet not connected");
       }
 
-      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-      const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = JSON.stringify({
         amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
@@ -366,7 +366,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(wallet.network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {
@@ -416,14 +416,14 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
     }
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],

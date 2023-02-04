@@ -177,7 +177,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
       }
 
-      const connect = await this.connect({ chainId: wallet.network.chainId });
+      const connect = await this.connect({ chainId: network.chainId });
 
       if (connect.account.address !== wallet.account.address) {
         reject("Wallet not connected");
@@ -186,8 +186,8 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
 
       const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-      const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = JSON.stringify({
         amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
@@ -201,7 +201,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(wallet.network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {
@@ -250,7 +250,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect({ chainId: wallet.network.chainId });
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -258,8 +258,8 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
 
     const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],

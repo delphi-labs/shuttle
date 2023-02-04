@@ -216,7 +216,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -230,13 +230,13 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
-        chainId: wallet.network.chainId,
+        chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
-      const txRestApi = new TxRestApi(wallet.network.rest);
+      const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
       txRaw.setSignaturesList([new Uint8Array(0)]);
       const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -294,7 +294,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -304,7 +304,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo, mobile });
 
       if (signResult.response) {
-        const txRestApi = new TxRestApi(wallet.network.rest);
+        const txRestApi = new TxRestApi(network.rest);
 
         const broadcast = await txRestApi.broadcast(signResult.response);
 
@@ -358,13 +358,13 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       throw new Error(`Network with chainId "${wallet.network.chainId}" is not an EVM compatible network`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: wallet.network.chainId });
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
     }
 
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
 
     if (isInjectiveNetwork(network.chainId)) {
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
