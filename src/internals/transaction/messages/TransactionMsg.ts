@@ -3,6 +3,11 @@ export type CosmosMsg = {
   value: any;
 };
 
+export type AminoMsg<T = any> = {
+  type: string;
+  value: T;
+};
+
 export type ProtoMsg = {
   typeUrl: string;
   value: Uint8Array;
@@ -16,6 +21,13 @@ export class TransactionMsg<T = any> {
   toCosmosMsg(): CosmosMsg {
     return {
       typeUrl: this.typeUrl,
+      value: this.value,
+    };
+  }
+
+  toAminoMsg(): AminoMsg<T> {
+    return {
+      type: this.typeUrl,
       value: this.value,
     };
   }

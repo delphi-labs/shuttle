@@ -3,7 +3,7 @@ import { MsgTransfer as CosmosMsgTransfer } from "cosmjs-types/ibc/applications/
 import { Height } from "cosmjs-types/ibc/core/client/v1/client";
 import Long from "long";
 
-import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 
 export type MsgTransferValue = {
   sender: string;
@@ -54,6 +54,13 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
         : undefined,
       timeout_timestamp: this.value.timeoutTimestamp,
     });
+  }
+
+  toAminoMsg(): AminoMsg<MsgTransferValue> {
+    return {
+      type: "cosmos-sdk/MsgTransfer",
+      value: this.value,
+    };
   }
 
   toProtoMsg(): ProtoMsg {

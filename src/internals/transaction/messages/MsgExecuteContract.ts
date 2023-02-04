@@ -2,7 +2,7 @@ import { toUtf8 } from "@cosmjs/encoding";
 import { Coin } from "@cosmjs/stargate";
 import { MsgExecuteContract as CosmosMsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 
-import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, CosmosMsg, ProtoMsg } from "./TransactionMsg";
 
 export type MsgExecuteContractValue = {
   sender: string;
@@ -30,6 +30,13 @@ export class MsgExecuteContract extends TransactionMsg<MsgExecuteContractValue> 
         ...this.value,
         msg: toUtf8(JSON.stringify(this.value.msg)),
       },
+    };
+  }
+
+  toAminoMsg(): AminoMsg<MsgExecuteContractValue> {
+    return {
+      type: "wasm/MsgExecuteContract",
+      value: this.value,
     };
   }
 

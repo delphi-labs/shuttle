@@ -48,6 +48,8 @@
     "@injectivelabs/sdk-ts": "^1.0.360",
     "@injectivelabs/ts-types": "^1.0.28",
     "@injectivelabs/utils": "^1.0.60",
+    "@keplr-wallet/cosmos": "^0.11.34",
+    "@keplr-wallet/proto-types": "^0.11.38",
     "@metamask/eth-sig-util": "^5.0.2",
     "@walletconnect/client": "^1.8.0",
     "@walletconnect/core": "^1.8.0",
