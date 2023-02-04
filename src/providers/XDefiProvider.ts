@@ -1,12 +1,12 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
-import TerraExtension from "../extensions/TerraExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { DEFAULT_GAS_MULTIPLIER, Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
+import XDefiTerraExtension from "../extensions/XDefiTerraExtension";
 
 declare global {
   interface Window {
@@ -22,6 +22,17 @@ const DEFAULT_CURRENCY = {
 };
 const DEFAULT_GAS_PRICE = `0.2${DEFAULT_CURRENCY.coinDenom}`;
 
+const mapChainIdToNetworkName = (chainId: string) => {
+  switch (chainId) {
+    case "pisco-1":
+      return "testnet";
+    case "phoenix-1":
+      return "mainnet";
+    default:
+      throw new Error(`Invalid chain id: ${chainId}`);
+  }
+};
+
 export const XDefiProvider = class XDefiProvider implements WalletProvider {
   id: string = "xdefi";
   name: string = "XDefi";
@@ -29,7 +40,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
   initializing: boolean = false;
   initialized: boolean = false;
 
-  terraExtension?: TerraExtension;
+  xdefi?: XDefiTerraExtension;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
     if (id) {
@@ -53,14 +64,13 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error("XDefi is not available");
     }
 
-    this.terraExtension = new TerraExtension("xdefi-wallet");
-    await this.terraExtension.init();
+    this.xdefi = new XDefiTerraExtension();
     this.initialized = true;
     this.initializing = false;
   }
 
   async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
-    if (!this.terraExtension) {
+    if (!this.xdefi) {
       throw new Error("XDefi is not available");
     }
 
@@ -70,16 +80,17 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    const account = await this.terraExtension.connect();
+    const account = await this.xdefi.connect(mapChainIdToNetworkName(chainId));
+    const address = account[0];
 
-    const info = await this.terraExtension.info();
+    const info = await this.xdefi.info(mapChainIdToNetworkName(chainId));
 
-    if (info.chainID !== chainId) {
+    if (info.network.chainID !== chainId) {
       throw new Error(`Wallet not connected to the network with chainId "${chainId}"`);
     }
 
     const client = await CosmWasmClient.connect(network.rpc);
-    const accountInfo = await client.getAccount(account.address);
+    const accountInfo = await client.getAccount(address);
 
     let algo: "secp256k1" | "ed25519" | "sr25519" = "secp256k1";
     if (accountInfo?.pubkey?.type === "tendermint/PubKeySecp256k1" || accountInfo?.pubkey?.type.match(/secp256k1/i)) {
@@ -97,10 +108,10 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     }
 
     return {
-      id: `provider:${this.id}:network:${network.chainId}:address:${account.address}`,
+      id: `provider:${this.id}:network:${network.chainId}:address:${accountInfo?.address || address}`,
       providerId: this.id,
       account: {
-        address: accountInfo?.address || account.address,
+        address: accountInfo?.address || address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
       },
@@ -119,7 +130,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
-    if (!this.terraExtension) {
+    if (!this.xdefi) {
       throw new Error("XDefi is not available");
     }
 
@@ -129,7 +140,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect({ chainId: wallet.network.chainId });
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -175,7 +186,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
-      if (!this.terraExtension) {
+      if (!this.xdefi) {
         reject("XDefi is not available");
         throw new Error("XDefi is not available");
       }
@@ -186,7 +197,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
         throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
       }
 
-      const connect = await this.connect({ chainId: wallet.network.chainId });
+      const connect = await this.connect({ chainId: network.chainId });
 
       if (connect.account.address !== wallet.account.address) {
         reject("Wallet not connected");
@@ -195,26 +206,33 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
 
       const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-      const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-      const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = JSON.stringify({
         amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
         gas_limit: gasLimit || gas,
       });
 
-      const post = await this.terraExtension.post(processedMessages, fee, memo || "");
+      const post = await this.xdefi.post(
+        mapChainIdToNetworkName(network.chainId),
+        wallet.account.address,
+        processedMessages,
+        fee,
+        network.gasPrice || DEFAULT_GAS_PRICE,
+        memo ?? undefined,
+      );
 
-      if (!post?.result?.txhash) {
+      if (post.code !== 0) {
         reject("Broadcast failed");
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(wallet.network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {
-        const tx = await client.getTx(post?.result?.txhash);
+        const tx = await client.getTx(post.txhash);
         if (tx) {
           clearInterval(interval);
           resolve({
@@ -249,7 +267,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
-    if (!this.terraExtension) {
+    if (!this.xdefi) {
       throw new Error("XDefi is not available");
     }
 
@@ -259,7 +277,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const connect = await this.connect({ chainId: wallet.network.chainId });
+    const connect = await this.connect({ chainId: network.chainId });
 
     if (connect.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -267,15 +285,22 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
 
     const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
       gas_limit: gasLimit || gas,
     });
 
-    const signing = await this.terraExtension.sign(processedMessages, fee, memo || "");
+    const signing = await this.xdefi.sign(
+      mapChainIdToNetworkName(network.chainId),
+      wallet.account.address,
+      processedMessages,
+      fee,
+      network.gasPrice || DEFAULT_GAS_PRICE,
+      memo ?? undefined,
+    );
 
     return {
       signatures: signing?.result.signatures.map((signature) => fromBase64(signature)),
