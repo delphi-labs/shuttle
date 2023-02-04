@@ -56,11 +56,11 @@ export default class TerraExtension {
   ): Promise<{
     id: string;
     msgs: string[];
-    prugeQueue: boolean;
+    purgeQueue: boolean;
     result: { height: number; raw_log: string; txhash: string };
     success: boolean;
   }> {
-    return this.request("post", { msgs: messages, prugeQueue: true, waitForConfirmation: true, memo, fee });
+    return this.request("post", { msgs: messages, purgeQueue: true, waitForConfirmation: true, memo, fee });
   }
 
   public async sign(
@@ -70,7 +70,7 @@ export default class TerraExtension {
   ): Promise<{
     id: string;
     msgs: string[];
-    prugeQueue: boolean;
+    purgeQueue: boolean;
     result: {
       auth_info: {
         fee: { amount: { amount: string; denom: string }[]; gas_limit: string; granter: string; payer: string };
@@ -81,7 +81,7 @@ export default class TerraExtension {
     };
     success: boolean;
   }> {
-    return this.request("sign", { msgs: messages, prugeQueue: true, memo, fee });
+    return this.request("sign", { msgs: messages, purgeQueue: true, memo, fee });
   }
 
   private request(type: string, data: any = {}, options: { timeout?: number } = { timeout: 30 }): Promise<any> {
