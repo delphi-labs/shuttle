@@ -6,7 +6,6 @@ import {
   ChainRestAuthApi,
   createTransactionAndCosmosSignDoc,
   createTxRawFromSigResponse,
-  MsgExecuteContract as InjMsgExecuteContract,
   TxRestApi,
 } from "@injectivelabs/sdk-ts";
 
@@ -22,15 +21,8 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
 } from "../internals/network";
-import {
-  TransactionMsg,
-  BroadcastResult,
-  Fee,
-  SigningResult,
-  SimulateResult,
-  MsgExecuteContract,
-} from "../internals/transaction";
-import { isInjectiveNetwork } from "../internals/injective";
+import { TransactionMsg, BroadcastResult, Fee, SigningResult, SimulateResult } from "../internals/transaction";
+import { isInjectiveNetwork, prepareMessagesForInjective } from "../internals/injective";
 
 declare global {
   interface Window {
@@ -177,17 +169,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -285,17 +267,6 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
@@ -306,6 +277,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         };
       }
 
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -387,17 +359,6 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
@@ -408,6 +369,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         };
       }
 
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,

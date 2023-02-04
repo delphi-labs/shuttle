@@ -13,15 +13,14 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
 } from "../internals/network";
-import { BroadcastResult, Fee, MsgExecuteContract, SigningResult, SimulateResult } from "../internals/transaction";
-import { isInjectiveNetwork } from "../internals/injective";
+import { BroadcastResult, Fee, SigningResult, SimulateResult } from "../internals/transaction";
+import { isInjectiveNetwork, prepareMessagesForInjective } from "../internals/injective";
 import { TransactionMsg } from "../internals";
 import {
   BaseAccount,
   ChainRestAuthApi,
   createTransactionAndCosmosSignDoc,
   createTxRawFromSigResponse,
-  MsgExecuteContract as InjMsgExecuteContract,
   TxRestApi,
 } from "@injectivelabs/sdk-ts";
 
@@ -176,17 +175,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -284,17 +273,6 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
@@ -305,6 +283,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         };
       }
 
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -386,17 +365,6 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = messages.map((msg) => {
-        const execMsg = msg as MsgExecuteContract;
-
-        return InjMsgExecuteContract.fromJSON({
-          sender: execMsg.value.sender,
-          contractAddress: execMsg.value.contract,
-          msg: execMsg.value.msg,
-          funds: execMsg.value.funds,
-        });
-      });
-
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
         const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
@@ -407,6 +375,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         };
       }
 
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
