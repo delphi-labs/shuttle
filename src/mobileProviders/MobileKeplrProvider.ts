@@ -220,10 +220,8 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
     return {
       walletconnectUrl: this.walletConnect.uri,
-      iosUrl: `keplrwallet://wcV1?${encodeURIComponent(this.walletConnect.uri)}`,
-      androidUrl: `intent://wcV1?${encodeURIComponent(
-        this.walletConnect.uri,
-      )}#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;`,
+      iosUrl: `keplrwallet://wcV1?${this.walletConnect.uri}`,
+      androidUrl: `intent://wcV1?${this.walletConnect.uri}#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;`,
     };
   }
 
