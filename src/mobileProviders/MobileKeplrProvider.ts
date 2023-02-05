@@ -1,8 +1,9 @@
 import WalletConnect from "@walletconnect/client";
-import { payloadId } from "@walletconnect/utils";
+import { isAndroid, payloadId } from "@walletconnect/utils";
 import { calculateFee } from "@cosmjs/stargate";
 import { GasPrice } from "@cosmjs/launchpad";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
+import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { AuthInfo, Fee as KeplrFee, TxBody, TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
 import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
 import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
@@ -32,7 +33,6 @@ import {
   Algo,
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
-import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWalletProvider {
@@ -476,6 +476,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     };
 
     if (mobile) {
+      if (isAndroid()) {
+        window.location.href = "intent://wcV1#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;";
+      }
+
       window.location.href = "keplrwallet://wcV1";
     }
 
