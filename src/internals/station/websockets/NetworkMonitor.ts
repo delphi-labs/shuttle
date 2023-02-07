@@ -1,7 +1,5 @@
 import { NetworkEvent, INetworkEventEmitter, INetworkMonitor } from "@walletconnect/types";
 
-// -- NetworkMonitor --------------------------------------------------------- //
-
 class NetworkMonitor implements INetworkMonitor {
   private _eventEmitters: INetworkEventEmitter[];
 

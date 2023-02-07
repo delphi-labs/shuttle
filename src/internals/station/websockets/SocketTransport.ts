@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {
   ISocketMessage,
   ITransportEvent,
@@ -8,11 +6,9 @@ import {
   ISocketTransportOptions,
 } from "@walletconnect/types";
 import { isBrowser, getLocation, getQueryString, detectEnv, appendToQueryString } from "@walletconnect/utils";
+import WebSocket from "isomorphic-ws";
 
 import NetworkMonitor from "./NetworkMonitor";
-
-// @ts-ignore
-const WS = typeof global.WebSocket !== "undefined" ? global.WebSocket : require("ws");
 
 // -- SocketTransport ------------------------------------------------------ //
 
@@ -48,42 +44,52 @@ class SocketTransport implements ITransportLib {
     this._netMonitor.on("online", () => this._socketCreate());
   }
 
+  // @ts-ignore
   set readyState(value) {
     // empty
   }
 
+  // @ts-ignore
   get readyState(): number {
     return this._socket ? this._socket.readyState : -1;
   }
 
+  // @ts-ignore
   set connecting(value) {
     // empty
   }
 
+  // @ts-ignore
   get connecting(): boolean {
     return this.readyState === 0;
   }
 
+  // @ts-ignore
   set connected(value) {
     // empty
   }
 
+  // @ts-ignore
   get connected(): boolean {
     return this.readyState === 1;
   }
 
+  // @ts-ignore
   set closing(value) {
     // empty
   }
 
+  // @ts-ignore
   get closing(): boolean {
     return this.readyState === 2;
   }
 
+  // @ts-ignore
   set closed(value) {
     // empty
   }
 
+  // @ts-ignore
   get closed(): boolean {
     return this.readyState === 3;
   }
@@ -133,16 +139,18 @@ class SocketTransport implements ITransportLib {
 
     const url = getWebSocketUrl(this._url, this._protocol, this._version);
 
-    this._nextSocket = new WS(url);
+    this._nextSocket = new WebSocket(url);
 
     if (!this._nextSocket) {
       throw new Error("Failed to create socket");
     }
 
+    // @ts-ignore
     this._nextSocket.onmessage = (event: MessageEvent) => this._socketReceive(event);
 
     this._nextSocket.onopen = () => this._socketOpen();
 
+    // @ts-ignore
     this._nextSocket.onerror = (event: Event) => this._socketError(event);
 
     this._nextSocket.onclose = () => {
