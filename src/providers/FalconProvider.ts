@@ -94,6 +94,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         address: accountInfo?.address || account.address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

@@ -100,6 +100,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
         address: accountInfo?.address || bech32Address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

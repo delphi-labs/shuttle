@@ -89,6 +89,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
         address: bech32Address,
         pubkey: null,
         algo: null,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

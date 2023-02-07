@@ -12,7 +12,7 @@ import {
 import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
-import { WalletConnection } from "../internals/wallet";
+import { Algo, WalletConnection } from "../internals/wallet";
 import {
   DEFAULT_BIP44_COIN_TYPE,
   DEFAULT_CHAIN_PREFIX,
@@ -121,17 +121,24 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
 
     await this.keplr.enable(chainId);
 
-    const offlineSigner = this.keplr.getOfflineSigner(chainId);
-
-    const accounts = await offlineSigner.getAccounts();
+    const account = (await this.keplr.getKey(chainId)) as {
+      address: Uint8Array;
+      algo: string;
+      bech32Address: string;
+      isKeystone: boolean;
+      isNanoLedger: boolean;
+      name: string;
+      pubKey: Uint8Array;
+    };
 
     return {
-      id: `provider:${this.id}:network:${network.chainId}:address:${accounts[0].address}`,
+      id: `provider:${this.id}:network:${network.chainId}:address:${account.bech32Address}`,
       providerId: this.id,
       account: {
-        address: accounts[0].address,
-        pubkey: toBase64(accounts[0].pubkey),
-        algo: accounts[0].algo,
+        address: account.bech32Address,
+        pubkey: toBase64(account.pubKey),
+        algo: account.algo as Algo,
+        isLedger: account.isNanoLedger,
       },
       network,
     };

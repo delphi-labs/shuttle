@@ -114,6 +114,7 @@ export class MetamaskProvider implements WalletProvider {
         address: address,
         pubkey: null,
         algo: null,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

@@ -102,6 +102,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
         address: accountInfo?.address || account.address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

@@ -133,6 +133,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
         address: account.bech32Address,
         pubkey: account.pubKey,
         algo: account.algo as Algo,
+        isLedger: account.isNanoLedger,
       },
       network,
     };

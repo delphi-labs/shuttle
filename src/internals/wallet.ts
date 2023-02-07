@@ -6,6 +6,7 @@ export type Account = {
   address: string;
   algo: Algo | null;
   pubkey: string | null;
+  isLedger: boolean;
 };
 
 export type WalletConnection = {

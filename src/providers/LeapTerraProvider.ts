@@ -101,6 +101,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
         address: accountInfo?.address || account.address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };

@@ -114,6 +114,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
         address: accountInfo?.address || address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
+        isLedger: false, // @TODO: check if it's a ledger
       },
       network,
     };
