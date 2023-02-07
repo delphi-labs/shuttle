@@ -1,12 +1,17 @@
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
+import { StdSignDoc } from "@cosmjs/amino";
+import { AuthInfo, Fee as KeplrFee, TxBody, TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
+import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
+import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
 import {
   BaseAccount,
   ChainRestAuthApi,
   createTransactionAndCosmosSignDoc,
   createTxRawFromSigResponse,
   TxRestApi,
+  TxRaw as InjTxRaw,
 } from "@injectivelabs/sdk-ts";
 
 import { Keplr } from "../extensions";
@@ -266,37 +271,28 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       throw new Error("Wallet not connected");
     }
 
+    if (wallet.account.isLedger) {
+      const client = await CosmWasmClient.connect(network.rpc);
+
+      const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
+
+      const broadcast = await client.broadcastTx(TxRaw.encode(signResult.response).finish(), 15000, 2500);
+
+      return {
+        hash: broadcast.transactionHash,
+        rawLogs: broadcast.rawLog || "",
+        response: broadcast,
+      };
+    }
+
     const offlineSigner = this.leap.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
 
     if (isInjectiveNetwork(network.chainId)) {
-      const chainRestAuthApi = new ChainRestAuthApi(network.rest);
-      const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
-      const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
+      const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
+      const txRaw = signResult.response as InjTxRaw;
 
-      let fee: Fee | undefined = undefined;
-      if (feeAmount && feeAmount != "auto") {
-        const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
-        const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-        fee = {
-          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
-          gas: gasLimit || gas,
-        };
-      }
-
-      const preparedMessages = prepareMessagesForInjective(messages);
-      const preparedTx = await createTransactionAndCosmosSignDoc({
-        pubKey: wallet.account.pubkey || "",
-        chainId: network.chainId,
-        fee,
-        message: preparedMessages.map((msg) => msg.toDirectSign()),
-        sequence: baseAccount.sequence,
-        accountNumber: baseAccount.accountNumber,
-      });
-
-      const directSignResponse = await offlineSigner.signDirect(wallet.account.address, preparedTx.cosmosSignDoc);
-      const txRaw = createTxRawFromSigResponse(directSignResponse);
       const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
 
       return {
@@ -357,8 +353,86 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       throw new Error("Wallet not connected");
     }
 
-    const offlineSigner = this.leap.getOfflineSigner(network.chainId);
+    if (wallet.account.isLedger) {
+      const offlineSigner = this.leap.getOfflineSigner(network.chainId);
+      const client = await CosmWasmClient.connect(network.rpc);
+      const accountInfo = await client.getAccount(wallet.account.address);
 
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+      const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+
+      let fee: Fee = {
+        amount: [{ amount: gas, denom: gasPrice.denom }],
+        gas: gasLimit || gas,
+      };
+      if (feeAmount && feeAmount != "auto") {
+        const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+        const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+        fee = {
+          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          gas: gasLimit || gas,
+        };
+      }
+
+      const signDoc: StdSignDoc = {
+        chain_id: network.chainId,
+        account_number: accountInfo?.accountNumber.toString() || "",
+        sequence: accountInfo?.sequence.toString() || "",
+        fee,
+        msgs: messages.map((message) => message.toAminoMsg()),
+        memo: memo || "",
+      };
+
+      const signResponse = await offlineSigner.signAmino(wallet.account.address, signDoc);
+
+      const signedTx = TxRaw.encode({
+        bodyBytes: TxBody.encode(
+          TxBody.fromPartial({
+            messages: messages.map((m) => m.toProtoMsg()) as any,
+            memo: memo || "",
+          }),
+        ).finish(),
+        authInfoBytes: AuthInfo.encode({
+          signerInfos: [
+            {
+              publicKey: {
+                typeUrl: (() => {
+                  if (isInjectiveNetwork(network.chainId)) {
+                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
+                  }
+
+                  return "/cosmos.crypto.secp256k1.PubKey";
+                })(),
+                value: PubKey.encode({
+                  key: Buffer.from(signResponse.signature.pub_key.value, "base64"),
+                }).finish(),
+              },
+              modeInfo: {
+                single: {
+                  mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                },
+                multi: undefined,
+              },
+              sequence: signResponse.signed.sequence,
+            },
+          ],
+          fee: KeplrFee.fromPartial({
+            amount: signResponse.signed.fee.amount as any,
+            gasLimit: signResponse.signed.fee.gas,
+            payer: undefined,
+          }),
+        }).finish(),
+        signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+      }).finish();
+
+      return {
+        signatures: TxRaw.decode(signedTx).signatures,
+        response: TxRaw.decode(signedTx),
+      };
+    }
+
+    const offlineSigner = this.leap.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
 

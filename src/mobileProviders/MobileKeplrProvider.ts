@@ -512,7 +512,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
                   return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
                 }
 
-                return "/ethermint.crypto.v1.ethsecp256k1.PubKey";
+                return "/cosmos.crypto.secp256k1.PubKey";
               })(),
               value: PubKey.encode({
                 key: Buffer.from(signResponse.signature.pub_key.value, "base64"),
