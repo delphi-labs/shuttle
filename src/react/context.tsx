@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import useLocalStorageState from 'use-local-storage-state'
+
 import { MobileWalletProvider } from "../mobileProviders/MobileWalletProvider";
 import { WalletProvider } from "../providers/WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { MobileConnectResponse } from "../internals/provider";
 import { TransactionMsg, SimulateResult, BroadcastResult, SigningResult } from "../internals/transaction";
-import { ShuttleStore, useShuttleStore } from "./store";
-import useLocalStorage from "./useLocalStorage";
+import { ShuttleStore, useShuttleStore } from "./store";+
 
 type ShuttleContextType =
   | {
@@ -94,7 +95,7 @@ export const ShuttleProvider = ({
   }, []);
 
   const internalStore = useShuttleStore();
-  const [walletConnections, setWalletConnections] = useLocalStorage<WalletConnection[]>(persistentKey || "shuttle", []);
+  const [walletConnections, setWalletConnections] = useLocalStorageState<WalletConnection[]>(persistentKey || "shuttle", { defaultValue: [] });
   useEffect(() => {
     if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
       internalStore.restore(walletConnections);
