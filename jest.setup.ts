@@ -8,3 +8,8 @@ Object.defineProperty(window, "TextDecoder", {
   writable: true,
   value: util.TextDecoder,
 });
+
+global.console = {
+  ...global.console,
+  info: jest.fn(),
+};
