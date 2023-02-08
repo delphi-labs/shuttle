@@ -172,6 +172,14 @@ export const ShuttleProvider = ({
       }
     };
 
+    const disconnectWallet = (wallet: WalletConnection) => {
+      internalStore.removeWallet(wallet);
+      store?.removeWallet(wallet);
+      if (persistent) {
+        setWalletConnections(internalStore.getWallets());
+      }
+    };
+
     const simulate = async ({ messages, wallet }: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -260,7 +268,7 @@ export const ShuttleProvider = ({
       getWallets,
       recentWallet,
       disconnect,
-      disconnectWallet: store?.removeWallet || internalStore.removeWallet,
+      disconnectWallet,
       simulate,
       broadcast,
       sign,
