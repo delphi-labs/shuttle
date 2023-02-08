@@ -1,49 +1,47 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import useLocalStorageState from 'use-local-storage-state'
+import useLocalStorageState from "use-local-storage-state";
 
 import { MobileWalletProvider } from "../mobileProviders/MobileWalletProvider";
 import { WalletProvider } from "../providers/WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { MobileConnectResponse } from "../internals/provider";
 import { TransactionMsg, SimulateResult, BroadcastResult, SigningResult } from "../internals/transaction";
-import { ShuttleStore, useShuttleStore } from "./store";+
+import { ShuttleStore, useShuttleStore } from "./store";
 
-type ShuttleContextType =
-  | {
-      providers: WalletProvider[];
-      mobileProviders: MobileWalletProvider[];
-      mobileConnect: (options: {
-        mobileProviderId: string;
-        chainId: string;
-        callback?: (walletConnection: WalletConnection) => void;
-      }) => Promise<MobileConnectResponse>;
-      connect: (options: { providerId: string; chainId: string }) => Promise<void>;
-      wallets: WalletConnection[];
-      getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
-      recentWallet: WalletConnection | null;
-      disconnect: (filters?: { providerId?: string; chainId?: string }) => void;
-      disconnectWallet: (wallet: WalletConnection) => void;
-      simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
-      broadcast: (options: {
-        messages: TransactionMsg[];
-        feeAmount?: string | null;
-        gasLimit?: string | null;
-        memo?: string | null;
-        wallet?: WalletConnection | null;
-        mobile?: boolean;
-      }) => Promise<BroadcastResult>;
-      sign: (options: {
-        messages: TransactionMsg[];
-        feeAmount?: string | null;
-        gasLimit?: string | null;
-        memo?: string | null;
-        wallet?: WalletConnection | null;
-        mobile?: boolean;
-      }) => Promise<SigningResult>;
-    }
-  | undefined;
+type ShuttleContextType = {
+  providers: WalletProvider[];
+  mobileProviders: MobileWalletProvider[];
+  mobileConnect: (options: {
+    mobileProviderId: string;
+    chainId: string;
+    callback?: (walletConnection: WalletConnection) => void;
+  }) => Promise<MobileConnectResponse>;
+  connect: (options: { providerId: string; chainId: string }) => Promise<void>;
+  wallets: WalletConnection[];
+  getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
+  recentWallet: WalletConnection | null;
+  disconnect: (filters?: { providerId?: string; chainId?: string }) => void;
+  disconnectWallet: (wallet: WalletConnection) => void;
+  simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
+  broadcast: (options: {
+    messages: TransactionMsg[];
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
+    wallet?: WalletConnection | null;
+    mobile?: boolean;
+  }) => Promise<BroadcastResult>;
+  sign: (options: {
+    messages: TransactionMsg[];
+    feeAmount?: string | null;
+    gasLimit?: string | null;
+    memo?: string | null;
+    wallet?: WalletConnection | null;
+    mobile?: boolean;
+  }) => Promise<SigningResult>;
+};
 
-export const ShuttleContext = createContext<ShuttleContextType>(undefined);
+export const ShuttleContext = createContext<ShuttleContextType | undefined>(undefined);
 
 export const ShuttleProvider = ({
   persistent = false,
@@ -95,7 +93,10 @@ export const ShuttleProvider = ({
   }, []);
 
   const internalStore = useShuttleStore();
-  const [walletConnections, setWalletConnections] = useLocalStorageState<WalletConnection[]>(persistentKey || "shuttle", { defaultValue: [] });
+  const [walletConnections, setWalletConnections] = useLocalStorageState<WalletConnection[]>(
+    persistentKey || "shuttle",
+    { defaultValue: [] },
+  );
   useEffect(() => {
     if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
       internalStore.restore(walletConnections);
