@@ -1,7 +1,7 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
-import TerraExtension from "../extensions/TerraExtension";
+import StationExtension from "../extensions/StationExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../internals/network";
@@ -10,7 +10,7 @@ import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
   interface Window {
-    isTerraExtensionAvailable: boolean;
+    isStationExtensionAvailable: boolean;
   }
 }
 
@@ -28,7 +28,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
   initializing: boolean = false;
   initialized: boolean = false;
 
-  terraExtension?: TerraExtension;
+  stationExtension?: StationExtension;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
     if (id) {
@@ -47,19 +47,19 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
     this.initializing = true;
 
-    if (!window.isTerraExtensionAvailable) {
+    if (!window.isStationExtensionAvailable) {
       this.initializing = false;
       throw new Error("Terra Station is not available");
     }
 
-    this.terraExtension = new TerraExtension("station");
-    await this.terraExtension.init();
+    this.stationExtension = new StationExtension("station");
+    await this.stationExtension.init();
     this.initialized = true;
     this.initializing = false;
   }
 
   async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
-    if (!this.terraExtension) {
+    if (!this.stationExtension) {
       throw new Error("Terra Station is not available");
     }
 
@@ -69,16 +69,16 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    const account = await this.terraExtension.connect();
+    const connect = await this.stationExtension.connect();
 
-    const info = await this.terraExtension.info();
+    const bech32Address = connect.addresses[network.chainId];
 
-    if (info.chainID !== chainId) {
+    if (!bech32Address) {
       throw new Error(`Wallet not connected to the network with chainId "${chainId}"`);
     }
 
     const client = await CosmWasmClient.connect(network.rpc);
-    const accountInfo = await client.getAccount(account.address);
+    const accountInfo = await client.getAccount(bech32Address);
 
     let algo: "secp256k1" | "ed25519" | "sr25519" = "secp256k1";
     if (accountInfo?.pubkey?.type === "tendermint/PubKeySecp256k1" || accountInfo?.pubkey?.type.match(/secp256k1/i)) {
@@ -96,13 +96,13 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     }
 
     return {
-      id: `provider:${this.id}:network:${network.chainId}:address:${account.address}`,
+      id: `provider:${this.id}:network:${network.chainId}:address:${bech32Address}`,
       providerId: this.id,
       account: {
-        address: accountInfo?.address || account.address,
+        address: accountInfo?.address || bech32Address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
-        isLedger: false, // @TODO: check if it's a ledger
+        isLedger: false,
       },
       network,
     };
@@ -119,7 +119,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
-    if (!this.terraExtension) {
+    if (!this.stationExtension) {
       throw new Error("Terra Station is not available");
     }
 
@@ -179,7 +179,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
-      if (!this.terraExtension) {
+      if (!this.stationExtension) {
         reject("Terra Station is not available");
         throw new Error("Terra Station is not available");
       }
@@ -213,7 +213,12 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
         gas_limit: gasLimit || gas,
       });
 
-      const post = await this.terraExtension.post(processedMessages, fee, memo || "");
+      const post = await this.stationExtension.post({
+        messages: processedMessages,
+        fee,
+        memo: memo || "",
+        chainId: network.chainId,
+      });
 
       if (!post?.result?.txhash) {
         reject("Broadcast failed");
@@ -259,7 +264,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
-    if (!this.terraExtension) {
+    if (!this.stationExtension) {
       throw new Error("Terra Station is not available");
     }
 
@@ -289,7 +294,12 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       gas_limit: gasLimit || gas,
     });
 
-    const signing = await this.terraExtension.sign(processedMessages, fee, memo || "");
+    const signing = await this.stationExtension.sign({
+      messages: processedMessages,
+      fee,
+      memo: memo || "",
+      chainId: network.chainId,
+    });
 
     return {
       signatures: signing?.result.signatures.map((signature) => fromBase64(signature)),
