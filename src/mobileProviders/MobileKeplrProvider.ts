@@ -35,6 +35,16 @@ import {
 import MobileWalletProvider from "./MobileWalletProvider";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
+type KeplrAccount = {
+  address: string;
+  algo: string;
+  bech32Address: string;
+  isKeystone: boolean;
+  isNanoLedger: boolean;
+  name: string;
+  pubKey: string;
+};
+
 export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWalletProvider {
   id: string = "mobile-keplr";
   name: string = "Keplr - WalletConnect";
@@ -44,6 +54,12 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
   walletConnect?: WalletConnect;
   chainId?: string;
+  enabledChains: {
+    [chainId: string]: boolean;
+  };
+  accounts: {
+    [chainId: string]: KeplrAccount[];
+  };
   connectCallback?: (wallet: WalletConnection) => void;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
@@ -54,6 +70,8 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+    this.enabledChains = {};
+    this.accounts = {};
   }
 
   async enable({ chainId }: { chainId: string }): Promise<void> {
@@ -67,6 +85,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
+    if (this.enabledChains[chainId]) {
+      return;
+    }
+
     await this.walletConnect.sendCustomRequest({
       id: payloadId(),
       jsonrpc: "2.0",
@@ -75,17 +97,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     });
   }
 
-  async getAccounts({ chainId }: { chainId: string }): Promise<
-    {
-      address: string;
-      algo: string;
-      bech32Address: string;
-      isKeystone: boolean;
-      isNanoLedger: boolean;
-      name: string;
-      pubKey: string;
-    }[]
-  > {
+  async getAccounts({ chainId }: { chainId: string }): Promise<KeplrAccount[]> {
     if (!this.walletConnect || !this.walletConnect.connected) {
       throw new Error("Mobile Keplr is not available");
     }
@@ -95,6 +107,12 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     if (!network) {
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
+
+    if (this.accounts[chainId]) {
+      return this.accounts[chainId];
+    }
+
+    await this.enable({ chainId: this.chainId || "" });
 
     return await this.walletConnect.sendCustomRequest({
       id: payloadId(),
@@ -115,16 +133,14 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    await this.enable({ chainId: network.chainId });
+    this.accounts[chainId] = await this.getAccounts({ chainId: network.chainId });
 
-    const accounts = await this.getAccounts({ chainId: network.chainId });
-
-    if (!accounts || accounts.length === 0) {
+    if (!this.accounts[chainId] || this.accounts[chainId].length === 0) {
       this.walletConnect?.killSession();
       throw new Error(`No wallet connected to chain: ${chainId}`);
     }
 
-    const account = accounts[0];
+    const account = this.accounts[chainId][0];
 
     return {
       id: `provider:${this.id}:network:${network.chainId}:address:${account.bech32Address}`,
