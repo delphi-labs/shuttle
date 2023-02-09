@@ -175,6 +175,14 @@ export const ShuttleProvider = ({
     };
 
     const disconnectWallet = (wallet: WalletConnection) => {
+      const provider =
+        availableProviders.find((provider) => provider.id === wallet.providerId) ||
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === wallet.providerId);
+
+      if (provider) {
+        provider.disconnect({ wallet });
+      }
+
       internalStore.removeWallet(wallet);
       store?.removeWallet(wallet);
       if (persistent) {
