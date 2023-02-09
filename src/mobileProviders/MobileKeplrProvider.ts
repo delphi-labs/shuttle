@@ -85,7 +85,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    if (this.enabledChains[chainId]) {
+    if (this.enabledChains[network.chainId]) {
       return;
     }
 
@@ -108,11 +108,11 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    if (this.accounts[chainId]) {
-      return this.accounts[chainId];
+    if (this.accounts[network.chainId]) {
+      return this.accounts[network.chainId];
     }
 
-    await this.enable({ chainId: this.chainId || "" });
+    await this.enable({ chainId: network.chainId || "" });
 
     return await this.walletConnect.sendCustomRequest({
       id: payloadId(),
@@ -133,14 +133,14 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    this.accounts[chainId] = await this.getAccounts({ chainId: network.chainId });
+    this.accounts[network.chainId] = await this.getAccounts({ chainId: network.chainId });
 
-    if (!this.accounts[chainId] || this.accounts[chainId].length === 0) {
+    if (!this.accounts[network.chainId] || this.accounts[network.chainId].length === 0) {
       this.walletConnect?.killSession();
-      throw new Error(`No wallet connected to chain: ${chainId}`);
+      throw new Error(`No wallet connected to chain: ${network.chainId}`);
     }
 
-    const account = this.accounts[chainId][0];
+    const account = this.accounts[network.chainId][0];
 
     return {
       id: `provider:${this.id}:network:${network.chainId}:address:${account.bech32Address}`,
