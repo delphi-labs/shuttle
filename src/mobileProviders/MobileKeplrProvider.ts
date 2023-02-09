@@ -12,6 +12,7 @@ import {
   createTransactionAndCosmosSignDoc,
   TxRestApi,
   TxRaw as InjTxRaw,
+  hexToBase64,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -130,7 +131,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       providerId: this.id,
       account: {
         address: account.bech32Address,
-        pubkey: account.pubKey,
+        pubkey: hexToBase64(account.pubKey),
         algo: account.algo as Algo,
         isLedger: account.isNanoLedger,
       },
