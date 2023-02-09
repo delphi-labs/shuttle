@@ -1,7 +1,6 @@
 import WalletConnect from "@walletconnect/client";
 import { isAndroid, payloadId } from "@walletconnect/utils";
-import { calculateFee } from "@cosmjs/stargate";
-import { GasPrice } from "@cosmjs/launchpad";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { AuthInfo, Fee as KeplrFee, TxBody, TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
@@ -244,7 +243,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     messages,
     wallet,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
@@ -299,13 +298,14 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
         };
       }
     } else {
+      const signer = new FakeOfflineSigner(wallet);
+      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+      const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, signer, { gasPrice });
+
       const processedMessages = messages.map((message) => message.toCosmosMsg());
 
       try {
-        const signer = new FakeOfflineSigner(wallet);
-        const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(network.rpc || "", signer);
-
-        const gasEstimation = await signingCosmWasmClient.simulate(wallet.account.address, processedMessages, "");
+        const gasEstimation = await client.simulate(wallet.account.address, processedMessages, "");
 
         const fee = calculateFee(
           Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),

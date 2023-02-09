@@ -4,8 +4,7 @@ import { IWalletConnectOptions } from "@walletconnect/types";
 import Connector from "@walletconnect/core";
 import * as cryptoLib from "@walletconnect/iso-crypto";
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { calculateFee } from "@cosmjs/stargate";
-import { GasPrice } from "@cosmjs/launchpad";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 
 import {
@@ -245,7 +244,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     messages,
     wallet,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {

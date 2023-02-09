@@ -1,6 +1,5 @@
 import WalletConnect from "@walletconnect/client";
-import { calculateFee } from "@cosmjs/stargate";
-import { GasPrice } from "@cosmjs/launchpad";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import {
   BaseAccount,
   ChainRestAuthApi,
@@ -200,7 +199,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
     messages,
     wallet,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {

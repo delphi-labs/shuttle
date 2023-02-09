@@ -128,7 +128,7 @@ export class MetamaskProvider implements WalletProvider {
     messages,
     wallet,
   }: {
-    messages: TransactionMsg<any>[];
+    messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
     if (!this.metamask) {
