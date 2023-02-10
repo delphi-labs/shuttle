@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
 
 import { MobileWalletProvider } from "../mobileProviders/MobileWalletProvider";
@@ -61,48 +61,11 @@ export const ShuttleProvider = ({
   const [availableProviders, setAvailableProviders] = useState<WalletProvider[]>([]);
   const [availableMobileProviders, setAvailableMobileProviders] = useState<MobileWalletProvider[]>([]);
 
-  useEffect(() => {
-    providers
-      .filter((provider) => !provider.initializing || !provider.initialized)
-      .forEach((provider) => {
-        provider
-          .init()
-          .then(() => {
-            setAvailableProviders((prev) => {
-              const rest = prev.filter((p) => p.id !== provider.id);
-              return [...rest, provider];
-            });
-          })
-          .catch((e) => console.warn("Shuttle: ", e));
-      });
-
-    mobileProviders
-      .filter((mobileProvider) => !mobileProvider.initializing || !mobileProvider.initialized)
-      .forEach((mobileProvider) => {
-        mobileProvider
-          .init()
-          .then(() => {
-            setAvailableMobileProviders((prev) => {
-              const rest = prev.filter((p) => p.id !== mobileProvider.id);
-              return [...rest, mobileProvider];
-            });
-          })
-          .catch((e) => console.warn("Shuttle: ", e));
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const internalStore = useShuttleStore();
   const [walletConnections, setWalletConnections] = useLocalStorageState<WalletConnection[]>(
     persistentKey || "shuttle",
     { defaultValue: [] },
   );
-  useEffect(() => {
-    if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
-      internalStore.restore(walletConnections);
-      store?.restore(walletConnections);
-    }
-  }, [walletConnections, internalStore, store]);
 
   const wallets = useMemo(() => {
     return store?.wallets || internalStore.wallets;
@@ -115,6 +78,39 @@ export const ShuttleProvider = ({
   const recentWallet = useMemo(() => {
     return store?.recentWallet || internalStore.recentWallet;
   }, [store, internalStore]);
+
+  const addWallet = useCallback(
+    (wallet: WalletConnection) => {
+      internalStore.addWallet(wallet);
+      store?.addWallet(wallet);
+      if (persistent) {
+        setWalletConnections(internalStore.getWallets());
+      }
+    },
+    [internalStore, persistent, setWalletConnections, store],
+  );
+
+  const removeWallets = useCallback(
+    (filters?: { providerId?: string; chainId?: string }) => {
+      internalStore.removeWallets(filters);
+      store?.removeWallets(filters);
+      if (persistent) {
+        setWalletConnections(internalStore.getWallets());
+      }
+    },
+    [internalStore, persistent, setWalletConnections, store],
+  );
+
+  const removeWallet = useCallback(
+    (wallet: WalletConnection) => {
+      internalStore.removeWallet(wallet);
+      store?.removeWallet(wallet);
+      if (persistent) {
+        setWalletConnections(internalStore.getWallets());
+      }
+    },
+    [internalStore, persistent, setWalletConnections, store],
+  );
 
   const providerInterface = useMemo(() => {
     const mobileConnect = async ({
@@ -150,11 +146,8 @@ export const ShuttleProvider = ({
         throw new Error(`Provider ${providerId} not found`);
       }
       const wallet = await provider.connect({ chainId });
-      internalStore.addWallet(wallet);
-      store?.addWallet(wallet);
-      if (persistent) {
-        setWalletConnections(internalStore.getWallets());
-      }
+
+      addWallet(wallet);
     };
 
     const disconnect = (filters?: { providerId?: string; chainId?: string }) => {
@@ -167,11 +160,7 @@ export const ShuttleProvider = ({
         }
       });
 
-      internalStore.removeWallets(filters);
-      store?.removeWallets(filters);
-      if (persistent) {
-        setWalletConnections(internalStore.getWallets());
-      }
+      removeWallets(filters);
     };
 
     const disconnectWallet = (wallet: WalletConnection) => {
@@ -183,11 +172,7 @@ export const ShuttleProvider = ({
         provider.disconnect({ wallet });
       }
 
-      internalStore.removeWallet(wallet);
-      store?.removeWallet(wallet);
-      if (persistent) {
-        setWalletConnections(internalStore.getWallets());
-      }
+      removeWallet(wallet);
     };
 
     const simulate = async ({ messages, wallet }: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => {
@@ -286,16 +271,75 @@ export const ShuttleProvider = ({
   }, [
     providers,
     mobileProviders,
-    availableProviders,
-    availableMobileProviders,
-    store,
-    internalStore,
     wallets,
     getWallets,
     recentWallet,
+    availableMobileProviders,
+    internalStore,
+    store,
     persistent,
     setWalletConnections,
+    availableProviders,
+    addWallet,
+    removeWallets,
+    removeWallet,
   ]);
+
+  // Initialize store
+  useEffect(() => {
+    if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
+      internalStore.restore(walletConnections);
+      store?.restore(walletConnections);
+    }
+  }, [walletConnections, internalStore, store]);
+
+  // Initialize providers
+  useEffect(() => {
+    providers
+      .filter((provider) => !provider.initializing && !provider.initialized)
+      .forEach((provider) => {
+        provider
+          .init()
+          .then(() => {
+            getWallets({ providerId: provider.id }).forEach((providerWallet) => {
+              provider
+                .connect({ chainId: providerWallet.network.chainId })
+                .then((wallet) => {
+                  console.log("compare wallets ids", providerWallet.id, wallet.id, providerWallet.id === wallet.id);
+                  console.log("compare wallets", providerWallet, wallet);
+                  if (providerWallet.id !== wallet.id) {
+                    removeWallet(providerWallet);
+                    addWallet(wallet);
+                  }
+                })
+                .catch(() => {
+                  removeWallet(providerWallet);
+                });
+            });
+
+            setAvailableProviders((prev) => {
+              const rest = prev.filter((p) => p.id !== provider.id);
+              return [...rest, provider];
+            });
+          })
+          .catch((e) => console.warn("Shuttle: ", e));
+      });
+
+    mobileProviders
+      .filter((mobileProvider) => !mobileProvider.initializing && !mobileProvider.initialized)
+      .forEach((mobileProvider) => {
+        mobileProvider
+          .init()
+          .then(() => {
+            setAvailableMobileProviders((prev) => {
+              const rest = prev.filter((p) => p.id !== mobileProvider.id);
+              return [...rest, mobileProvider];
+            });
+          })
+          .catch((e) => console.warn("Shuttle: ", e));
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
 };
