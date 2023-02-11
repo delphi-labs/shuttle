@@ -32,6 +32,9 @@ import { TransactionMsg } from "../internals";
 
 declare global {
   interface Cosmostation {
+    cosmos: {
+      on(event: string, callback: () => void): void;
+    };
     providers: {
       keplr: Keplr;
     };
@@ -48,6 +51,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   cosmostation?: Cosmostation;
 
@@ -59,6 +63,10 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async init(): Promise<void> {
@@ -79,6 +87,11 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     }
 
     this.cosmostation = window.cosmostation;
+
+    this.cosmostation.cosmos.on("accountChanged", () => {
+      this.onUpdate?.();
+    });
+
     this.initialized = true;
     this.initializing = false;
   }

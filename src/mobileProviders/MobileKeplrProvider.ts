@@ -155,6 +155,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     };
   }
 
+  setOnUpdateCallback(_callback: () => void): void {
+    return;
+  }
+
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;

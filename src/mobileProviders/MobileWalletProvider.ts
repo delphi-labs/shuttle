@@ -9,6 +9,7 @@ export interface MobileWalletProvider {
   networks: Map<string, Network>;
   initializing: boolean;
   initialized: boolean;
+  setOnUpdateCallback(callback: () => void): void;
   init(): Promise<void>;
   connect(options: {
     chainId: string;

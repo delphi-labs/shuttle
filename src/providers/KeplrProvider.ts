@@ -41,6 +41,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   keplr?: Keplr;
 
@@ -52,6 +53,10 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async init(): Promise<void> {
@@ -72,6 +77,11 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     }
 
     this.keplr = window.keplr;
+
+    window.addEventListener("keplr_keystorechange", () => {
+      this.onUpdate?.();
+    });
+
     this.initialized = true;
     this.initializing = false;
   }
