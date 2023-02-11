@@ -285,6 +285,22 @@ export const ShuttleProvider = ({
     removeWallet,
   ]);
 
+  const updateWallets = (provider: WalletProvider) => {
+    getWallets({ providerId: provider.id }).forEach((providerWallet) => {
+      provider
+        .connect({ chainId: providerWallet.network.chainId })
+        .then((wallet) => {
+          if (providerWallet.id !== wallet.id) {
+            removeWallet(providerWallet);
+            addWallet(wallet);
+          }
+        })
+        .catch(() => {
+          removeWallet(providerWallet);
+        });
+    });
+  };
+
   // Initialize store
   useEffect(() => {
     if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
@@ -301,20 +317,10 @@ export const ShuttleProvider = ({
         provider
           .init()
           .then(() => {
-            getWallets({ providerId: provider.id }).forEach((providerWallet) => {
-              provider
-                .connect({ chainId: providerWallet.network.chainId })
-                .then((wallet) => {
-                  console.log("compare wallets ids", providerWallet.id, wallet.id, providerWallet.id === wallet.id);
-                  console.log("compare wallets", providerWallet, wallet);
-                  if (providerWallet.id !== wallet.id) {
-                    removeWallet(providerWallet);
-                    addWallet(wallet);
-                  }
-                })
-                .catch(() => {
-                  removeWallet(providerWallet);
-                });
+            updateWallets(provider);
+
+            provider.setOnUpdateCallback(() => {
+              updateWallets(provider);
             });
 
             setAvailableProviders((prev) => {

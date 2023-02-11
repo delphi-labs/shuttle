@@ -48,9 +48,13 @@ export const recoverTypedSignaturePubKey = (data: any, signature: string): strin
   return `0x${compressedKey.toString("hex")}`;
 };
 
+type EthereumWithEvents = Ethereum & {
+  on: (event: string, callback: (data: any) => void) => void;
+};
+
 declare global {
   interface Window {
-    ethereum?: Ethereum;
+    ethereum?: EthereumWithEvents;
   }
 }
 
@@ -60,13 +64,18 @@ export class MetamaskProvider implements WalletProvider {
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
-  metamask?: Ethereum;
+  metamask?: EthereumWithEvents;
 
   constructor({ id = "metamask", name = "Metamask", networks }: { id?: string; name?: string; networks: Network[] }) {
     this.id = id;
     this.name = name;
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async init(): Promise<void> {
@@ -82,6 +91,11 @@ export class MetamaskProvider implements WalletProvider {
     }
 
     this.metamask = window.ethereum;
+
+    this.metamask.on("accountsChanged", () => {
+      this.onUpdate?.();
+    });
+
     this.initialized = true;
     this.initializing = false;
   }

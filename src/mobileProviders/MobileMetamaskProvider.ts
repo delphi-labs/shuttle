@@ -94,6 +94,10 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
     };
   }
 
+  setOnUpdateCallback(_callback: () => void): void {
+    return;
+  }
+
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;

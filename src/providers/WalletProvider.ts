@@ -9,6 +9,7 @@ export interface WalletProvider {
   initializing: boolean;
   initialized: boolean;
   init(): Promise<void>;
+  setOnUpdateCallback(callback: () => void): void;
   connect(options: { chainId: string }): Promise<WalletConnection>;
   disconnect(options: { wallet: WalletConnection }): Promise<void>;
   simulate: (options: { messages: TransactionMsg[]; wallet: WalletConnection }) => Promise<SimulateResult>;

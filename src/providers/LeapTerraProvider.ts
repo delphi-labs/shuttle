@@ -39,6 +39,10 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
   }
 
+  setOnUpdateCallback(_callback: () => void): void {
+    return;
+  }
+
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;

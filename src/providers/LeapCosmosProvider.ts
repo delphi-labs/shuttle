@@ -41,6 +41,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   leap?: Keplr;
 
@@ -52,6 +53,10 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async init(): Promise<void> {
@@ -72,6 +77,11 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     }
 
     this.leap = window.leap;
+
+    window.addEventListener("leap_keystorechange", () => {
+      this.onUpdate?.();
+    });
+
     this.initialized = true;
     this.initializing = false;
   }

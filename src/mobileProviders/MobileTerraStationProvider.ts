@@ -105,6 +105,10 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     };
   }
 
+  setOnUpdateCallback(_callback: () => void): void {
+    return;
+  }
+
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;
