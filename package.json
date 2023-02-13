@@ -54,7 +54,7 @@
     "@walletconnect/client": "^1.8.0",
     "@walletconnect/core": "^1.8.0",
     "@walletconnect/iso-crypto": "^1.8.0",
-    "@walletconnect/utils": "^1.8.0",
+    "@walletconnect/utils": "^2.4.2",
     "cosmjs-types": "^0.6.1",
     "ethereumjs-util": "^7.1.5",
     "isomorphic-ws": "^5.0.0",
