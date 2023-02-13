@@ -151,7 +151,6 @@ describe("MsgExecuteContract", () => {
             },
           }),
         ),
-        funds: [],
       },
     });
 
@@ -174,7 +173,6 @@ describe("MsgExecuteContract", () => {
             },
           },
         },
-        funds: [],
       }),
     );
   });
