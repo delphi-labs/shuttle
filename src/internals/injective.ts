@@ -56,10 +56,10 @@ export function prepareMessagesForInjective(
           port: execMsg.value.sourcePort,
           channelId: execMsg.value.sourceChannel,
           amount: execMsg.value.token ?? { denom: "", amount: "" },
-          timeout: execMsg.value.timeoutTimestamp?.toNumber(),
+          timeout: execMsg.value.timeoutTimestamp.toNumber() || 1,
           height: {
-            revisionHeight: execMsg.value.timeoutHeight?.revisionHeight?.toNumber() || 0,
-            revisionNumber: execMsg.value.timeoutHeight?.revisionNumber?.toNumber() || 0,
+            revisionHeight: execMsg.value.timeoutHeight?.revisionHeight?.toNumber() || 1,
+            revisionNumber: execMsg.value.timeoutHeight?.revisionNumber?.toNumber() || 1,
           },
         });
       }
