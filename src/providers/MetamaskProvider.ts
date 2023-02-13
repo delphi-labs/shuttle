@@ -169,8 +169,12 @@ export class MetamaskProvider implements WalletProvider {
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
+      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
+      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
+      const latestHeight = latestBlock.header.height;
+      const revisionNumber = latestBlock.header.version.block;
 
-      const preparedMessages = prepareMessagesForInjective(messages);
+      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -316,6 +320,7 @@ export class MetamaskProvider implements WalletProvider {
       const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
       const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
       const latestHeight = latestBlock.header.height;
+      const revisionNumber = latestBlock.header.version.block;
       const timeoutHeight = new BigNumberInBase(latestHeight).plus(DEFAULT_BLOCK_TIMEOUT_HEIGHT);
 
       let fee: Fee | undefined = undefined;
@@ -329,7 +334,7 @@ export class MetamaskProvider implements WalletProvider {
         };
       }
 
-      const preparedMessages = prepareMessagesForInjective(messages);
+      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
       const eip712TypedData = getEip712TypedData({
         msgs: preparedMessages,
         tx: {

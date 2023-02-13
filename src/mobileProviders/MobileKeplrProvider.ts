@@ -13,6 +13,7 @@ import {
   TxRestApi,
   TxRaw as InjTxRaw,
   hexToBase64,
+  ChainRestTendermintApi,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -287,8 +288,12 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
+      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
+      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
+      const latestHeight = latestBlock.header.height;
+      const revisionNumber = latestBlock.header.version.block;
 
-      const preparedMessages = prepareMessagesForInjective(messages);
+      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,

@@ -3,6 +3,7 @@ import {
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   MsgTransfer as InjMsgTransfer,
 } from "@injectivelabs/sdk-ts";
+import { BigNumberInBase } from "@injectivelabs/utils";
 
 import { MsgExecuteContract, MsgTransfer, TransactionMsg } from "./transaction";
 import { nonNullable } from "../utils";
@@ -33,6 +34,7 @@ export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): st
 
 export function prepareMessagesForInjective(
   messages: TransactionMsg[],
+  { latestHeight, revisionNumber }: { latestHeight: string; revisionNumber: string },
 ): (InjMsgExecuteContractCompat | InjMsgTransfer)[] {
   return messages
     .map((msg) => {
@@ -51,6 +53,7 @@ export function prepareMessagesForInjective(
         const execMsg = msg as MsgTransfer;
 
         return InjMsgTransfer.fromJSON({
+          memo: "IBC Transfer",
           sender: execMsg.value.sender,
           receiver: execMsg.value.receiver,
           port: execMsg.value.sourcePort,
@@ -58,8 +61,11 @@ export function prepareMessagesForInjective(
           amount: execMsg.value.token ?? { denom: "", amount: "" },
           timeout: execMsg.value.timeoutTimestamp.toNumber() || 1,
           height: {
-            revisionHeight: execMsg.value.timeoutHeight?.revisionHeight?.toNumber() || 1,
-            revisionNumber: execMsg.value.timeoutHeight?.revisionNumber?.toNumber() || 1,
+            revisionHeight:
+              execMsg.value.timeoutHeight?.revisionHeight?.toNumber() ??
+              new BigNumberInBase(latestHeight).plus(100).toNumber(),
+            revisionNumber:
+              execMsg.value.timeoutHeight?.revisionNumber?.toNumber() ?? new BigNumberInBase(revisionNumber).toNumber(),
           },
         });
       }
