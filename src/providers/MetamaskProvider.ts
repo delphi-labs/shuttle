@@ -315,7 +315,6 @@ export class MetamaskProvider implements WalletProvider {
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
-      const accountDetails = baseAccount.toAccountDetails();
 
       const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
       const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
@@ -338,8 +337,9 @@ export class MetamaskProvider implements WalletProvider {
       const eip712TypedData = getEip712TypedData({
         msgs: preparedMessages,
         tx: {
-          accountNumber: accountDetails.accountNumber.toString(),
-          sequence: accountDetails.sequence.toString(),
+          memo: memo || "",
+          accountNumber: baseAccount.accountNumber.toString(),
+          sequence: baseAccount.sequence.toString(),
           chainId: network.chainId,
           timeoutHeight: timeoutHeight.toFixed(),
         },

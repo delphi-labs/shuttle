@@ -59,13 +59,14 @@ export function prepareMessagesForInjective(
           port: execMsg.value.sourcePort,
           channelId: execMsg.value.sourceChannel,
           amount: execMsg.value.token ?? { denom: "", amount: "" },
-          timeout: execMsg.value.timeoutTimestamp.toNumber(),
+          timeout: new BigNumberInBase(execMsg.value.timeoutTimestamp).toNumber(),
           height: {
-            revisionHeight:
-              execMsg.value.timeoutHeight?.revisionHeight?.toNumber() ??
-              new BigNumberInBase(latestHeight).plus(100).toNumber(),
-            revisionNumber:
-              execMsg.value.timeoutHeight?.revisionNumber?.toNumber() ?? new BigNumberInBase(revisionNumber).toNumber(),
+            revisionHeight: execMsg.value.timeoutHeight?.revisionHeight
+              ? new BigNumberInBase(execMsg.value.timeoutHeight?.revisionHeight).toNumber()
+              : new BigNumberInBase(latestHeight).plus(100).toNumber(),
+            revisionNumber: execMsg.value.timeoutHeight?.revisionNumber
+              ? new BigNumberInBase(execMsg.value.timeoutHeight?.revisionNumber).toNumber()
+              : new BigNumberInBase(revisionNumber).toNumber(),
           },
         });
       }

@@ -1,7 +1,5 @@
 import { Coin } from "@cosmjs/stargate";
 import { MsgTransfer as CosmosMsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
-import { Height } from "cosmjs-types/ibc/core/client/v1/client";
-import Long from "long";
 
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 
@@ -11,8 +9,11 @@ export type MsgTransferValue = {
   sourcePort: string;
   sourceChannel: string;
   token?: Coin;
-  timeoutHeight?: Height;
-  timeoutTimestamp: Long;
+  timeoutHeight?: {
+    revisionNumber: string;
+    revisionHeight: string;
+  };
+  timeoutTimestamp: string;
 };
 
 export class MsgTransfer extends TransactionMsg<MsgTransferValue> {

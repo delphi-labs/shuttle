@@ -1,4 +1,3 @@
-import Long from "long";
 import { CosmosMsg, MsgTransfer } from "../../../../src";
 
 describe("MsgTransfer", () => {
@@ -9,8 +8,8 @@ describe("MsgTransfer", () => {
       sourcePort: "channel-1",
       sourceChannel: "channel-2",
       token: { amount: "1000000", denom: "uastrod" },
-      timeoutHeight: { revisionHeight: new Long(100), revisionNumber: new Long(1) },
-      timeoutTimestamp: new Long(1000000000),
+      timeoutHeight: { revisionHeight: "100", revisionNumber: "1" },
+      timeoutTimestamp: "1000000000",
     });
 
     expect(msg.typeUrl).toEqual("/ibc.applications.transfer.v1.MsgTransfer");
@@ -23,8 +22,8 @@ describe("MsgTransfer", () => {
       sourcePort: "channel-1",
       sourceChannel: "channel-2",
       token: { amount: "1000000", denom: "uastrod" },
-      timeoutHeight: { revisionHeight: new Long(100), revisionNumber: new Long(1) },
-      timeoutTimestamp: new Long(1000000000),
+      timeoutHeight: { revisionHeight: "100", revisionNumber: "1" },
+      timeoutTimestamp: "1000000000",
     });
 
     const cosmosMsg: CosmosMsg = msg.toCosmosMsg();
@@ -37,8 +36,8 @@ describe("MsgTransfer", () => {
         sourcePort: "channel-1",
         sourceChannel: "channel-2",
         token: { amount: "1000000", denom: "uastrod" },
-        timeoutHeight: { revisionHeight: new Long(100), revisionNumber: new Long(1) },
-        timeoutTimestamp: new Long(1000000000),
+        timeoutHeight: { revisionHeight: "100", revisionNumber: "1" },
+        timeoutTimestamp: "1000000000",
       },
     });
   });
@@ -50,8 +49,8 @@ describe("MsgTransfer", () => {
       sourcePort: "channel-1",
       sourceChannel: "channel-2",
       token: { amount: "1000000", denom: "uastrod" },
-      timeoutHeight: { revisionHeight: new Long(100), revisionNumber: new Long(1) },
-      timeoutTimestamp: new Long(1000000000),
+      timeoutHeight: { revisionHeight: "100", revisionNumber: "1" },
+      timeoutTimestamp: "1000000000",
     });
 
     const terraExtensionMsg: string = msg.toTerraExtensionMsg();
@@ -64,8 +63,8 @@ describe("MsgTransfer", () => {
         source_port: "channel-1",
         source_channel: "channel-2",
         token: { amount: "1000000", denom: "uastrod" },
-        timeout_height: { revision_height: new Long(100), revision_number: new Long(1) },
-        timeout_timestamp: new Long(1000000000),
+        timeout_height: { revision_height: "100", revision_number: "1" },
+        timeout_timestamp: "1000000000",
       }),
     );
   });
@@ -76,7 +75,7 @@ describe("MsgTransfer", () => {
       receiver: "address2",
       sourcePort: "channel-1",
       sourceChannel: "channel-2",
-      timeoutTimestamp: new Long(1000000000),
+      timeoutTimestamp: "1000000000",
     });
 
     const cosmosMsg: CosmosMsg = msg.toCosmosMsg();
@@ -88,7 +87,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         sourcePort: "channel-1",
         sourceChannel: "channel-2",
-        timeoutTimestamp: new Long(1000000000),
+        timeoutTimestamp: "1000000000",
       },
     });
 
@@ -101,7 +100,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         source_port: "channel-1",
         source_channel: "channel-2",
-        timeout_timestamp: new Long(1000000000),
+        timeout_timestamp: "1000000000",
       }),
     );
   });

@@ -58,7 +58,6 @@
     "cosmjs-types": "^0.6.1",
     "ethereumjs-util": "^7.1.5",
     "isomorphic-ws": "^5.0.0",
-    "long": "^5.2.1",
     "secp256k1": "^5.0.0",
     "tslib": "^2.4.0",
     "use-local-storage-state": "^18.1.2",
