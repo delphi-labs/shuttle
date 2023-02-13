@@ -59,7 +59,7 @@ export function prepareMessagesForInjective(
           port: execMsg.value.sourcePort,
           channelId: execMsg.value.sourceChannel,
           amount: execMsg.value.token ?? { denom: "", amount: "" },
-          timeout: execMsg.value.timeoutTimestamp.toNumber() || 1,
+          timeout: execMsg.value.timeoutTimestamp.toNumber(),
           height: {
             revisionHeight:
               execMsg.value.timeoutHeight?.revisionHeight?.toNumber() ??
