@@ -70,12 +70,13 @@ describe("MsgTransfer", () => {
     );
   });
 
-  test("token, timeoutHeight and timeoutTimestamp are optional", () => {
+  test("token amd timeoutHeight are optional", () => {
     const msg = new MsgTransfer({
       sender: "address1",
       receiver: "address2",
       sourcePort: "channel-1",
       sourceChannel: "channel-2",
+      timeoutTimestamp: new Long(1000000000),
     });
 
     const cosmosMsg: CosmosMsg = msg.toCosmosMsg();
@@ -87,6 +88,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         sourcePort: "channel-1",
         sourceChannel: "channel-2",
+        timeoutTimestamp: new Long(1000000000),
       },
     });
 
@@ -99,6 +101,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         source_port: "channel-1",
         source_channel: "channel-2",
+        timeout_timestamp: new Long(1000000000),
       }),
     );
   });

@@ -12,7 +12,7 @@ export type MsgTransferValue = {
   sourceChannel: string;
   token?: Coin;
   timeoutHeight?: Height;
-  timeoutTimestamp?: Long;
+  timeoutTimestamp: Long;
 };
 
 export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
