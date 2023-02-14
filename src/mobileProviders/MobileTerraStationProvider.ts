@@ -40,6 +40,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   walletConnect?: WalletConnect;
   chainId?: string;
@@ -53,6 +54,10 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async getWalletConnection({ chainId }: { chainId: string }) {
@@ -103,10 +108,6 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       },
       network,
     };
-  }
-
-  setOnUpdateCallback(_callback: () => void): void {
-    return;
   }
 
   async init(): Promise<void> {
@@ -186,6 +187,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       }
 
       console.log("session_update", payload);
+      this.onUpdate?.();
     });
 
     this.walletConnect.on("disconnect", async (error) => {
@@ -194,6 +196,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       }
 
       await this.disconnect();
+      this.onUpdate?.();
     });
 
     this.initialized = true;

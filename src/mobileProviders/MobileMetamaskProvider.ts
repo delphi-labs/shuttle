@@ -42,6 +42,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   walletConnect?: WalletConnect;
   chainId?: string;
@@ -55,6 +56,10 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async getWalletConnection({ chainId }: { chainId: string }) {
@@ -94,10 +99,6 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
     };
   }
 
-  setOnUpdateCallback(_callback: () => void): void {
-    return;
-  }
-
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;
@@ -133,12 +134,12 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       this.connectCallback?.(walletConnection);
     });
 
-    this.walletConnect.on("session_update", (error, payload) => {
+    this.walletConnect.on("session_update", (error, _payload) => {
       if (error) {
         throw error;
       }
 
-      console.log("session_update", payload);
+      this.onUpdate?.();
     });
 
     this.walletConnect.on("disconnect", async (error) => {
@@ -147,6 +148,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       }
 
       await this.disconnect();
+      this.onUpdate?.();
     });
 
     this.initialized = true;

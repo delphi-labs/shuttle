@@ -15,6 +15,7 @@ export interface MobileWalletProvider {
     chainId: string;
     callback?: (walletConnection: WalletConnection) => void;
   }): Promise<MobileConnectResponse>;
+  getWalletConnection({ chainId }: { chainId: string }): Promise<WalletConnection>;
   disconnect(options: { wallet: WalletConnection }): Promise<void>;
   simulate(options: { messages: TransactionMsg[]; wallet: WalletConnection }): Promise<SimulateResult>;
   broadcast(options: {

@@ -301,6 +301,22 @@ export const ShuttleProvider = ({
     });
   };
 
+  const updateMobileWallets = (mobileProvider: MobileWalletProvider) => {
+    getWallets({ providerId: mobileProvider.id }).forEach((mobileProviderWallet) => {
+      mobileProvider
+        .getWalletConnection({ chainId: mobileProviderWallet.network.chainId })
+        .then((wallet) => {
+          if (mobileProviderWallet.id !== wallet.id) {
+            removeWallet(mobileProviderWallet);
+            addWallet(wallet);
+          }
+        })
+        .catch(() => {
+          removeWallet(mobileProviderWallet);
+        });
+    });
+  };
+
   // Initialize store
   useEffect(() => {
     if (walletConnections && walletConnections.length > 0 && internalStore.getWallets().length === 0) {
@@ -337,6 +353,12 @@ export const ShuttleProvider = ({
         mobileProvider
           .init()
           .then(() => {
+            updateMobileWallets(mobileProvider);
+
+            mobileProvider.setOnUpdateCallback(() => {
+              updateMobileWallets(mobileProvider);
+            });
+
             setAvailableMobileProviders((prev) => {
               const rest = prev.filter((p) => p.id !== mobileProvider.id);
               return [...rest, mobileProvider];

@@ -52,6 +52,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   walletConnect?: WalletConnect;
   chainId?: string;
@@ -73,6 +74,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
     this.enabledChains = {};
     this.accounts = {};
+  }
+
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async enable({ chainId }: { chainId: string }): Promise<void> {
@@ -158,10 +163,6 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     };
   }
 
-  setOnUpdateCallback(_callback: () => void): void {
-    return;
-  }
-
   async init(): Promise<void> {
     if (this.initializing || this.initialized) {
       return;
@@ -208,6 +209,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       }
 
       console.log("session_update", payload);
+      this.onUpdate?.();
     });
 
     this.walletConnect.on("disconnect", async (error) => {
@@ -216,6 +218,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       }
 
       await this.disconnect();
+      this.onUpdate?.();
     });
 
     this.initialized = true;
