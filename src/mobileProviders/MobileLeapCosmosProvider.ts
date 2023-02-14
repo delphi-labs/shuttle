@@ -46,9 +46,9 @@ type KeplrAccount = {
   pubKey: string;
 };
 
-export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWalletProvider {
-  id: string = "mobile-keplr";
-  name: string = "Keplr - WalletConnect";
+export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implements MobileWalletProvider {
+  id: string = "mobile-leap-cosmos";
+  name: string = "Leap Cosmos - WalletConnect";
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
@@ -77,7 +77,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
   async enable({ chainId }: { chainId: string }): Promise<void> {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(chainId);
@@ -102,7 +102,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
   async getAccounts({ chainId }: { chainId: string }): Promise<KeplrAccount[]> {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(chainId);
@@ -127,7 +127,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
   async getWalletConnection({ chainId }: { chainId: string }) {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(chainId);
@@ -188,10 +188,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       }
 
       const peerMetaName = payload.params[0].peerMeta.name;
-      if (peerMetaName !== "Keplr") {
+      if (peerMetaName !== "Leap Cosmos Wallet") {
         this.walletConnect?.killSession();
         throw new Error(
-          `Invalid provider, peerMetaName: ${peerMetaName} doesn't match the expected peerMetaName: Keplr`,
+          `Invalid provider, peerMetaName: ${peerMetaName} doesn't match the expected peerMetaName: Leap Cosmos Wallet`,
         );
       }
 
@@ -230,7 +230,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     callback?: ((walletConnection: WalletConnection) => void) | undefined;
   }): Promise<MobileConnectResponse> {
     if (!this.walletConnect) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(chainId);
@@ -244,8 +244,8 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
 
     return {
       walletconnectUrl: this.walletConnect.uri,
-      iosUrl: `keplrwallet://wcV1?${this.walletConnect.uri}`,
-      androidUrl: `intent://wcV1?${this.walletConnect.uri}#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;`,
+      iosUrl: "",
+      androidUrl: "",
     };
   }
 
@@ -271,7 +271,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -369,7 +369,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     mobile?: boolean;
   }): Promise<BroadcastResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -441,7 +441,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     mobile?: boolean;
   }): Promise<SigningResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
-      throw new Error("Mobile Keplr is not available");
+      throw new Error("Mobile Leap Cosmos is not available");
     }
 
     const network = this.networks.get(wallet.network.chainId);
