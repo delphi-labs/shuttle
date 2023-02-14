@@ -13,6 +13,7 @@ import {
   TxRestApi,
   TxRaw as InjTxRaw,
   hexToBase64,
+  ChainRestTendermintApi,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -92,7 +93,7 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
     await this.walletConnect.sendCustomRequest({
       id: payloadId(),
       jsonrpc: "2.0",
-      method: "leap_enable_wallet_connect_v1",
+      method: "keplr_enable_wallet_connect_v1",
       params: [network.chainId],
     });
 
@@ -119,7 +120,7 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
     return await this.walletConnect.sendCustomRequest({
       id: payloadId(),
       jsonrpc: "2.0",
-      method: "leap_get_key_wallet_connect_v1",
+      method: "keplr_get_key_wallet_connect_v1",
       params: [network.chainId],
     });
   }
@@ -171,9 +172,9 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
     this.walletConnect = new WalletConnect({
       bridge: "https://bridge.walletconnect.org",
       signingMethods: [
-        "leap_enable_wallet_connect_v1",
-        "leap_get_key_wallet_connect_v1",
-        "leap_sign_amino_wallet_connect_v1",
+        "keplr_enable_wallet_connect_v1",
+        "keplr_get_key_wallet_connect_v1",
+        "keplr_sign_amino_wallet_connect_v1",
       ],
     });
 
@@ -186,13 +187,11 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
         throw error;
       }
 
-      console.log("payload", payload);
       const peerMetaName = payload.params[0].peerMeta.name;
-      console.log("peerMetaName", peerMetaName);
-      if (peerMetaName !== "Leap") {
+      if (peerMetaName !== "Leap Cosmos Wallet") {
         this.walletConnect?.killSession();
         throw new Error(
-          `Invalid provider, peerMetaName: ${peerMetaName} doesn't match the expected peerMetaName: Leap`,
+          `Invalid provider, peerMetaName: ${peerMetaName} doesn't match the expected peerMetaName: Leap Cosmos Wallet`,
         );
       }
 
@@ -245,8 +244,8 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
 
     return {
       walletconnectUrl: this.walletConnect.uri,
-      iosUrl: `keplrwallet://wcV1?${this.walletConnect.uri}`,
-      androidUrl: `intent://wcV1?${this.walletConnect.uri}#Intent;package=com.chainapsis.keplr;scheme=keplrwallet;end;`,
+      iosUrl: "",
+      androidUrl: "",
     };
   }
 
@@ -291,8 +290,12 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
+      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
+      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
+      const latestHeight = latestBlock.header.height;
+      const revisionNumber = latestBlock.header.version.block;
 
-      const preparedMessages = prepareMessagesForInjective(messages);
+      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -516,7 +519,7 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
     const signResponse = (
       await this.walletConnect.sendCustomRequest({
         jsonrpc: "2.0",
-        method: "leap_sign_amino_wallet_connect_v1",
+        method: "keplr_sign_amino_wallet_connect_v1",
         params: [network.chainId, wallet.account.address, signDoc, options],
       })
     )[0] as AminoSignResponse;
