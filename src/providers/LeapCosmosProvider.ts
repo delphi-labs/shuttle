@@ -12,7 +12,6 @@ import {
   createTxRawFromSigResponse,
   TxRestApi,
   TxRaw as InjTxRaw,
-  ChainRestTendermintApi,
 } from "@injectivelabs/sdk-ts";
 
 import { Keplr } from "../extensions";
@@ -192,12 +191,8 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
-      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
-      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
-      const latestHeight = latestBlock.header.height;
-      const revisionNumber = latestBlock.header.version.block;
 
-      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
@@ -455,10 +450,6 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
-      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
-      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
-      const latestHeight = latestBlock.header.height;
-      const revisionNumber = latestBlock.header.version.block;
 
       let fee: Fee | undefined = undefined;
       if (feeAmount && feeAmount != "auto") {
@@ -470,7 +461,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
         };
       }
 
-      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
+      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = await createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,

@@ -34,7 +34,6 @@ export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): st
 
 export function prepareMessagesForInjective(
   messages: TransactionMsg[],
-  { latestHeight, revisionNumber }: { latestHeight: string; revisionNumber: string },
 ): (InjMsgExecuteContractCompat | InjMsgTransfer)[] {
   return messages
     .map((msg) => {
@@ -52,6 +51,10 @@ export function prepareMessagesForInjective(
       if (msg.typeUrl === MsgTransfer.TYPE) {
         const execMsg = msg as MsgTransfer;
 
+        if (!execMsg.value.timeoutHeight) {
+          throw new Error("Injective IBC transfer requires timeout height");
+        }
+
         return InjMsgTransfer.fromJSON({
           memo: "IBC Transfer",
           sender: execMsg.value.sender,
@@ -61,12 +64,8 @@ export function prepareMessagesForInjective(
           amount: execMsg.value.token ?? { denom: "", amount: "" },
           timeout: new BigNumberInBase(execMsg.value.timeoutTimestamp).toNumber(),
           height: {
-            revisionHeight: execMsg.value.timeoutHeight?.revisionHeight
-              ? new BigNumberInBase(execMsg.value.timeoutHeight?.revisionHeight).toNumber()
-              : new BigNumberInBase(latestHeight).plus(100).toNumber(),
-            revisionNumber: execMsg.value.timeoutHeight?.revisionNumber
-              ? new BigNumberInBase(execMsg.value.timeoutHeight?.revisionNumber).toNumber()
-              : new BigNumberInBase(revisionNumber).toNumber(),
+            revisionHeight: new BigNumberInBase(execMsg.value.timeoutHeight.revisionHeight).toNumber(),
+            revisionNumber: new BigNumberInBase(execMsg.value.timeoutHeight.revisionNumber).toNumber(),
           },
         });
       }
