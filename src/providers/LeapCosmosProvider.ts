@@ -193,7 +193,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
       const preparedMessages = prepareMessagesForInjective(messages);
-      const preparedTx = await createTransactionAndCosmosSignDoc({
+      const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
@@ -462,7 +462,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
       }
 
       const preparedMessages = prepareMessagesForInjective(messages);
-      const preparedTx = await createTransactionAndCosmosSignDoc({
+      const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
         fee,

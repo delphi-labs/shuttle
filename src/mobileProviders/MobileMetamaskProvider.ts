@@ -234,7 +234,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
       const preparedMessages = prepareMessagesForInjective(messages);
-      const preparedTx = await createTransactionAndCosmosSignDoc({
+      const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
