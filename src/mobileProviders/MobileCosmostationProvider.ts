@@ -12,7 +12,7 @@ import {
   createTransactionAndCosmosSignDoc,
   TxRestApi,
   TxRaw as InjTxRaw,
-  ChainRestTendermintApi,
+  hexToBase64,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -34,15 +34,15 @@ import {
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
-import { toBase64 } from "@cosmjs/encoding";
 
-type CosmostationAccount = {
-  address: Uint8Array;
+type KeplrAccount = {
+  address: string;
   algo: string;
   bech32Address: string;
+  isKeystone: boolean;
   isNanoLedger: boolean;
   name: string;
-  pubKey: Uint8Array;
+  pubKey: string;
 };
 
 export const MobileCosmostationProvider = class MobileCosmostationProvider implements MobileWalletProvider {
@@ -51,11 +51,15 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   walletConnect?: WalletConnect;
   chainId?: string;
+  enabledChains: {
+    [chainId: string]: boolean;
+  };
   accounts: {
-    [chainId: string]: CosmostationAccount[];
+    [chainId: string]: KeplrAccount[];
   };
   connectCallback?: (wallet: WalletConnection) => void;
 
@@ -67,10 +71,40 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       this.name = name;
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
+    this.enabledChains = {};
     this.accounts = {};
   }
 
-  async getAccounts({ chainId }: { chainId: string }): Promise<CosmostationAccount[]> {
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
+  }
+
+  async enable({ chainId }: { chainId: string }): Promise<void> {
+    if (!this.walletConnect || !this.walletConnect.connected) {
+      throw new Error("Mobile Cosmostation is not available");
+    }
+
+    const network = this.networks.get(chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${chainId}" not found`);
+    }
+
+    if (this.enabledChains[network.chainId]) {
+      return;
+    }
+
+    await this.walletConnect.sendCustomRequest({
+      id: payloadId(),
+      jsonrpc: "2.0",
+      method: "keplr_enable_wallet_connect_v1",
+      params: [network.chainId],
+    });
+
+    this.enabledChains[network.chainId] = true;
+  }
+
+  async getAccounts({ chainId }: { chainId: string }): Promise<KeplrAccount[]> {
     if (!this.walletConnect || !this.walletConnect.connected) {
       throw new Error("Mobile Cosmostation is not available");
     }
@@ -85,10 +119,12 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       return this.accounts[network.chainId];
     }
 
+    await this.enable({ chainId: network.chainId || "" });
+
     return await this.walletConnect.sendCustomRequest({
       id: payloadId(),
       jsonrpc: "2.0",
-      method: "cosmostation_wc_accounts_v1",
+      method: "keplr_get_key_wallet_connect_v1",
       params: [network.chainId],
     });
   }
@@ -118,16 +154,12 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       providerId: this.id,
       account: {
         address: account.bech32Address,
-        pubkey: toBase64(account.pubKey),
+        pubkey: hexToBase64(account.pubKey),
         algo: account.algo as Algo,
         isLedger: account.isNanoLedger,
       },
       network,
     };
-  }
-
-  setOnUpdateCallback(_callback: () => void): void {
-    return;
   }
 
   async init(): Promise<void> {
@@ -139,7 +171,11 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
 
     this.walletConnect = new WalletConnect({
       bridge: "https://bridge.walletconnect.org",
-      signingMethods: ["cosmostation_wc_accounts_v1", "cosmostation_wc_sign_tx_v1"],
+      signingMethods: [
+        "keplr_enable_wallet_connect_v1",
+        "keplr_get_key_wallet_connect_v1",
+        "keplr_sign_amino_wallet_connect_v1",
+      ],
     });
 
     if (!this.walletConnect.connected) {
@@ -172,6 +208,7 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       }
 
       console.log("session_update", payload);
+      this.onUpdate?.();
     });
 
     this.walletConnect.on("disconnect", async (error) => {
@@ -180,6 +217,7 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       }
 
       await this.disconnect();
+      this.onUpdate?.();
     });
 
     this.initialized = true;
@@ -254,13 +292,9 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
       const chainRestAuthApi = new ChainRestAuthApi(network.rest);
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
-      const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
-      const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
-      const latestHeight = latestBlock.header.height;
-      const revisionNumber = latestBlock.header.version.block;
 
-      const preparedMessages = prepareMessagesForInjective(messages, { latestHeight, revisionNumber });
-      const preparedTx = await createTransactionAndCosmosSignDoc({
+      const preparedMessages = prepareMessagesForInjective(messages);
+      const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
         message: preparedMessages.map((msg) => msg.toDirectSign()),
@@ -483,7 +517,7 @@ export const MobileCosmostationProvider = class MobileCosmostationProvider imple
     const signResponse = (
       await this.walletConnect.sendCustomRequest({
         jsonrpc: "2.0",
-        method: "cosmostation_wc_sign_tx_v1",
+        method: "keplr_sign_amino_wallet_connect_v1",
         params: [network.chainId, wallet.account.address, signDoc, options],
       })
     )[0] as AminoSignResponse;
