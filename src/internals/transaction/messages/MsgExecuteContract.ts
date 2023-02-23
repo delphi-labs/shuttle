@@ -19,7 +19,7 @@ export class MsgExecuteContract extends TransactionMsg<MsgExecuteContractValue> 
       sender,
       contract,
       msg,
-      funds: funds && funds.length > 0 ? funds : undefined,
+      funds: funds || [],
     });
   }
 
