@@ -182,9 +182,10 @@ export class MetamaskProvider implements WalletProvider {
       const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
       txRaw.setSignaturesList([new Uint8Array(0)]);
-      const txClientSimulateResponse = await txRestApi.simulate(txRaw);
 
       try {
+        const txClientSimulateResponse = await txRestApi.simulate(txRaw);
+
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || "0.0005inj",
@@ -197,7 +198,7 @@ export class MetamaskProvider implements WalletProvider {
       } catch (error: any) {
         return {
           success: false,
-          error: error?.message,
+          error: error?.errorMessage || error?.message,
         };
       }
     }
