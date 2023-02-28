@@ -16,7 +16,7 @@ type ShuttleContextType = {
     chainId: string;
     callback?: (walletConnection: WalletConnection) => void;
   }) => Promise<MobileConnectResponse>;
-  connect: (options: { providerId: string; chainId: string }) => Promise<void>;
+  connect: (options: { providerId: string; chainId: string }) => Promise<WalletConnection>;
   wallets: WalletConnection[];
   getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
   recentWallet: WalletConnection | null;
@@ -130,17 +130,19 @@ export const ShuttleProvider = ({
       return mobileProvider.connect({
         chainId,
         callback: (wallet) => {
-          internalStore.addWallet(wallet);
-          store?.addWallet(wallet);
-          if (persistent) {
-            setWalletConnections(internalStore.getWallets());
-          }
+          addWallet(wallet);
           callback?.(wallet);
         },
       });
     };
 
-    const connect = async ({ providerId, chainId }: { providerId: string; chainId: string }) => {
+    const connect = async ({
+      providerId,
+      chainId,
+    }: {
+      providerId: string;
+      chainId: string;
+    }): Promise<WalletConnection> => {
       const provider = availableProviders.find((provider) => provider.id === providerId);
       if (!provider) {
         throw new Error(`Provider ${providerId} not found`);
@@ -148,6 +150,7 @@ export const ShuttleProvider = ({
       const wallet = await provider.connect({ chainId });
 
       addWallet(wallet);
+      return wallet;
     };
 
     const disconnect = (filters?: { providerId?: string; chainId?: string }) => {
@@ -276,9 +279,6 @@ export const ShuttleProvider = ({
     recentWallet,
     availableMobileProviders,
     internalStore,
-    store,
-    persistent,
-    setWalletConnections,
     availableProviders,
     addWallet,
     removeWallets,
