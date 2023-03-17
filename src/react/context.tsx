@@ -344,7 +344,9 @@ export const ShuttleProvider = ({
               return [...rest, provider];
             });
           })
-          .catch((e) => console.warn("Shuttle: ", e));
+          .catch(() => {
+            // ignore error if provider is not available
+          });
       });
 
     mobileProviders
