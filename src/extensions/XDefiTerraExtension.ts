@@ -95,6 +95,7 @@ export default class XDefiTerraExtension {
     options: { timeout?: number } = { timeout: 30 },
   ): Promise<any> {
     return new Promise((resolve, reject) => {
+      const id = new Date().getTime();
       let promiseData: any = null;
       const onMessage = (event: any) => {
         const message = event?.data;
@@ -103,13 +104,11 @@ export default class XDefiTerraExtension {
         if (typeof message !== "object") return;
         if (message.target !== `xdefiinpage`) return;
         if (!message.data || !message.data.data) return;
-
-        if ("result" in message.data.data) {
+        if ("result" in message.data.data && message.data.data.id === id) {
           promiseData = message.data.data.result;
         }
       };
       window.addEventListener("message", onMessage);
-      const id = new Date().getTime();
 
       window.postMessage(
         {
