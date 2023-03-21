@@ -50,6 +50,7 @@ export const ShuttleProvider = ({
   mobileProviders = [],
   store,
   children,
+  withLogging = false,
 }: {
   persistent?: boolean;
   persistentKey?: string;
@@ -57,6 +58,7 @@ export const ShuttleProvider = ({
   mobileProviders: MobileWalletProvider[];
   store?: ShuttleStore;
   children?: React.ReactNode;
+  withLogging?: boolean;
 }) => {
   const [availableProviders, setAvailableProviders] = useState<WalletProvider[]>([]);
   const [availableMobileProviders, setAvailableMobileProviders] = useState<MobileWalletProvider[]>([]);
@@ -344,7 +346,11 @@ export const ShuttleProvider = ({
               return [...rest, provider];
             });
           })
-          .catch((e) => console.warn("Shuttle: ", e));
+          .catch((e) => {
+            if (withLogging) {
+              console.warn("Shuttle: ", e);
+            }
+          });
       });
 
     mobileProviders
@@ -364,7 +370,11 @@ export const ShuttleProvider = ({
               return [...rest, mobileProvider];
             });
           })
-          .catch((e) => console.warn("Shuttle: ", e));
+          .catch((e) => {
+            if (withLogging) {
+              console.warn("Shuttle: ", e);
+            }
+          });
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
