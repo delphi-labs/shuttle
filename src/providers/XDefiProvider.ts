@@ -84,10 +84,10 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    await this.xdefi.connect(mapChainIdToNetworkName(chainId));
+    const account = await this.xdefi.connect(mapChainIdToNetworkName(chainId));
+    const address = account[0];
 
     const info = await this.xdefi.info(mapChainIdToNetworkName(chainId));
-    const address = info.focusedWalletAddress;
 
     if (info.network.chainID !== chainId) {
       throw new Error(`Wallet not connected to the network with chainId "${chainId}"`);
