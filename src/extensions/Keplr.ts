@@ -56,12 +56,24 @@ interface SecretUtils {
   encrypt: (contractCodeHash: string, msg: object) => Promise<Uint8Array>;
 }
 
+interface KeplrSignOptions {
+  readonly preferNoSetFee?: boolean;
+  readonly preferNoSetMemo?: boolean;
+
+  readonly disableBalanceCheck?: boolean;
+}
+
 export interface Keplr {
   readonly version: string;
   experimentalSuggestChain(chainInfo: ChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
   getKey(chainId: string): Promise<Key>;
-  signAmino(chainId: string, signer: string, signDoc: StdSignDoc): Promise<AminoSignResponse>;
+  signAmino(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc,
+    signOptions?: KeplrSignOptions,
+  ): Promise<AminoSignResponse>;
   signDirect(
     chainId: string,
     signer: string,
@@ -75,6 +87,7 @@ export interface Keplr {
       /** SignDoc accountNumber */
       accountNumber?: Long | null;
     },
+    signOptions?: KeplrSignOptions,
   ): Promise<DirectSignResponse>;
   sendTx(chainId: string, stdTx: StdTx, mode: BroadcastMode): Promise<Uint8Array>;
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
@@ -84,4 +97,15 @@ export interface Keplr {
   getEnigmaPubKey(chainId: string): Promise<Uint8Array>;
   enigmaEncrypt(chainId: string, contractCodeHash: string, msg: object): Promise<Uint8Array>;
   enigmaDecrypt(chainId: string, ciphertext: Uint8Array, nonce: Uint8Array): Promise<Uint8Array>;
+  experimentalSignEIP712CosmosTx_v0(
+    chainId: string,
+    signer: string,
+    eip712: {
+      types: Record<string, { name: string; type: string }[] | undefined>;
+      domain: Record<string, any>;
+      primaryType: string;
+    },
+    signDoc: StdSignDoc,
+    signOptions?: KeplrSignOptions,
+  ): Promise<AminoSignResponse>;
 }
