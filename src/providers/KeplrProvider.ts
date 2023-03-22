@@ -12,6 +12,12 @@ import {
   createTxRawFromSigResponse,
   TxRestApi,
   TxRaw as InjTxRaw,
+  getEip712TypedData,
+  ChainRestTendermintApi,
+  createTransaction,
+  SIGN_AMINO,
+  createWeb3Extension,
+  createTxRawEIP712,
 } from "@injectivelabs/sdk-ts";
 
 import { Keplr } from "../extensions";
@@ -27,7 +33,12 @@ import {
   Network,
 } from "../internals/network";
 import { TransactionMsg, BroadcastResult, Fee, SigningResult, SimulateResult } from "../internals/transaction";
-import { isInjectiveNetwork, prepareMessagesForInjective } from "../internals/injective";
+import {
+  fromInjectiveCosmosChainToEthereumChain,
+  isInjectiveNetwork,
+  prepareMessagesForInjective,
+} from "../internals/injective";
+import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 
 declare global {
   interface Window {
@@ -286,13 +297,25 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
 
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
-      const broadcast = await client.broadcastTx(TxRaw.encode(signResult.response).finish(), 15000, 2500);
+      if (isInjectiveNetwork(network.chainId)) {
+        const txRaw = signResult.response as InjTxRaw;
 
-      return {
-        hash: broadcast.transactionHash,
-        rawLogs: broadcast.rawLog || "",
-        response: broadcast,
-      };
+        const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+
+        return {
+          hash: broadcast.transactionHash,
+          rawLogs: broadcast.rawLog || "",
+          response: broadcast,
+        };
+      } else {
+        const broadcast = await client.broadcastTx(TxRaw.encode(signResult.response).finish(), 15000, 2500);
+
+        return {
+          hash: broadcast.transactionHash,
+          rawLogs: broadcast.rawLog || "",
+          response: broadcast,
+        };
+      }
     }
 
     const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
@@ -364,10 +387,6 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     }
 
     if (wallet.account.isLedger) {
-      const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
-      const client = await CosmWasmClient.connect(network.rpc);
-      const accountInfo = await client.getAccount(wallet.account.address);
-
       const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
@@ -385,61 +404,129 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         };
       }
 
-      const signDoc: StdSignDoc = {
-        chain_id: network.chainId,
-        account_number: accountInfo?.accountNumber.toString() || "",
-        sequence: accountInfo?.sequence.toString() || "",
-        fee,
-        msgs: messages.map((message) => message.toAminoMsg()),
-        memo: memo || "",
-      };
+      if (isInjectiveNetwork(network.chainId)) {
+        const chainRestAuthApi = new ChainRestAuthApi(wallet.network.rest);
+        const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
+        const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const signResponse = await offlineSigner.signAmino(wallet.account.address, signDoc);
+        const chainRestTendermintApi = new ChainRestTendermintApi(network.rest);
+        const latestBlock = await chainRestTendermintApi.fetchLatestBlock();
+        const latestHeight = latestBlock.header.height;
+        const timeoutHeight = new BigNumberInBase(latestHeight).plus(DEFAULT_BLOCK_TIMEOUT_HEIGHT);
 
-      const signedTx = TxRaw.encode({
-        bodyBytes: TxBody.encode(
-          TxBody.fromPartial({
-            messages: messages.map((m) => m.toProtoMsg()) as any,
+        const preparedMessages = prepareMessagesForInjective(messages);
+        const eip712TypedData = getEip712TypedData({
+          msgs: preparedMessages,
+          tx: {
             memo: memo || "",
-          }),
-        ).finish(),
-        authInfoBytes: AuthInfo.encode({
-          signerInfos: [
-            {
-              publicKey: {
-                typeUrl: (() => {
-                  if (isInjectiveNetwork(network.chainId)) {
-                    return "/injective.crypto.v1beta1.ethsecp256k1.PubKey";
-                  }
+            accountNumber: baseAccount.accountNumber.toString(),
+            sequence: baseAccount.sequence.toString(),
+            chainId: network.chainId,
+            timeoutHeight: timeoutHeight.toFixed(),
+          },
+          fee,
+          ethereumChainId: fromInjectiveCosmosChainToEthereumChain(network.chainId),
+        });
 
-                  return "/cosmos.crypto.secp256k1.PubKey";
-                })(),
-                value: PubKey.encode({
-                  key: Buffer.from(signResponse.signature.pub_key.value, "base64"),
-                }).finish(),
-              },
-              modeInfo: {
-                single: {
-                  mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+        const signDoc = {
+          chain_id: network.chainId,
+          timeout_height: timeoutHeight.toFixed(),
+          account_number: baseAccount.accountNumber.toString(),
+          sequence: baseAccount.sequence.toString(),
+          fee,
+          msgs: preparedMessages.map((m) => m.toEip712()),
+          memo: memo || "",
+        };
+
+        const aminoSignResponse = await this.keplr!.experimentalSignEIP712CosmosTx_v0(
+          network.chainId,
+          wallet.account.address,
+          eip712TypedData,
+          signDoc,
+        );
+
+        const preparedTx = createTransaction({
+          message: preparedMessages.map((m) => m.toDirectSign()),
+          memo: aminoSignResponse.signed.memo,
+          signMode: SIGN_AMINO,
+          fee: aminoSignResponse.signed.fee,
+          pubKey: wallet.account.pubkey || "",
+          sequence: parseInt(aminoSignResponse.signed.sequence, 10),
+          timeoutHeight: parseInt((aminoSignResponse.signed as any).timeout_height, 10),
+          accountNumber: parseInt(aminoSignResponse.signed.account_number, 10),
+          chainId: network.chainId,
+        });
+
+        const web3Extension = createWeb3Extension({
+          ethereumChainId: fromInjectiveCosmosChainToEthereumChain(network.chainId),
+        });
+
+        const txRawEip712 = createTxRawEIP712(preparedTx.txRaw, web3Extension);
+
+        const signatureBuff = Buffer.from(aminoSignResponse.signature.signature, "base64");
+        txRawEip712.setSignaturesList([signatureBuff]);
+
+        return {
+          signatures: txRawEip712.getSignaturesList_asU8(),
+          response: txRawEip712,
+        };
+      } else {
+        const client = await CosmWasmClient.connect(network.rpc);
+        const accountInfo = await client.getAccount(wallet.account.address);
+        const accountNumber = accountInfo?.accountNumber.toString() || "";
+        const sequence = accountInfo?.sequence.toString() || "";
+
+        const signDoc: StdSignDoc = {
+          chain_id: network.chainId,
+          account_number: accountNumber,
+          sequence,
+          fee,
+          msgs: messages.map((message) => message.toAminoMsg()),
+          memo: memo || "",
+        };
+        const signResponse = await this.keplr.signAmino(network.chainId, wallet.account.address, signDoc);
+
+        const signedTx = TxRaw.encode({
+          bodyBytes: TxBody.encode(
+            TxBody.fromPartial({
+              messages: messages.map((m) => m.toProtoMsg()) as any,
+              memo: memo || "",
+            }),
+          ).finish(),
+          authInfoBytes: AuthInfo.encode({
+            signerInfos: [
+              {
+                publicKey: {
+                  typeUrl: (() => {
+                    return "/cosmos.crypto.secp256k1.PubKey";
+                  })(),
+                  value: PubKey.encode({
+                    key: Buffer.from(signResponse.signature.pub_key.value, "base64"),
+                  }).finish(),
                 },
-                multi: undefined,
+                modeInfo: {
+                  single: {
+                    mode: SignMode.SIGN_MODE_LEGACY_AMINO_JSON,
+                  },
+                  multi: undefined,
+                },
+                sequence: signResponse.signed.sequence,
               },
-              sequence: signResponse.signed.sequence,
-            },
-          ],
-          fee: KeplrFee.fromPartial({
-            amount: signResponse.signed.fee.amount as any,
-            gasLimit: signResponse.signed.fee.gas,
-            payer: undefined,
-          }),
-        }).finish(),
-        signatures: [Buffer.from(signResponse.signature.signature, "base64")],
-      }).finish();
+            ],
+            fee: KeplrFee.fromPartial({
+              amount: signResponse.signed.fee.amount as any,
+              gasLimit: signResponse.signed.fee.gas,
+              payer: undefined,
+            }),
+          }).finish(),
+          signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+        }).finish();
 
-      return {
-        signatures: TxRaw.decode(signedTx).signatures,
-        response: TxRaw.decode(signedTx),
-      };
+        return {
+          signatures: TxRaw.decode(signedTx).signatures,
+          response: TxRaw.decode(signedTx),
+        };
+      }
     }
 
     const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
@@ -471,7 +558,11 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         accountNumber: baseAccount.accountNumber,
       });
 
-      const directSignResponse = await offlineSigner.signDirect(wallet.account.address, preparedTx.cosmosSignDoc);
+      const directSignResponse = await this.keplr.signDirect(
+        network.chainId,
+        wallet.account.address,
+        preparedTx.cosmosSignDoc,
+      );
       const signing = createTxRawFromSigResponse(directSignResponse);
 
       return {
