@@ -24,41 +24,109 @@ npm install @delphi-labs/shuttle
 ```tsx
 import { ShuttleProvider } from "@delphi-labs/shuttle";
 
+const providers = [
+  // ...
+];
+
+const mobileProviders = [
+  // ...
+];
+
 function App() {
-  return <ShuttleProvider
-    providers={[
-      // ...
-    ]}
-    // Add the following prop if you want wallet connections
-    // to be persisted to local storage.
-    persistent
-  >
-    <Component />
-  </ShuttleProvider>
+  return (
+    <ShuttleProvider
+      providers={providers}
+      mobileProviders={mobileProviders}
+      // Add the following prop if you want wallet connections
+      // to be persisted to local storage.
+      persistent
+    >
+      <Component {...pageProps} />
+    </ShuttleProvider>
+  );
 }
 ```
 
 ### Use
 
 ```tsx
+import { useState } from "react";
+import QRCode from "react-qr-code";
 import { useShuttle } from "@delphi-labs/shuttle";
 
-function App() {
-  const { connect, recentWallet, disconnect } = useShuttle();
-   
-  return <>
-    {!recentWallet && (<button onClick={() => connect("keplr", "mars-1")}>Connect</button>)}
-    {recentWallet && (
-      <>
-        <h2>Recent Wallet</h2>
-        <p>ID: {recentWallet.id}</p>
-        <p>Provider ID: {recentWallet.providerId}</p>
-        <p>Chain ID: {recentWallet.network.chainId}</p>
-        <p>Address: {recentWallet.account.address}</p>
-        <button onClick={disconnect}>Disconnect</button>
-      </>
-    )}
-  </>
+import { isAndroid, isIOS, isMobile } from "./utils/device";
+
+const currentNetworkId = "mars-1";
+
+function Header() {
+  const { providers, connect, mobileProviders, mobileConnect } = useShuttle();
+  const [walletconnectUrl, setWalletconnectUrl] = useState("");
+  const wallet = getWallets({ chainId: currentNetworkId })[0];
+
+  return (<>
+      {wallet && (
+        <>
+          <p>Address: {wallet.account.address}</p>
+        </>
+      )}
+
+    {!wallet && (<>
+      {providers.map((provider) => {
+        return (
+          <button
+            key={provider.id}
+            onClick={() =>
+              connect({
+                providerId: provider.id,
+                chainId: currentNetworkId,
+              })
+            }
+            disabled={!provider.initialized}
+          >
+            {provider.name}
+          </button>
+        );
+      })}
+
+      {mobileProviders.map((mobileProvider) => {
+        return (
+          <button
+            key={mobileProvider.id}
+            onClick={async () => {
+              const urls = await mobileConnect({
+                mobileProviderId: mobileProvider.id,
+                chainId: currentNetworkId,
+                callback: () => {
+                  setWalletconnectUrl("");
+                },
+              });
+
+              if (isMobile()) {
+                if (isAndroid()) {
+                  window.location.href = urls.androidUrl;
+                } else if (isIOS()) {
+                  window.location.href = urls.iosUrl;
+                } else {
+                  window.location.href = urls.androidUrl;
+                }
+              } else {
+                setWalletconnectUrl(urls.walletconnectUrl);
+              }
+            }}
+            disabled={!mobileProvider.initialized}
+          >
+            {mobileProvider.name}
+          </button>
+        );
+      })}
+
+      {walletconnectUrl && (
+        <>
+          <QRCode value={walletconnectUrl} />
+        </>
+      )}
+    </>)}
+  </>);
 }
 ```
 
