@@ -60,7 +60,11 @@ export default class StationExtension {
     return this.request("info");
   }
 
-  public async connect(): Promise<{ address: string; addresses: { [key: string]: string } }> {
+  public async connect(): Promise<{
+    address: string;
+    addresses: { [key: string]: string };
+    pubkey: { [coinType: number]: string };
+  }> {
     return this.request("connect");
   }
 

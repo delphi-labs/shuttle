@@ -27,6 +27,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
+  onUpdate?: () => void;
 
   stationExtension?: StationExtension;
 
@@ -40,8 +41,8 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
   }
 
-  setOnUpdateCallback(_callback: () => void): void {
-    return;
+  setOnUpdateCallback(callback: () => void): void {
+    this.onUpdate = callback;
   }
 
   async init(): Promise<void> {
@@ -58,6 +59,15 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
     this.stationExtension = new StationExtension("station");
     await this.stationExtension.init();
+
+    window.addEventListener("station_wallet_change", () => {
+      this.onUpdate?.();
+    });
+
+    window.addEventListener("station_network_change", () => {
+      this.onUpdate?.();
+    });
+
     this.initialized = true;
     this.initializing = false;
   }
