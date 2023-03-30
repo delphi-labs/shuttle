@@ -48,9 +48,7 @@ export class MsgSend extends TransactionMsg<MsgSendValue> {
     const cosmosMsg = this.toCosmosMsg();
     return {
       typeUrl: this.typeUrl,
-      value: CosmosMsgSend.encode(
-        CosmosMsgSend.fromPartial(cosmosMsg.value)
-      ).finish(),
+      value: CosmosMsgSend.encode(CosmosMsgSend.fromPartial(cosmosMsg.value)).finish(),
     };
   }
 }

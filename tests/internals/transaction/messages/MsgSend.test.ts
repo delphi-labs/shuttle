@@ -34,7 +34,7 @@ describe("MsgSend", () => {
     const msg = new MsgSend({
       from_address: "address1",
       to_address: "address2",
-      amount: [{ denom: "uluna", amount: "100000" }]
+      amount: [{ denom: "uluna", amount: "100000" }],
     });
 
     const terraExtensionMsg: string = msg.toTerraExtensionMsg();
@@ -44,7 +44,7 @@ describe("MsgSend", () => {
         "@type": "/cosmos.bank.v1beta1.MsgSend",
         from_address: "address1",
         to_address: "address2",
-        amount: [{ denom: "uluna", amount: "100000" }]
+        amount: [{ denom: "uluna", amount: "100000" }],
       }),
     );
   });
