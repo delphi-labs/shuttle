@@ -4,43 +4,35 @@ import { MsgSend as CosmosMsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 
 export type MsgSendValue = {
-  from_address: string;
-  to_address: string;
+  fromAddress: string;
+  toAddress: string;
   amount: Coin[];
 };
 
 export class MsgSend extends TransactionMsg<MsgSendValue> {
   static TYPE = "/cosmos.bank.v1beta1.MsgSend";
 
-  constructor({ from_address, to_address, amount }: MsgSendValue) {
+  constructor({ fromAddress, toAddress, amount }: MsgSendValue) {
     super(MsgSend.TYPE, {
-      from_address,
-      to_address,
+      fromAddress,
+      toAddress,
       amount,
     });
   }
 
   toTerraExtensionMsg(): string {
-    const { from_address, to_address, amount } = this.value;
-
     return JSON.stringify({
       "@type": this.typeUrl,
-      from_address,
-      to_address,
-      amount,
+      from_address: this.value.fromAddress,
+      to_address: this.value.toAddress,
+      amount: this.value.amount,
     });
   }
 
   toAminoMsg(): AminoMsg<MsgSendValue> {
-    const { from_address, to_address, amount } = this.value;
-
     return {
       type: "cosmos-sdk/MsgSend",
-      value: {
-        from_address,
-        to_address,
-        amount,
-      },
+      value: this.value,
     };
   }
 

@@ -3,8 +3,8 @@ import { CosmosMsg, MsgSend } from "../../../../src";
 describe("MsgSend", () => {
   test("it returns the correct typeUrl", () => {
     const msg = new MsgSend({
-      from_address: "address1",
-      to_address: "address2",
+      fromAddress: "address1",
+      toAddress: "address2",
       amount: [{ denom: "uluna", amount: "100000" }],
     });
 
@@ -13,8 +13,8 @@ describe("MsgSend", () => {
 
   test("it converts to CosmosMsg", () => {
     const msg = new MsgSend({
-      from_address: "address1",
-      to_address: "address2",
+      fromAddress: "address1",
+      toAddress: "address2",
       amount: [{ denom: "uluna", amount: "100000" }],
     });
 
@@ -23,8 +23,8 @@ describe("MsgSend", () => {
     expect(cosmosMsg).toEqual({
       typeUrl: "/cosmos.bank.v1beta1.MsgSend",
       value: {
-        from_address: "address1",
-        to_address: "address2",
+        fromAddress: "address1",
+        toAddress: "address2",
         amount: [{ denom: "uluna", amount: "100000" }],
       },
     });
@@ -32,8 +32,8 @@ describe("MsgSend", () => {
 
   test("it converts to TerraExtension string", () => {
     const msg = new MsgSend({
-      from_address: "address1",
-      to_address: "address2",
+      fromAddress: "address1",
+      toAddress: "address2",
       amount: [{ denom: "uluna", amount: "100000" }],
     });
 
