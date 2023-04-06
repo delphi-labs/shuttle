@@ -1,6 +1,7 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
-import { calculateFee, GasPrice } from "@cosmjs/stargate";
+import { GeneratedType, Registry } from "@cosmjs/proto-signing";
+import { calculateFee, GasPrice, defaultRegistryTypes } from "@cosmjs/stargate";
 import StationExtension from "../extensions/StationExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
@@ -25,18 +26,34 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
   id: string = "terra-station";
   name: string = "Terra Station";
   networks: Map<string, Network>;
+  registry: Registry = new Registry(defaultRegistryTypes);
   initializing: boolean = false;
   initialized: boolean = false;
   onUpdate?: () => void;
 
   stationExtension?: StationExtension;
 
-  constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
+  constructor({
+    id,
+    name,
+    networks,
+    customMsgs,
+  }: {
+    id?: string;
+    name?: string;
+    networks: Network[];
+    customMsgs?: { [key: string]: GeneratedType };
+  }) {
     if (id) {
       this.id = id;
     }
     if (name) {
       this.name = name;
+    }
+    if (customMsgs) {
+      for (let key of Object.keys(customMsgs)) {
+        this.registry.register(key, customMsgs[key]);
+      }
     }
     this.networks = new Map(networks.map((network) => [network.chainId, network]));
   }
@@ -157,7 +174,9 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
     try {
       const signer = new FakeOfflineSigner(wallet);
-      const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(network.rpc || "", signer);
+      const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(network.rpc || "", signer, {
+        registry: this.registry,
+      });
 
       const gasEstimation = await signingCosmWasmClient.simulate(wallet.account.address, processedMessages, "");
 
