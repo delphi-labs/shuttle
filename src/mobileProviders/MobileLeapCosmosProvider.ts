@@ -246,8 +246,8 @@ export const MobileLeapCosmosProvider = class MobileLeapCosmosProvider implement
 
     return {
       walletconnectUrl: this.walletConnect.uri,
-      iosUrl: "",
-      androidUrl: "",
+      iosUrl: `leapwallet://wcV1?${this.walletConnect.uri}`,
+      androidUrl: `intent://wcV1?${this.walletConnect.uri}#Intent;package=io.leapwallet.cosmos;scheme=leapwallet;end;`,
     };
   }
 
