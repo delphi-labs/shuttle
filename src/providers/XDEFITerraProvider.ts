@@ -7,10 +7,16 @@ import { DEFAULT_GAS_MULTIPLIER, Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 import XDefiTerraExtension from "../extensions/XDefiTerraExtension";
+import { Keplr } from "../extensions";
+
+export type xfiKeplr = Keplr & { addListener?: (event: string, callback: () => void) => void };
 
 declare global {
   interface Window {
-    xfi?: any;
+    xfi?: {
+      terra: any;
+      keplr: xfiKeplr;
+    };
   }
 }
 
@@ -33,9 +39,9 @@ const mapChainIdToNetworkName = (chainId: string) => {
   }
 };
 
-export const XDefiProvider = class XDefiProvider implements WalletProvider {
-  id: string = "xdefi";
-  name: string = "XDefi";
+export const XDEFITerraProvider = class XDEFITerraProvider implements WalletProvider {
+  id: string = "xfi-terra";
+  name: string = "XDEFI Wallet - Terra";
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
@@ -314,4 +320,4 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
   }
 };
 
-export default XDefiProvider;
+export default XDEFITerraProvider;
