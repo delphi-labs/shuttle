@@ -9,9 +9,10 @@ export type MsgRevokeAllowanceValue = {
 
 export class MsgRevokeAllowance extends TransactionMsg<MsgRevokeAllowanceValue> {
   static TYPE = "/cosmos.feegrant.v1beta1.MsgRevokeAllowance";
+  static AMINO_TYPE = "cosmos-sdk/MsgRevokeAllowance";
 
   constructor({ granter, grantee }: MsgRevokeAllowanceValue) {
-    super(MsgRevokeAllowance.TYPE, {
+    super(MsgRevokeAllowance.TYPE, MsgRevokeAllowance.AMINO_TYPE, {
       granter,
       grantee,
     });

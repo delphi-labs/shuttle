@@ -1,19 +1,20 @@
 import { MsgGrantAllowance as CosmosMsgGrantAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/tx";
 
-import BasicAllowance from "./BasicAllowance";
-import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
+import BasicAllowance, { BasicAllowanceValue } from "./BasicAllowance";
+import TransactionMsg, { AminoMsg, CosmosMsg, ProtoMsg } from "./TransactionMsg";
 
 export type MsgGrantAllowanceValue = {
   granter: string;
   grantee: string;
-  allowance: BasicAllowance;
+  allowance: BasicAllowanceValue;
 };
 
 export class MsgGrantAllowance extends TransactionMsg<MsgGrantAllowanceValue> {
   static TYPE = "/cosmos.feegrant.v1beta1.MsgGrantAllowance";
+  static AMINO_TYPE = "cosmos-sdk/MsgGrantAllowance";
 
   constructor({ granter, grantee, allowance }: MsgGrantAllowanceValue) {
-    super(MsgGrantAllowance.TYPE, {
+    super(MsgGrantAllowance.TYPE, MsgGrantAllowance.AMINO_TYPE, {
       granter,
       grantee,
       allowance,
@@ -25,20 +26,31 @@ export class MsgGrantAllowance extends TransactionMsg<MsgGrantAllowanceValue> {
       typeUrl: this.typeUrl,
       value: {
         ...this.value,
-        allowance: this.value.allowance.toCosmosMsg(),
+        allowance: new BasicAllowance(this.value.allowance).toCosmosMsg(),
       },
     };
   }
 
   toTerraExtensionMsg(): any {
+    const basicAllowance = new BasicAllowance(this.value.allowance);
     return JSON.stringify({
       "@type": this.typeUrl,
       ...this.value,
       allowance: {
-        "@type": this.value.allowance.typeUrl,
-        ...this.value.allowance.value,
+        "@type": basicAllowance.typeUrl,
+        ...basicAllowance.value,
       },
     });
+  }
+
+  toAminoMsg(): AminoMsg {
+    return {
+      type: this.aminoTypeUrl,
+      value: {
+        ...this.value,
+        allowance: new BasicAllowance(this.value.allowance).toAminoMsg(),
+      },
+    };
   }
 
   toProtoMsg(): ProtoMsg {

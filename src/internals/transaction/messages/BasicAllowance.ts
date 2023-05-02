@@ -1,7 +1,7 @@
 import { Coin } from "@cosmjs/stargate";
 import { BasicAllowance as CosmosBasicAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/feegrant";
 
-import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 
 export type BasicAllowanceValue = {
   spendLimit: Coin[];
@@ -10,9 +10,10 @@ export type BasicAllowanceValue = {
 
 export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
   static TYPE = "/cosmos.feegrant.v1beta1.BasicAllowance";
+  static AMINO_TYPE = "cosmos-sdk/BasicAllowance";
 
   constructor({ spendLimit, expiration }: BasicAllowanceValue) {
-    super(BasicAllowance.TYPE, {
+    super(BasicAllowance.TYPE, BasicAllowance.AMINO_TYPE, {
       spendLimit,
       expiration,
     });
@@ -24,6 +25,16 @@ export class BasicAllowance extends TransactionMsg<BasicAllowanceValue> {
       spend_limit: this.value.spendLimit,
       expiration: this.value.expiration,
     });
+  }
+
+  toAminoMsg(): AminoMsg {
+    return {
+      type: this.aminoTypeUrl,
+      value: {
+        spend_limit: this.value.spendLimit,
+        expiration: this.value.expiration,
+      },
+    };
   }
 
   toProtoMsg(): ProtoMsg {

@@ -3,9 +3,9 @@ export type CosmosMsg = {
   value: any;
 };
 
-export type AminoMsg<T = any> = {
+export type AminoMsg = {
   type: string;
-  value: T;
+  value: any;
 };
 
 export type ProtoMsg = {
@@ -15,8 +15,9 @@ export type ProtoMsg = {
 
 export class TransactionMsg<T = any> {
   static TYPE: string;
+  static AMINO_TYPE: string;
 
-  constructor(public typeUrl: string, public value: T) {}
+  constructor(public typeUrl: string, public aminoTypeUrl: string, public value: T) {}
 
   toCosmosMsg(): CosmosMsg {
     return {
@@ -25,9 +26,9 @@ export class TransactionMsg<T = any> {
     };
   }
 
-  toAminoMsg(): AminoMsg<T> {
+  toAminoMsg(): AminoMsg {
     return {
-      type: this.typeUrl,
+      type: this.aminoTypeUrl,
       value: this.value,
     };
   }

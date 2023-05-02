@@ -53,6 +53,7 @@
     "@keplr-wallet/cosmos": "^0.11.38",
     "@keplr-wallet/proto-types": "^0.11.38",
     "@metamask/eth-sig-util": "^5.0.2",
+    "@terra-money/terra.proto": "^3.0.5",
     "@walletconnect/client": "^1.8.0",
     "@walletconnect/core": "^1.8.0",
     "@walletconnect/iso-crypto": "^1.8.0",

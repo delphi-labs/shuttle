@@ -1,21 +1,38 @@
-import { CosmosMsg, BasicAllowance, MsgGrantAllowance } from "../../../../src";
+import { CosmosMsg, BasicAllowance, MsgGrantAllowance, AminoMsg } from "../../../../src";
 
 describe("MsgGrantAllowance", () => {
   test("it returns the correct typeUrl", () => {
     const msg = new MsgGrantAllowance({
       granter: "address1",
       grantee: "address2",
-      allowance: new BasicAllowance({
+      allowance: {
         spendLimit: [
           {
             amount: "100",
             denom: "uatom",
           },
         ],
-      }),
+      },
     });
 
     expect(msg.typeUrl).toEqual("/cosmos.feegrant.v1beta1.MsgGrantAllowance");
+  });
+
+  test("it returns the correct aminoTypeUrl", () => {
+    const msg = new MsgGrantAllowance({
+      granter: "address1",
+      grantee: "address2",
+      allowance: {
+        spendLimit: [
+          {
+            amount: "100",
+            denom: "uatom",
+          },
+        ],
+      },
+    });
+
+    expect(msg.aminoTypeUrl).toEqual("cosmos-sdk/MsgGrantAllowance");
   });
 
   test("it converts to CosmosMsg", () => {
@@ -25,7 +42,7 @@ describe("MsgGrantAllowance", () => {
         denom: "uatom",
       },
     ];
-    const allowance = new BasicAllowance({ spendLimit });
+    const allowance = { spendLimit };
     const msg = new MsgGrantAllowance({
       granter: "address1",
       grantee: "address2",
@@ -39,7 +56,7 @@ describe("MsgGrantAllowance", () => {
       value: {
         granter: "address1",
         grantee: "address2",
-        allowance: allowance.toCosmosMsg(),
+        allowance: new BasicAllowance(allowance).toCosmosMsg(),
       },
     });
   });
@@ -51,7 +68,7 @@ describe("MsgGrantAllowance", () => {
         denom: "uatom",
       },
     ];
-    const allowance = new BasicAllowance({ spendLimit });
+    const allowance = { spendLimit };
     const msg = new MsgGrantAllowance({
       granter: "address1",
       grantee: "address2",
@@ -60,16 +77,44 @@ describe("MsgGrantAllowance", () => {
 
     const terraExtensionMsg: string = msg.toTerraExtensionMsg();
 
+    const basicAllowance = new BasicAllowance(allowance);
+
     expect(terraExtensionMsg).toEqual(
       JSON.stringify({
         "@type": "/cosmos.feegrant.v1beta1.MsgGrantAllowance",
         granter: "address1",
         grantee: "address2",
         allowance: {
-          "@type": allowance.typeUrl,
-          ...allowance.value,
+          "@type": basicAllowance.typeUrl,
+          ...basicAllowance.value,
         },
       }),
     );
+  });
+
+  test("it converts to AminoMsg", () => {
+    const spendLimit = [
+      {
+        amount: "100",
+        denom: "uatom",
+      },
+    ];
+    const allowance = { spendLimit };
+    const msg = new MsgGrantAllowance({
+      granter: "address1",
+      grantee: "address2",
+      allowance,
+    });
+
+    const aminoMsg: AminoMsg = msg.toAminoMsg();
+
+    expect(aminoMsg).toEqual({
+      type: "cosmos-sdk/MsgGrantAllowance",
+      value: {
+        granter: "address1",
+        grantee: "address2",
+        allowance: new BasicAllowance(allowance).toAminoMsg(),
+      },
+    });
   });
 });

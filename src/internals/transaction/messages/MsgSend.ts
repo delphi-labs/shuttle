@@ -11,9 +11,10 @@ export type MsgSendValue = {
 
 export class MsgSend extends TransactionMsg<MsgSendValue> {
   static TYPE = "/cosmos.bank.v1beta1.MsgSend";
+  static AMINO_TYPE = "cosmos-sdk/MsgSend";
 
   constructor({ fromAddress, toAddress, amount }: MsgSendValue) {
-    super(MsgSend.TYPE, {
+    super(MsgSend.TYPE, MsgSend.AMINO_TYPE, {
       fromAddress,
       toAddress,
       amount,
@@ -29,10 +30,14 @@ export class MsgSend extends TransactionMsg<MsgSendValue> {
     });
   }
 
-  toAminoMsg(): AminoMsg<MsgSendValue> {
+  toAminoMsg(): AminoMsg {
     return {
-      type: "cosmos-sdk/MsgSend",
-      value: this.value,
+      type: this.aminoTypeUrl,
+      value: {
+        from_address: this.value.fromAddress,
+        to_address: this.value.toAddress,
+        amount: this.value.amount,
+      },
     };
   }
 

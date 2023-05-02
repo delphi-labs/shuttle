@@ -1,5 +1,6 @@
 import { toUtf8 } from "@cosmjs/encoding";
 import { CosmosMsg, MsgExecuteContract } from "../../../../src";
+import { AminoMsg } from "@cosmjs/amino";
 
 describe("MsgExecuteContract", () => {
   test("it returns the correct typeUrl", () => {
@@ -22,6 +23,28 @@ describe("MsgExecuteContract", () => {
     });
 
     expect(msg.typeUrl).toEqual("/cosmwasm.wasm.v1.MsgExecuteContract");
+  });
+
+  test("it returns the correct aminoTypeUrl", () => {
+    const msg = new MsgExecuteContract({
+      sender: "address1",
+      contract: "address2",
+      msg: {
+        swap: {
+          offer_asset: {
+            info: {
+              native_token: {
+                denom: "uastrod",
+              },
+            },
+            amount: "1000000",
+          },
+        },
+      },
+      funds: [{ amount: "1000000", denom: "uastrod" }],
+    });
+
+    expect(msg.aminoTypeUrl).toEqual("wasm/MsgExecuteContract");
   });
 
   test("it converts to CosmosMsg", () => {
@@ -112,6 +135,49 @@ describe("MsgExecuteContract", () => {
     );
   });
 
+  test("it converts to AminoMsg", () => {
+    const msg = new MsgExecuteContract({
+      sender: "address1",
+      contract: "address2",
+      msg: {
+        swap: {
+          offer_asset: {
+            info: {
+              native_token: {
+                denom: "uastrod",
+              },
+            },
+            amount: "1000000",
+          },
+        },
+      },
+      funds: [{ amount: "1000000", denom: "uastrod" }],
+    });
+
+    const aminoMsg: AminoMsg = msg.toAminoMsg();
+
+    expect(aminoMsg).toEqual({
+      type: "wasm/MsgExecuteContract",
+      value: {
+        sender: "address1",
+        contract: "address2",
+        msg: {
+          swap: {
+            offer_asset: {
+              info: {
+                native_token: {
+                  denom: "uastrod",
+                },
+              },
+              amount: "1000000",
+            },
+          },
+        },
+        funds: [{ amount: "1000000", denom: "uastrod" }],
+      },
+    });
+  });
+
   test("funds are optional", () => {
     const msg = new MsgExecuteContract({
       sender: "address1",
@@ -151,6 +217,29 @@ describe("MsgExecuteContract", () => {
             },
           }),
         ),
+        funds: [],
+      },
+    });
+
+    const aminoMsg: AminoMsg = msg.toAminoMsg();
+
+    expect(aminoMsg).toEqual({
+      type: "wasm/MsgExecuteContract",
+      value: {
+        sender: "address1",
+        contract: "address2",
+        msg: {
+          swap: {
+            offer_asset: {
+              info: {
+                token: {
+                  contract_addr: "address3",
+                },
+              },
+              amount: "1000000",
+            },
+          },
+        },
         funds: [],
       },
     });

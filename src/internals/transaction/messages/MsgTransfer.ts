@@ -18,6 +18,7 @@ export type MsgTransferValue = {
 
 export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
   static TYPE = "/ibc.applications.transfer.v1.MsgTransfer";
+  static AMINO_TYPE = "cosmos-sdk/MsgTransfer";
 
   constructor({
     sender,
@@ -28,7 +29,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
     timeoutHeight,
     timeoutTimestamp,
   }: MsgTransferValue) {
-    super(MsgTransfer.TYPE, {
+    super(MsgTransfer.TYPE, MsgTransfer.AMINO_TYPE, {
       sender,
       receiver,
       sourcePort,
@@ -57,10 +58,23 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
     });
   }
 
-  toAminoMsg(): AminoMsg<MsgTransferValue> {
+  toAminoMsg(): AminoMsg {
     return {
-      type: "cosmos-sdk/MsgTransfer",
-      value: this.value,
+      type: this.aminoTypeUrl,
+      value: {
+        sender: this.value.sender,
+        receiver: this.value.receiver,
+        source_port: this.value.sourcePort,
+        source_channel: this.value.sourceChannel,
+        token: this.value.token,
+        timeout_height: this.value.timeoutHeight
+          ? {
+              revision_height: this.value.timeoutHeight.revisionHeight,
+              revision_number: this.value.timeoutHeight.revisionNumber,
+            }
+          : undefined,
+        timeout_timestamp: this.value.timeoutTimestamp,
+      },
     };
   }
 

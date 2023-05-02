@@ -1,4 +1,4 @@
-import { CosmosMsg, MsgRevokeAllowance } from "../../../../src";
+import { AminoMsg, CosmosMsg, MsgRevokeAllowance } from "../../../../src";
 
 describe("MsgRevokeAllowance", () => {
   test("it returns the correct typeUrl", () => {
@@ -8,6 +8,15 @@ describe("MsgRevokeAllowance", () => {
     });
 
     expect(msg.typeUrl).toEqual("/cosmos.feegrant.v1beta1.MsgRevokeAllowance");
+  });
+
+  test("it returns the correct aminoTypeUrl", () => {
+    const msg = new MsgRevokeAllowance({
+      granter: "address1",
+      grantee: "address2",
+    });
+
+    expect(msg.aminoTypeUrl).toEqual("cosmos-sdk/MsgRevokeAllowance");
   });
 
   test("it converts to CosmosMsg", () => {
@@ -42,5 +51,22 @@ describe("MsgRevokeAllowance", () => {
         grantee: "address2",
       }),
     );
+  });
+
+  test("it converts to AminoMsg", () => {
+    const msg = new MsgRevokeAllowance({
+      granter: "address1",
+      grantee: "address2",
+    });
+
+    const aminoMsg: AminoMsg = msg.toAminoMsg();
+
+    expect(aminoMsg).toEqual({
+      type: "cosmos-sdk/MsgRevokeAllowance",
+      value: {
+        granter: "address1",
+        grantee: "address2",
+      },
+    });
   });
 });
