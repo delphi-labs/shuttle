@@ -38,7 +38,7 @@ import {
   prepareMessagesForInjective,
 } from "../internals/injective";
 import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
-import { xfiKeplr } from "./XDEFITerraProvider";
+import { xfiKeplr } from "./XDefiProvider";
 
 export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletProvider {
   id: string = "xfi-cosmos";
