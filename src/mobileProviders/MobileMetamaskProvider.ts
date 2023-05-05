@@ -279,6 +279,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
     gasLimit,
     memo,
     mobile,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -286,6 +287,10 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
       throw new Error("Mobile Metamask is not available");
@@ -311,7 +316,7 @@ export const MobileMetamaskProvider = class MobileMetamaskProvider implements Mo
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo, mobile });
 
       if (signResult.response) {
-        const txRestApi = new TxRestApi(network.rest);
+        const txRestApi = new TxRestApi(overrides?.rest || network.rest);
 
         const broadcast = await txRestApi.broadcast(signResult.response);
 

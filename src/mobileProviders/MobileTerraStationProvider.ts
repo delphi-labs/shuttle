@@ -302,6 +302,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     gasLimit,
     memo,
     mobile,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -309,6 +310,10 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return await new Promise(async (resolve, reject) => {
       if (!this.walletConnect || !this.walletConnect.connected) {
@@ -373,7 +378,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {

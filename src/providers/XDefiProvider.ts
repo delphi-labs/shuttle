@@ -188,6 +188,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -195,6 +196,10 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.xdefi) {
@@ -239,7 +244,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {

@@ -169,6 +169,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -176,6 +177,10 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {
@@ -213,7 +218,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {

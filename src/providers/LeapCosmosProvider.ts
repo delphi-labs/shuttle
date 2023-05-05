@@ -269,6 +269,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -276,6 +277,10 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.leap) {
       throw new Error("Leap is not available");
@@ -294,7 +299,7 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
     }
 
     if (wallet.account.isLedger) {
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
@@ -321,7 +326,9 @@ export const LeapCosmosProvider = class LeapCosmosProvider implements WalletProv
 
     const offlineSigner = this.leap.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+      gasPrice,
+    });
 
     if (isInjectiveNetwork(network.chainId)) {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
