@@ -25,10 +25,10 @@ type ShuttleContextType = {
   simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
   broadcast: (options: {
     messages: TransactionMsg[];
+    wallet?: WalletConnection | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
-    wallet?: WalletConnection | null;
     mobile?: boolean;
     overrides?: {
       rpc?: string;
@@ -203,18 +203,18 @@ export const ShuttleProvider = ({
 
     const broadcast = async ({
       messages,
+      wallet,
       feeAmount,
       gasLimit,
       memo,
-      wallet,
       mobile,
       overrides,
     }: {
       messages: TransactionMsg[];
+      wallet?: WalletConnection | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
-      wallet?: WalletConnection | null;
       mobile?: boolean;
       overrides?: {
         rpc?: string;
