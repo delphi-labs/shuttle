@@ -20,6 +20,10 @@ export interface WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult>;
   sign(options: {
     messages: TransactionMsg[];

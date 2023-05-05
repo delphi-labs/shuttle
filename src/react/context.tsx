@@ -30,6 +30,10 @@ type ShuttleContextType = {
     memo?: string | null;
     wallet?: WalletConnection | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }) => Promise<BroadcastResult>;
   sign: (options: {
     messages: TransactionMsg[];
@@ -204,6 +208,7 @@ export const ShuttleProvider = ({
       memo,
       wallet,
       mobile,
+      overrides,
     }: {
       messages: TransactionMsg[];
       feeAmount?: string | null;
@@ -211,6 +216,10 @@ export const ShuttleProvider = ({
       memo?: string | null;
       wallet?: WalletConnection | null;
       mobile?: boolean;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+      };
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -225,7 +234,7 @@ export const ShuttleProvider = ({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile });
+      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile, overrides });
     };
 
     const sign = async ({
