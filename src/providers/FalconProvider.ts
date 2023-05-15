@@ -162,7 +162,6 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
     feeAmount,
     gasLimit,
     memo,
-    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -211,7 +210,7 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {

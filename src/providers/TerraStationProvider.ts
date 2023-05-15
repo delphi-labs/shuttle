@@ -184,7 +184,6 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     feeAmount,
     gasLimit,
     memo,
-    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -244,7 +243,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {

@@ -325,7 +325,9 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
 
     const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+      gasPrice,
+    });
 
     if (isInjectiveNetwork(network.chainId)) {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });

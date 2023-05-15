@@ -169,7 +169,6 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
     feeAmount,
     gasLimit,
     memo,
-    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -218,7 +217,7 @@ export const LeapTerraProvider = class LeapTerraProvider implements WalletProvid
         throw new Error("Broadcast failed");
       }
 
-      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
+      const client = await CosmWasmClient.connect(network.rpc);
 
       let tries = 0;
       const interval = setInterval(async () => {
