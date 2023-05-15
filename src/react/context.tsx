@@ -25,11 +25,15 @@ type ShuttleContextType = {
   simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
   broadcast: (options: {
     messages: TransactionMsg[];
+    wallet?: WalletConnection | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
-    wallet?: WalletConnection | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }) => Promise<BroadcastResult>;
   sign: (options: {
     messages: TransactionMsg[];
@@ -199,18 +203,23 @@ export const ShuttleProvider = ({
 
     const broadcast = async ({
       messages,
+      wallet,
       feeAmount,
       gasLimit,
       memo,
-      wallet,
       mobile,
+      overrides,
     }: {
       messages: TransactionMsg[];
+      wallet?: WalletConnection | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
-      wallet?: WalletConnection | null;
       mobile?: boolean;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+      };
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -225,7 +234,7 @@ export const ShuttleProvider = ({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile });
+      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, mobile, overrides });
     };
 
     const sign = async ({

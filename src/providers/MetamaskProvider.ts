@@ -215,6 +215,7 @@ export class MetamaskProvider implements WalletProvider {
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -222,6 +223,10 @@ export class MetamaskProvider implements WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.metamask) {
       throw new Error("Metamask is not available");
@@ -247,7 +252,7 @@ export class MetamaskProvider implements WalletProvider {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
       if (signResult.response) {
-        const txRestApi = new TxRestApi(network.rest);
+        const txRestApi = new TxRestApi(overrides?.rest || network.rest);
 
         const broadcast = await txRestApi.broadcast(signResult.response);
 

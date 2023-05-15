@@ -169,6 +169,10 @@ export const FalconProvider = class FalconProvider implements WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.terraExtension) {

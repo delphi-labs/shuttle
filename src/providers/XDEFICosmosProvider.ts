@@ -264,6 +264,7 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -271,6 +272,10 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.xfi) {
       throw new Error("XDEFI Wallet is not available");
@@ -289,7 +294,7 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
     }
 
     if (wallet.account.isLedger) {
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
@@ -316,7 +321,9 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
 
     const offlineSigner = this.xfi.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+      gasPrice,
+    });
 
     if (isInjectiveNetwork(network.chainId)) {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });

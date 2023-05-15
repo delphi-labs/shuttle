@@ -268,6 +268,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -275,6 +276,10 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.keplr) {
       throw new Error("Keplr is not available");
@@ -293,7 +298,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
     }
 
     if (wallet.account.isLedger) {
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
@@ -320,7 +325,9 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
 
     const offlineSigner = this.keplr.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+      gasPrice,
+    });
 
     if (isInjectiveNetwork(network.chainId)) {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });

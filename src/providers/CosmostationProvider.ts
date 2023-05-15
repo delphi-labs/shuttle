@@ -277,6 +277,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     feeAmount,
     gasLimit,
     memo,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -284,6 +285,10 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.cosmostation?.providers?.keplr) {
       throw new Error("Cosmostation is not available");
@@ -302,7 +307,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     }
 
     if (wallet.account.isLedger) {
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
 
@@ -329,7 +334,9 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
     const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+      gasPrice,
+    });
 
     if (isInjectiveNetwork(network.chainId)) {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });

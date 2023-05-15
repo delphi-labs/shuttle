@@ -359,6 +359,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     gasLimit,
     memo,
     mobile,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
@@ -366,6 +367,10 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     if (!this.walletConnect || !this.walletConnect.connected) {
       throw new Error("Mobile Keplr is not available");
@@ -394,7 +399,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     }
 
     if (isInjectiveNetwork(network.chainId)) {
-      const txRestApi = new TxRestApi(network.rest);
+      const txRestApi = new TxRestApi(overrides?.rest || network.rest);
 
       const txRaw = InjTxRaw.deserializeBinary(TxRaw.encode(signResult.response).finish());
 
@@ -412,7 +417,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
         response: response,
       };
     } else {
-      const client = await CosmWasmClient.connect(network.rpc);
+      const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
 
       const broadcast = await client.broadcastTx(TxRaw.encode(signResult.response).finish(), 15000, 2500);
 

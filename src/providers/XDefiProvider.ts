@@ -195,6 +195,10 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.xdefi) {

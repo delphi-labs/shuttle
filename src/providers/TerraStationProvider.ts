@@ -191,6 +191,10 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     gasLimit?: string | null;
     memo?: string | null;
     mobile?: boolean;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+    };
   }): Promise<BroadcastResult> {
     return new Promise(async (resolve, reject) => {
       if (!this.stationExtension) {
