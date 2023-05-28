@@ -307,10 +307,30 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
     const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
     const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-    const fee = JSON.stringify({
-      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
-      gas_limit: gasLimit || gas,
-    });
+    let fee: string;
+    if (!feeAmount || feeAmount == "auto" || !gasLimit) {
+      const processedCosmosMessages = messages.map((message) => message.toCosmosMsg());
+      try {
+        const signer = new FakeOfflineSigner(wallet);
+        const signingCosmWasmClient = await SigningCosmWasmClient.connectWithSigner(network.rpc || "", signer);
+        const gasEstimation = await signingCosmWasmClient.simulate(wallet.account.address, processedCosmosMessages, "");
+        const stdFee = calculateFee(
+          Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
+          network.gasPrice || DEFAULT_GAS_PRICE,
+        );
+        fee = JSON.stringify({
+          fee: stdFee.amount[0],
+          gasLimit: stdFee.gas,
+        });
+      } catch (error: any) {
+        throw error;
+      }
+    } else {
+      fee = JSON.stringify({
+        amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
+        gas_limit: gasLimit || gas,
+      });
+    }
 
     const signing = await this.stationExtension.sign({
       messages: processedMessages,
