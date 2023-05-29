@@ -59,7 +59,7 @@ import { isAndroid, isIOS, isMobile } from "./utils/device";
 const currentNetworkId = "mars-1";
 
 function Header() {
-  const { providers, connect, mobileProviders, mobileConnect } = useShuttle();
+  const { providers, connect, mobileProviders, mobileConnect, getWallets } = useShuttle();
   const [walletconnectUrl, setWalletconnectUrl] = useState("");
   const wallet = getWallets({ chainId: currentNetworkId })[0];
 
