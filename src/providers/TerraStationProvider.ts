@@ -223,6 +223,18 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
       const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
+      if (feeAmount === "auto") {
+        try {
+          const simulate = await this.simulate({ messages, wallet });
+          if (simulate.success) {
+            feeAmount = simulate.fee?.amount[0].amount;
+            gasLimit = simulate.fee?.gas;
+          }
+        } catch (error: any) {
+          /* empty */
+        }
+      }
+
       const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
       const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
@@ -304,8 +316,20 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
     const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    if (feeAmount === "auto") {
+      try {
+        const simulate = await this.simulate({ messages, wallet });
+        if (simulate.success) {
+          feeAmount = simulate.fee?.amount[0].amount;
+          gasLimit = simulate.fee?.gas;
+        }
+      } catch (error: any) {
+        /* empty */
+      }
+    }
+
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
