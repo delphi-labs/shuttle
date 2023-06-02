@@ -18,7 +18,9 @@ import {
   SIGN_AMINO,
   createWeb3Extension,
   createTxRawEIP712,
+  BroadcastMode,
 } from "@injectivelabs/sdk-ts";
+import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 
 import { defaultBech32Config, nonNullable } from "../utils";
 import WalletProvider from "./WalletProvider";
@@ -37,7 +39,6 @@ import {
   isInjectiveNetwork,
   prepareMessagesForInjective,
 } from "../internals/injective";
-import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 import { xfiKeplr } from "./XDefiProvider";
 
 export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletProvider {
@@ -301,10 +302,15 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
       if (isInjectiveNetwork(network.chainId)) {
         const txRaw = signResult.response as InjTxRaw;
 
-        const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+        const txRestApi = new TxRestApi(network.rest);
+
+        const broadcast = await txRestApi.broadcast(txRaw, {
+          mode: BroadcastMode.Sync as any,
+          timeout: 15000,
+        });
 
         return {
-          hash: broadcast.transactionHash,
+          hash: broadcast.txHash,
           rawLogs: broadcast.rawLog || "",
           response: broadcast,
         };
@@ -329,10 +335,15 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
       const txRaw = signResult.response as InjTxRaw;
 
-      const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+      const txRestApi = new TxRestApi(network.rest);
+
+      const broadcast = await txRestApi.broadcast(txRaw, {
+        mode: BroadcastMode.Sync as any,
+        timeout: 15000,
+      });
 
       return {
-        hash: broadcast.transactionHash,
+        hash: broadcast.txHash,
         rawLogs: broadcast.rawLog || "",
         response: broadcast,
       };

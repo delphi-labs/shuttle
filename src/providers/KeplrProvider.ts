@@ -18,6 +18,7 @@ import {
   SIGN_AMINO,
   createWeb3Extension,
   createTxRawEIP712,
+  BroadcastMode,
 } from "@injectivelabs/sdk-ts";
 
 import { Keplr } from "../extensions";
@@ -305,10 +306,15 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       if (isInjectiveNetwork(network.chainId)) {
         const txRaw = signResult.response as InjTxRaw;
 
-        const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+        const txRestApi = new TxRestApi(network.rest);
+
+        const broadcast = await txRestApi.broadcast(txRaw, {
+          mode: BroadcastMode.Sync as any,
+          timeout: 15000,
+        });
 
         return {
-          hash: broadcast.transactionHash,
+          hash: broadcast.txHash,
           rawLogs: broadcast.rawLog || "",
           response: broadcast,
         };
@@ -333,10 +339,15 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
       const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo });
       const txRaw = signResult.response as InjTxRaw;
 
-      const broadcast = await client.broadcastTx(txRaw.serializeBinary(), 15000, 2500);
+      const txRestApi = new TxRestApi(network.rest);
+
+      const broadcast = await txRestApi.broadcast(txRaw, {
+        mode: BroadcastMode.Sync as any,
+        timeout: 15000,
+      });
 
       return {
-        hash: broadcast.transactionHash,
+        hash: broadcast.txHash,
         rawLogs: broadcast.rawLog || "",
         response: broadcast,
       };
