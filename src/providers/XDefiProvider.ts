@@ -1,10 +1,12 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
+
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { DEFAULT_GAS_MULTIPLIER, Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 import XDefiTerraExtension from "../extensions/XDefiTerraExtension";
 import { Keplr } from "../extensions";
@@ -168,7 +170,7 @@ export const XDefiProvider = class XDefiProvider implements WalletProvider {
       const fee = calculateFee(
         Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
         network.gasPrice || DEFAULT_GAS_PRICE,
-      );
+      ) as Fee;
 
       return {
         success: true,

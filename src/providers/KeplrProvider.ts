@@ -20,6 +20,7 @@ import {
   createTxRawEIP712,
   BroadcastMode,
 } from "@injectivelabs/sdk-ts";
+import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 
 import { Keplr } from "../extensions";
 import { defaultBech32Config, nonNullable } from "../utils";
@@ -33,13 +34,13 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
 } from "../internals/network";
-import { TransactionMsg, BroadcastResult, Fee, SigningResult, SimulateResult } from "../internals/transaction";
+import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import {
   fromInjectiveCosmosChainToEthereumChain,
   isInjectiveNetwork,
   prepareMessagesForInjective,
 } from "../internals/injective";
-import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 
 declare global {
   interface Window {
@@ -222,7 +223,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || "0.0005inj",
-        );
+        ) as Fee;
 
         return {
           success: true,
@@ -248,7 +249,7 @@ export const KeplrProvider = class KeplrProvider implements WalletProvider {
         const fee = calculateFee(
           Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || DEFAULT_GAS_PRICE,
-        );
+        ) as Fee;
 
         return {
           success: true,

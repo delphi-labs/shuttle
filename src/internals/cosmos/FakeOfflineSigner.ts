@@ -1,5 +1,6 @@
 import { fromBase64 } from "@cosmjs/encoding";
 import { OfflineDirectSigner, AccountData } from "@cosmjs/proto-signing";
+
 import { WalletConnection } from "../wallet";
 
 export default class FakeOfflineSigner implements OfflineDirectSigner {

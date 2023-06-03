@@ -189,7 +189,7 @@ export class MetamaskProvider implements WalletProvider {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || "0.0005inj",
-        );
+        ) as Fee;
 
         return {
           success: true,

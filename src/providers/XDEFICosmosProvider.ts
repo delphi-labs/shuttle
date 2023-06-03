@@ -33,7 +33,8 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
 } from "../internals/network";
-import { TransactionMsg, BroadcastResult, Fee, SigningResult, SimulateResult } from "../internals/transaction";
+import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import {
   fromInjectiveCosmosChainToEthereumChain,
   isInjectiveNetwork,
@@ -218,7 +219,7 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || "0.0005inj",
-        );
+        ) as Fee;
 
         return {
           success: true,
@@ -244,7 +245,7 @@ export const XDEFICosmosProvider = class XDEFICosmosProvider implements WalletPr
         const fee = calculateFee(
           Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || DEFAULT_GAS_PRICE,
-        );
+        ) as Fee;
 
         return {
           success: true,

@@ -1,11 +1,13 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
+
 import StationExtension from "../extensions/StationExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
@@ -164,7 +166,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       const fee = calculateFee(
         Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
         network.gasPrice || DEFAULT_GAS_PRICE,
-      );
+      ) as Fee;
 
       return {
         success: true,

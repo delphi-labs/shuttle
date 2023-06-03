@@ -1,7 +1,7 @@
-import { Coin } from "@cosmjs/stargate";
 import { BasicAllowance as CosmosBasicAllowance } from "cosmjs-types/cosmos/feegrant/v1beta1/feegrant";
 
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../cosmos";
 
 export type BasicAllowanceValue = {
   spendLimit: Coin[];

@@ -1,7 +1,7 @@
-import { Coin } from "@cosmjs/stargate";
 import { MsgTransfer as CosmosMsgTransfer } from "cosmjs-types/ibc/applications/transfer/v1/tx";
 
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../cosmos";
 
 export type MsgTransferValue = {
   sender: string;
