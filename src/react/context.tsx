@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import useLocalStorageState from "use-local-storage-state";
 
@@ -8,7 +10,7 @@ import { MobileConnectResponse } from "../internals/provider";
 import { TransactionMsg, SimulateResult, BroadcastResult, SigningResult } from "../internals/transaction";
 import { ShuttleStore, useShuttleStore } from "./store";
 
-type ShuttleContextType = {
+export type ShuttleContextType = {
   providers: WalletProvider[];
   mobileProviders: MobileWalletProvider[];
   mobileConnect: (options: {
@@ -47,7 +49,7 @@ type ShuttleContextType = {
 
 export const ShuttleContext = createContext<ShuttleContextType | undefined>(undefined);
 
-export const ShuttleProvider = ({
+export function ShuttleProvider({
   persistent = false,
   persistentKey = "shuttle",
   providers = [],
@@ -63,7 +65,7 @@ export const ShuttleProvider = ({
   store?: ShuttleStore;
   children?: React.ReactNode;
   withLogging?: boolean;
-}) => {
+}) {
   const [availableProviders, setAvailableProviders] = useState<WalletProvider[]>([]);
   const [availableMobileProviders, setAvailableMobileProviders] = useState<MobileWalletProvider[]>([]);
 
@@ -389,9 +391,9 @@ export const ShuttleProvider = ({
   }, []);
 
   return <ShuttleContext.Provider value={providerInterface}>{children}</ShuttleContext.Provider>;
-};
+}
 
-export const useShuttle = () => {
+export function useShuttle() {
   const context = useContext(ShuttleContext);
 
   if (context === undefined) {
@@ -399,4 +401,4 @@ export const useShuttle = () => {
   }
 
   return context;
-};
+}
