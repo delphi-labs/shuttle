@@ -1,10 +1,11 @@
+import Long from "long";
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { toBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { StdSignDoc } from "@cosmjs/amino";
-import { AuthInfo, Fee as KeplrFee, TxBody, TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
+import { SignMode } from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
+import { SignDoc, TxRaw, TxBody, AuthInfo, Fee as CosmosFee } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import {
   BaseAccount,
   ChainRestAuthApi,
@@ -35,7 +36,7 @@ import {
   Network,
 } from "../internals/network";
 import { BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
-import { Fee } from "../internals/cosmos";
+import { Coin, Fee } from "../internals/cosmos";
 import {
   fromInjectiveCosmosChainToEthereumChain,
   isInjectiveNetwork,
@@ -213,18 +214,17 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
-        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        message: prepareMessagesForInjective(messages),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
       const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
-      txRaw.setSignaturesList([new Uint8Array(0)]);
+      txRaw.signatures = [new Uint8Array(0)];
 
       try {
         const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -474,7 +474,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         );
 
         const preparedTx = createTransaction({
-          message: preparedMessages.map((m) => m.toDirectSign()),
+          message: preparedMessages,
           memo: aminoSignResponse.signed.memo,
           signMode: SIGN_AMINO,
           fee: aminoSignResponse.signed.fee,
@@ -492,10 +492,10 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         const txRawEip712 = createTxRawEIP712(preparedTx.txRaw, web3Extension);
 
         const signatureBuff = Buffer.from(aminoSignResponse.signature.signature, "base64");
-        txRawEip712.setSignaturesList([signatureBuff]);
+        txRawEip712.signatures = [signatureBuff];
 
         return {
-          signatures: txRawEip712.getSignaturesList_asU8(),
+          signatures: txRawEip712.signatures,
           response: txRawEip712,
         };
       } else {
@@ -542,11 +542,11 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
                   },
                   multi: undefined,
                 },
-                sequence: signResponse.signed.sequence,
+                sequence: Long.fromString(signResponse.signed.sequence),
               },
             ],
-            fee: KeplrFee.fromPartial({
-              amount: signResponse.signed.fee.amount as any,
+            fee: CosmosFee.fromPartial({
+              amount: signResponse.signed.fee.amount as Coin[],
               gasLimit: signResponse.signed.fee.gas,
               payer: undefined,
             }),
@@ -580,21 +580,23 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         };
       }
 
-      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
         fee,
-        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        message: prepareMessagesForInjective(messages),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
-      const directSignResponse = await offlineSigner.signDirect(wallet.account.address, preparedTx.cosmosSignDoc);
+      const directSignResponse = await offlineSigner.signDirect(
+        wallet.account.address,
+        preparedTx.cosmosSignDoc as unknown as SignDoc,
+      );
       const signing = createTxRawFromSigResponse(directSignResponse);
 
       return {
-        signatures: signing.getSignaturesList_asU8(),
+        signatures: signing.signatures,
         response: signing,
       };
     } else {

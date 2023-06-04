@@ -1,17 +1,17 @@
+import Long from "long";
 import WalletConnect from "@walletconnect/client";
 import { isAndroid, payloadId } from "@walletconnect/utils";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { AuthInfo, Fee as KeplrFee, TxBody, TxRaw } from "@keplr-wallet/proto-types/cosmos/tx/v1beta1/tx";
-import { SignMode } from "@keplr-wallet/proto-types/cosmos/tx/signing/v1beta1/signing";
-import { PubKey } from "@keplr-wallet/proto-types/cosmos/crypto/secp256k1/keys";
+import { SignMode } from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
+import { TxRaw, TxBody, AuthInfo, Fee as CosmosFee } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import {
   BaseAccount,
   ChainRestAuthApi,
   createTransactionAndCosmosSignDoc,
   TxRestApi,
-  TxRaw as InjTxRaw,
   hexToBase64,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
@@ -31,6 +31,7 @@ import {
   Fee,
   prepareMessagesForInjective,
   Algo,
+  Coin,
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
@@ -293,18 +294,17 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
-        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        message: prepareMessagesForInjective(messages),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
       const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
-      txRaw.setSignaturesList([new Uint8Array(0)]);
+      txRaw.signatures = [new Uint8Array(0)];
 
       try {
         const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -401,7 +401,7 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
     if (isInjectiveNetwork(network.chainId)) {
       const txRestApi = new TxRestApi(overrides?.rest || network.rest);
 
-      const txRaw = InjTxRaw.deserializeBinary(TxRaw.encode(signResult.response).finish());
+      const txRaw = TxRaw.fromPartial(signResult.response);
 
       const broadcast = await txRestApi.broadcast(txRaw);
 
@@ -556,11 +556,11 @@ export const MobileKeplrProvider = class MobileKeplrProvider implements MobileWa
               },
               multi: undefined,
             },
-            sequence: signResponse.signed.sequence,
+            sequence: Long.fromString(signResponse.signed.sequence),
           },
         ],
-        fee: KeplrFee.fromPartial({
-          amount: signResponse.signed.fee.amount as any,
+        fee: CosmosFee.fromPartial({
+          amount: signResponse.signed.fee.amount as Coin[],
           gasLimit: signResponse.signed.fee.gas,
           payer: undefined,
         }),
