@@ -54,7 +54,7 @@ import { useState } from "react";
 import QRCode from "react-qr-code";
 import { useShuttle } from "@delphi-labs/shuttle";
 
-import { isAndroid, isIOS, isMobile } from "./utils/device";
+import {isAndroid, isIOS, isMobile} from '@walletconnect/browser-utils';
 
 const currentNetworkId = "mars-1";
 
