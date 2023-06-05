@@ -1,7 +1,7 @@
-import { Coin } from "@cosmjs/stargate";
 import { MsgSend as CosmosMsgSend } from "cosmjs-types/cosmos/bank/v1beta1/tx";
 
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../cosmos";
 
 export type MsgSendValue = {
   fromAddress: string;

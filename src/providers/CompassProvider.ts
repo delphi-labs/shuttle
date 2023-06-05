@@ -35,39 +35,30 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
 } from "../internals/network";
-import { BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
-import { Coin, Fee } from "../internals/cosmos";
+import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import {
   fromInjectiveCosmosChainToEthereumChain,
   isInjectiveNetwork,
   prepareMessagesForInjective,
 } from "../internals/injective";
-import { TransactionMsg } from "../internals";
+import { Coin } from "cosmjs-types/cosmos/base/v1beta1/coin";
 
 declare global {
-  interface Cosmostation {
-    cosmos: {
-      on(event: string, callback: () => void): void;
-    };
-    providers: {
-      keplr: Keplr;
-    };
-  }
-
   interface Window {
-    cosmostation: Cosmostation;
+    compass?: Keplr;
   }
 }
 
-export const CosmostationProvider = class CosmostationProvider implements WalletProvider {
-  id: string = "cosmostation";
-  name: string = "Cosmostation";
+export class CompassProvider implements WalletProvider {
+  id: string = "compass";
+  name: string = "Compass";
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
   onUpdate?: () => void;
 
-  cosmostation?: Cosmostation;
+  leap?: Keplr;
 
   constructor({ id, name, networks }: { id?: string; name?: string; networks: Network[] }) {
     if (id) {
@@ -90,29 +81,30 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
     this.initializing = true;
 
-    if (!window.cosmostation?.providers?.keplr) {
+    if (!window.compass) {
       this.initializing = false;
-      throw new Error("Cosmostation is not available");
+      throw new Error(`${this.name} is not available`);
     }
 
-    if (!window.cosmostation?.providers?.keplr?.experimentalSuggestChain) {
+    if (!window.compass.experimentalSuggestChain) {
       this.initializing = false;
-      throw new Error("Cosmostation does not support chain suggestion");
+      throw new Error(`${this.name} does not support chain suggestion`);
     }
 
-    this.cosmostation = window.cosmostation;
+    this.leap = window.compass;
 
-    this.cosmostation.cosmos.on("accountChanged", () => {
-      this.onUpdate?.();
-    });
+    // @TODO - add support for wallet change
+    // window.addEventListener("compass_keystorechange", () => {
+    //   this.onUpdate?.();
+    // });
 
     this.initialized = true;
     this.initializing = false;
   }
 
   async connect({ chainId }: { chainId: string }): Promise<WalletConnection> {
-    if (!this.cosmostation) {
-      throw new Error("Cosmostation is not available");
+    if (!this.leap) {
+      throw new Error(`${this.name} is not available`);
     }
 
     const network = this.networks.get(chainId);
@@ -123,9 +115,11 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
 
     const defaultCurrency = network.defaultCurrency || DEFAULT_CURRENCY;
     const baseGasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    await this.cosmostation.providers.keplr.experimentalSuggestChain({
-      ...network,
+
+    await this.leap.experimentalSuggestChain({
+      chainId: network.chainId,
       chainName: network.name,
+      name: network.name,
       rpc: network.rpc,
       rest: network.rest,
       bip44: {
@@ -158,9 +152,9 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       features: network.features || [],
     });
 
-    await this.cosmostation.providers.keplr.enable(chainId);
+    await this.leap.enable(chainId);
 
-    const account = (await this.cosmostation.providers.keplr.getKey(chainId)) as {
+    const account = (await this.leap.getKey(chainId)) as {
       address: Uint8Array;
       algo: string;
       bech32Address: string;
@@ -193,8 +187,8 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
-    if (!this.cosmostation?.providers?.keplr) {
-      throw new Error("Cosmostation is not available");
+    if (!this.leap) {
+      throw new Error(`${this.name} is not available`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -245,7 +239,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
         };
       }
     } else {
-      const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
+      const offlineSigner = this.leap.getOfflineSigner(network.chainId);
 
       const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
@@ -292,8 +286,8 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       rest?: string;
     };
   }): Promise<BroadcastResult> {
-    if (!this.cosmostation?.providers?.keplr) {
-      throw new Error("Cosmostation is not available");
+    if (!this.leap) {
+      throw new Error(`${this.name} is not available`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -339,7 +333,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       }
     }
 
-    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
+    const offlineSigner = this.leap.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
       gasPrice,
@@ -398,8 +392,8 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
     memo?: string | null;
     mobile?: boolean;
   }): Promise<SigningResult> {
-    if (!this.cosmostation?.providers?.keplr) {
-      throw new Error("Cosmostation is not available");
+    if (!this.leap) {
+      throw new Error(`${this.name} is not available`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -466,7 +460,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
           memo: memo || "",
         };
 
-        const aminoSignResponse = await this.cosmostation.providers.keplr.experimentalSignEIP712CosmosTx_v0(
+        const aminoSignResponse = await this.leap.experimentalSignEIP712CosmosTx_v0(
           network.chainId,
           wallet.account.address,
           eip712TypedData,
@@ -512,11 +506,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
           msgs: messages.map((message) => message.toAminoMsg()),
           memo: memo || "",
         };
-        const signResponse = await this.cosmostation.providers.keplr.signAmino(
-          network.chainId,
-          wallet.account.address,
-          signDoc,
-        );
+        const signResponse = await this.leap.signAmino(network.chainId, wallet.account.address, signDoc);
 
         const signedTx = TxRaw.encode({
           bodyBytes: TxBody.encode(
@@ -561,7 +551,7 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       }
     }
 
-    const offlineSigner = this.cosmostation.providers.keplr.getOfflineSigner(network.chainId);
+    const offlineSigner = this.leap.getOfflineSigner(network.chainId);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(network.rpc, offlineSigner, { gasPrice });
 
@@ -616,6 +606,6 @@ export const CosmostationProvider = class CosmostationProvider implements Wallet
       };
     }
   }
-};
+}
 
-export default CosmostationProvider;
+export default CompassProvider;

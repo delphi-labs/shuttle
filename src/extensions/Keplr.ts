@@ -1,5 +1,7 @@
-import { BroadcastMode, AminoSignResponse, StdSignDoc, StdTx, OfflineSigner } from "@cosmjs/launchpad";
-import { DirectSignResponse, OfflineDirectSigner } from "@cosmjs/proto-signing";
+import { DirectSignResponse, OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
+import { AminoSignResponse, StdSignDoc, StdTx } from "@cosmjs/amino";
+import { BroadcastMode } from "cosmjs-types/cosmos/tx/v1beta1/service";
+
 import { Bech32Config, BIP44, Network, NetworkCurrency } from "../internals";
 
 interface ChainInfo extends Network {

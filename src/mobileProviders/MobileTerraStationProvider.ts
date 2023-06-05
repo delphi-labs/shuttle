@@ -18,6 +18,7 @@ import {
   DEFAULT_GAS_MULTIPLIER,
   DEFAULT_GAS_PRICE,
   DEFAULT_CURRENCY,
+  Fee,
 } from "../internals";
 import MobileWalletProvider from "./MobileWalletProvider";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
@@ -281,7 +282,7 @@ export const MobileTerraStationProvider = class MobileTerraStationProvider imple
       const fee = calculateFee(
         Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
         network.gasPrice || DEFAULT_GAS_PRICE,
-      );
+      ) as Fee;
 
       return {
         success: true,

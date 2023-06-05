@@ -1,8 +1,8 @@
 import { toUtf8 } from "@cosmjs/encoding";
-import { Coin } from "@cosmjs/stargate";
 import { MsgExecuteContract as CosmosMsgExecuteContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 
 import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../cosmos";
 
 export type MsgExecuteContractValue = {
   sender: string;

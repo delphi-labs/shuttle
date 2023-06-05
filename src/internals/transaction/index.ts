@@ -1,16 +1,11 @@
-import { StdFee } from "@cosmjs/amino";
+import { Fee } from "../cosmos";
 
 export * from "./messages";
-
-export type Fee = {
-  amount: { amount: string; denom: string }[];
-  gas: string;
-};
 
 export type SimulateResult = {
   success: boolean;
   error?: string | null;
-  fee?: StdFee | null;
+  fee?: Fee | null;
 };
 
 export type BroadcastResult = {

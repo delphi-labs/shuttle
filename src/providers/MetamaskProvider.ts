@@ -170,18 +170,17 @@ export class MetamaskProvider implements WalletProvider {
       const accountDetailsResponse = await chainRestAuthApi.fetchAccount(wallet.account.address);
       const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
-      const preparedMessages = prepareMessagesForInjective(messages);
       const preparedTx = createTransactionAndCosmosSignDoc({
         pubKey: wallet.account.pubkey || "",
         chainId: network.chainId,
-        message: preparedMessages.map((msg) => msg.toDirectSign()),
+        message: prepareMessagesForInjective(messages),
         sequence: baseAccount.sequence,
         accountNumber: baseAccount.accountNumber,
       });
 
       const txRestApi = new TxRestApi(network.rest);
       const txRaw = preparedTx.txRaw;
-      txRaw.setSignaturesList([new Uint8Array(0)]);
+      txRaw.signatures = [new Uint8Array(0)];
 
       try {
         const txClientSimulateResponse = await txRestApi.simulate(txRaw);
@@ -189,7 +188,7 @@ export class MetamaskProvider implements WalletProvider {
         const fee = calculateFee(
           Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
           network.gasPrice || "0.0005inj",
-        );
+        ) as Fee;
 
         return {
           success: true,
@@ -358,7 +357,7 @@ export class MetamaskProvider implements WalletProvider {
       const publicKeyBase64 = hexToBase64(publicKeyHex);
 
       const preparedTx = createTransaction({
-        message: preparedMessages.map((m) => m.toDirectSign()),
+        message: preparedMessages,
         memo: memo || "",
         signMode: SIGN_AMINO,
         fee,
@@ -374,10 +373,10 @@ export class MetamaskProvider implements WalletProvider {
       });
 
       const txRawEip712 = createTxRawEIP712(preparedTx.txRaw, web3Extension);
-      txRawEip712.setSignaturesList([signatureBuff]);
+      txRawEip712.signatures = [signatureBuff];
 
       return {
-        signatures: txRawEip712.getSignaturesList_asU8(),
+        signatures: txRawEip712.signatures,
         response: txRawEip712,
       };
     }

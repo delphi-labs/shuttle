@@ -1,11 +1,13 @@
 import { CosmWasmClient, SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
+
 import StationExtension from "../extensions/StationExtension";
 import WalletProvider from "./WalletProvider";
 import { WalletConnection } from "../internals/wallet";
 import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../internals/network";
 import { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../internals/transaction";
+import { Fee } from "../internals/cosmos";
 import FakeOfflineSigner from "../internals/cosmos/FakeOfflineSigner";
 
 declare global {
@@ -164,7 +166,7 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       const fee = calculateFee(
         Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
         network.gasPrice || DEFAULT_GAS_PRICE,
-      );
+      ) as Fee;
 
       return {
         success: true,
@@ -222,6 +224,18 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
       }
 
       const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
+
+      if (feeAmount === "auto") {
+        try {
+          const simulate = await this.simulate({ messages, wallet });
+          if (simulate.success) {
+            feeAmount = simulate.fee?.amount[0].amount;
+            gasLimit = simulate.fee?.gas;
+          }
+        } catch (error: any) {
+          /* empty */
+        }
+      }
 
       const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
       const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
@@ -304,8 +318,20 @@ export const TerraStationProvider = class TerraStationProvider implements Wallet
 
     const processedMessages = messages.map((message) => message.toTerraExtensionMsg());
 
-    const feeCurrency = wallet.network.feeCurrencies?.[0] || wallet.network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(wallet.network.gasPrice || DEFAULT_GAS_PRICE);
+    if (feeAmount === "auto") {
+      try {
+        const simulate = await this.simulate({ messages, wallet });
+        if (simulate.success) {
+          feeAmount = simulate.fee?.amount[0].amount;
+          gasLimit = simulate.fee?.gas;
+        }
+      } catch (error: any) {
+        /* empty */
+      }
+    }
+
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],

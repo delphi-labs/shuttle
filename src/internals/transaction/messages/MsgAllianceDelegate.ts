@@ -1,7 +1,7 @@
-import { Coin } from "@cosmjs/stargate";
 import { MsgDelegate as TerraMsgAllianceDelegate } from "@terra-money/terra.proto/alliance/tx";
 
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../cosmos";
 
 export type MsgAllianceDelegateValue = {
   delegatorAddress: string;
