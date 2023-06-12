@@ -128,7 +128,7 @@ describe("MsgInstantiateContract", () => {
         "@type": "/cosmwasm.wasm.v1.MsgInstantiateContract",
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         label: "New contract",
         msg: {
           swap: {
@@ -175,7 +175,7 @@ describe("MsgInstantiateContract", () => {
       value: {
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         label: "New contract",
         msg: {
           swap: {
@@ -247,7 +247,7 @@ describe("MsgInstantiateContract", () => {
       value: {
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         msg: {
           swap: {
             offer_asset: {
@@ -271,7 +271,7 @@ describe("MsgInstantiateContract", () => {
         "@type": "/cosmwasm.wasm.v1.MsgInstantiateContract",
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         msg: {
           swap: {
             offer_asset: {
@@ -343,7 +343,7 @@ describe("MsgInstantiateContract", () => {
       value: {
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         label: "New contract",
         msg: {
           swap: {
@@ -368,7 +368,7 @@ describe("MsgInstantiateContract", () => {
         "@type": "/cosmwasm.wasm.v1.MsgInstantiateContract",
         sender: "address1",
         admin: "address2",
-        codeId: "10",
+        code_id: "10",
         label: "New contract",
         msg: {
           swap: {

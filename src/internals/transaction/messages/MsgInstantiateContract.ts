@@ -1,7 +1,7 @@
 import { toUtf8 } from "@cosmjs/encoding";
 import { MsgInstantiateContract as CosmosMsgInstantiateContract } from "cosmjs-types/cosmwasm/wasm/v1/tx";
 
-import TransactionMsg, { CosmosMsg, ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, CosmosMsg, ProtoMsg } from "./TransactionMsg";
 import { Coin } from "../../cosmos";
 
 export type MsgInstantiateContractValue = {
@@ -26,6 +26,32 @@ export class MsgInstantiateContract extends TransactionMsg<MsgInstantiateContrac
       msg,
       funds: funds || [],
     });
+  }
+
+  toTerraExtensionMsg(): string {
+    return JSON.stringify({
+      "@type": this.typeUrl,
+      sender: this.value.sender,
+      admin: this.value.admin,
+      code_id: this.value.codeId,
+      label: this.value.label,
+      msg: this.value.msg,
+      funds: this.value.funds,
+    });
+  }
+
+  toAminoMsg(): AminoMsg {
+    return {
+      type: this.aminoTypeUrl,
+      value: {
+        sender: this.value.sender,
+        admin: this.value.admin,
+        code_id: this.value.codeId,
+        label: this.value.label,
+        msg: this.value.msg,
+        funds: this.value.funds,
+      },
+    };
   }
 
   toCosmosMsg(): CosmosMsg {
