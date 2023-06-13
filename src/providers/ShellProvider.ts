@@ -42,8 +42,8 @@ declare global {
 }
 
 export class ShellProvider implements WalletProvider {
-  id: string = "shellwallet";
-  name: string = "shellwallet";
+  id: string = "shell";
+  name: string = "Shell";
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
