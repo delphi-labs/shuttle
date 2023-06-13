@@ -7,3 +7,4 @@ export * from "./MsgSend";
 export * from "./MsgTransfer";
 export * from "./MsgAllianceDelegate";
 export * from "./MsgInstantiateContract";
+export * from "./MsgMigrateContract";

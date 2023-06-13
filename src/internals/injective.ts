@@ -3,10 +3,17 @@ import {
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   MsgTransfer as InjMsgTransfer,
   MsgInstantiateContract as InjMsgInstantiateContract,
+  MsgMigrateContract as InjMsgMigrateContract,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
-import { MsgExecuteContract, MsgInstantiateContract, MsgTransfer, TransactionMsg } from "./transaction";
+import {
+  MsgExecuteContract,
+  MsgInstantiateContract,
+  MsgMigrateContract,
+  MsgTransfer,
+  TransactionMsg,
+} from "./transaction";
 import { nonNullable } from "../utils";
 
 export function isInjectiveNetwork(chainId: string): boolean {
@@ -35,7 +42,7 @@ export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): st
 
 export function prepareMessagesForInjective(
   messages: TransactionMsg[],
-): (InjMsgExecuteContractCompat | InjMsgInstantiateContract | InjMsgTransfer)[] {
+): (InjMsgExecuteContractCompat | InjMsgInstantiateContract | InjMsgMigrateContract | InjMsgTransfer)[] {
   return messages
     .map((msg) => {
       if (msg.typeUrl === MsgExecuteContract.TYPE) {
@@ -62,6 +69,17 @@ export function prepareMessagesForInjective(
             instantiateMsg.value.funds && instantiateMsg.value.funds.length > 0
               ? instantiateMsg.value.funds[0]
               : undefined,
+        });
+      }
+
+      if (msg.typeUrl === MsgMigrateContract.TYPE) {
+        const migrateMsg = msg as MsgMigrateContract;
+
+        return InjMsgMigrateContract.fromJSON({
+          sender: migrateMsg.value.sender,
+          contract: migrateMsg.value.contract,
+          codeId: Number(migrateMsg.value.codeId),
+          msg: migrateMsg.value.msg,
         });
       }
 
