@@ -25,7 +25,7 @@ const DEFAULT_CURRENCY = {
 
 export const TerraStationProvider = class TerraStationProvider implements WalletProvider {
   id: string = "terra-station";
-  name: string = "Terra Station";
+  name: string = "Station";
   networks: Map<string, Network>;
   initializing: boolean = false;
   initialized: boolean = false;
