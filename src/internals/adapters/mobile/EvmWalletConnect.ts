@@ -1,0 +1,282 @@
+import { AminoSignResponse } from "@cosmjs/amino";
+import SignClient from "@walletconnect/sign-client";
+import { SessionTypes } from "@walletconnect/types";
+
+import { isAndroid, isIOS, isMobile } from "../../../utils/device";
+import type { Network } from "../../../internals/network";
+import type { WalletConnection, Algo } from "../../../internals/wallet";
+import type { WalletMobileProvider } from "../../../providers/mobile";
+import type { SigningResult } from "../../../internals/transactions";
+import type { TransactionMsg } from "../../../internals/transactions/messages";
+import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
+import { MobileProviderAdapter } from "./";
+import { fromInjectiveCosmosChainToEthereumChain } from "../../injective";
+
+type EvmWCAccount = {
+  address: string;
+  algo: string;
+  pubkey: string;
+};
+
+export class EvmWalletConnect implements MobileProviderAdapter {
+  walletConnectPeerName: string;
+  walletConnectProjectId?: string;
+  walletConnect?: SignClient;
+  walletConnectSession?: SessionTypes.Struct;
+  accounts: {
+    [chainId: string]: EvmWCAccount[];
+  };
+
+  constructor({
+    walletConnectPeerName,
+    walletConnectProjectId,
+  }: {
+    walletConnectPeerName: string;
+    walletConnectProjectId?: string;
+  }) {
+    this.walletConnectPeerName = walletConnectPeerName;
+    this.walletConnectProjectId = walletConnectProjectId;
+    this.accounts = {};
+  }
+
+  async init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void> {
+    this.walletConnectProjectId = params.walletConnectProjectId ?? this.walletConnectProjectId;
+
+    this.walletConnect = await SignClient.init({
+      projectId: this.walletConnectProjectId,
+    });
+
+    const sessions = await this.walletConnect.session.getAll();
+    console.log("sessions", sessions);
+    this.walletConnectSession = sessions.find((session) => session.peer.metadata.name === this.walletConnectPeerName);
+
+    this.walletConnect.on("session_update", () => {
+      this.accounts = {};
+      provider.onUpdate?.();
+    });
+
+    this.walletConnect.on("session_delete", async (session) => {
+      if (this.walletConnectSession?.topic === session.topic) {
+        await this.disconnect(provider);
+      }
+      this.accounts = {};
+      provider.onUpdate?.();
+    });
+  }
+
+  isReady(): boolean {
+    return !!this.walletConnect;
+  }
+
+  isConnected(): boolean {
+    return !!this.walletConnectSession;
+  }
+
+  private async getAccounts({ network }: { network: Network }): Promise<EvmWCAccount[]> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    if (this.accounts[network.chainId]) {
+      return this.accounts[network.chainId];
+    }
+
+    console.log(
+      "getAccounts",
+      await this.walletConnect.request({
+        topic: this.walletConnectSession.topic,
+        chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
+        request: {
+          method: "eth_requestAccounts",
+          params: {},
+        },
+      }),
+    );
+
+    return await this.walletConnect.request({
+      topic: this.walletConnectSession.topic,
+      chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
+      request: {
+        method: "eth_requestAccounts",
+        params: {},
+      },
+    });
+  }
+
+  async getWalletConnection(
+    provider: WalletMobileProvider,
+    { network }: { network: Network },
+  ): Promise<WalletConnection> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    console.group(provider.id, "getWalletConnection");
+    this.accounts[network.chainId] = await this.getAccounts({ network });
+
+    if (!this.accounts[network.chainId] || this.accounts[network.chainId].length === 0) {
+      throw new Error(`No wallet connected to chain: ${network.chainId}`);
+    }
+
+    const account = this.accounts[network.chainId][0];
+    console.log("walletConnection", {
+      id: `provider:${provider.id}:network:${network.chainId}:address:${account.address}`,
+      providerId: provider.id,
+      account: {
+        address: account.address,
+        pubkey: account.pubkey,
+        algo: account.algo as Algo,
+      },
+      network,
+    });
+    console.groupEnd();
+
+    return {
+      id: `provider:${provider.id}:network:${network.chainId}:address:${account.address}`,
+      providerId: provider.id,
+      account: {
+        address: account.address,
+        pubkey: account.pubkey,
+        algo: account.algo as Algo,
+      },
+      network,
+    };
+  }
+
+  async connect(
+    provider: WalletMobileProvider,
+    { network, callback }: { network: Network; callback?: ((walletConnection: WalletConnection) => void) | undefined },
+  ): Promise<string> {
+    if (!this.walletConnect) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    const { uri, approval } = await this.walletConnect.connect({
+      requiredNamespaces: {
+        eip155: {
+          methods: ["eth_requestAccounts", "eth_signTypedData"],
+          chains: [`eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`],
+          events: ["chainChanged", "accountsChanged"],
+        },
+      },
+    });
+
+    approval().then(async (session) => {
+      console.log("walletConnectSession", session);
+      this.walletConnectSession = session;
+
+      const peerMetaName = session.peer.metadata.name;
+      if (peerMetaName !== this.walletConnectPeerName) {
+        throw new Error(
+          `Invalid provider, peerMetaName: ${peerMetaName} doesn't match the expected peerMetaName: ${this.walletConnectPeerName}`,
+        );
+      }
+
+      const walletConnection = await this.getWalletConnection(provider, { network });
+
+      callback?.(walletConnection);
+    });
+
+    return uri || "";
+  }
+
+  async disconnect(_provider: WalletMobileProvider, _options?: { network: Network }): Promise<void> {
+    if (this.walletConnect && this.walletConnectSession) {
+      try {
+        await this.walletConnect.disconnect({
+          topic: this.walletConnectSession.topic,
+          reason: {
+            code: -1,
+            message: "Disconnected by user",
+          },
+        });
+      } catch {
+        /* empty */
+      }
+      this.walletConnectSession = undefined;
+      this.accounts = {};
+    }
+  }
+
+  async sign(
+    provider: WalletMobileProvider,
+    {
+      network,
+      messages,
+      wallet,
+      feeAmount,
+      gasLimit,
+      memo,
+      overrides,
+      intents,
+    }: {
+      network: Network;
+      messages: TransactionMsg<any>[];
+      wallet: WalletConnection;
+      feeAmount?: string | null | undefined;
+      gasLimit?: string | null | undefined;
+      memo?: string | null | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      intents: { androidUrl: string; iosUrl: string };
+    },
+  ): Promise<SigningResult> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    const signDoc = await AminoSigningClient.prepare({
+      network,
+      wallet,
+      messages,
+      feeAmount,
+      gasLimit,
+      memo,
+      overrides,
+    });
+
+    if (isMobile()) {
+      if (isIOS()) {
+        window.location.href = intents.iosUrl;
+      } else if (isAndroid()) {
+        window.location.href = intents.androidUrl;
+      } else {
+        window.location.href = intents.androidUrl;
+      }
+    }
+
+    console.group(provider.id, "sign");
+    console.log(
+      "sign",
+      await this.walletConnect.request({
+        topic: this.walletConnectSession.topic,
+        chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
+        request: {
+          method: "eth_signTypedData",
+          params: {
+            signerAddress: wallet.account.address,
+            signDoc,
+          },
+        },
+      }),
+    );
+    console.groupEnd();
+
+    const signResponse = (await this.walletConnect.request({
+      topic: this.walletConnectSession.topic,
+      chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
+      request: {
+        method: "eth_signTypedData",
+        params: {
+          signerAddress: wallet.account.address,
+          signDoc,
+        },
+      },
+    })) as AminoSignResponse;
+
+    return await AminoSigningClient.finish({
+      network,
+      messages,
+      signResponse,
+    });
+  }
+}

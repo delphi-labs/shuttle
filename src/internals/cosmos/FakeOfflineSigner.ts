@@ -1,9 +1,9 @@
 import { fromBase64 } from "@cosmjs/encoding";
 import { OfflineDirectSigner, AccountData } from "@cosmjs/proto-signing";
 
-import { WalletConnection } from "../wallet";
+import { WalletConnection } from "../../internals/wallet";
 
-export default class FakeOfflineSigner implements OfflineDirectSigner {
+export class FakeOfflineSigner implements OfflineDirectSigner {
   private readonly wallet: WalletConnection | null;
 
   constructor(wallet: WalletConnection | null) {
@@ -24,3 +24,5 @@ export default class FakeOfflineSigner implements OfflineDirectSigner {
     throw new Error("Method not implemented.");
   }
 }
+
+export default FakeOfflineSigner;

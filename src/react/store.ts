@@ -1,5 +1,6 @@
 import { create, StateCreator } from "zustand";
-import { WalletConnection } from "../internals/wallet";
+
+import type { WalletConnection } from "../internals/wallet";
 
 export type ShuttleStore = {
   wallets: WalletConnection[];

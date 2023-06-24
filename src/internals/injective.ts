@@ -7,14 +7,14 @@ import {
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
+import { nonNullable } from "../utils";
 import {
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgMigrateContract,
   MsgTransfer,
   TransactionMsg,
-} from "./transaction";
-import { nonNullable } from "../utils";
+} from "./transactions";
 
 export function isInjectiveNetwork(chainId: string): boolean {
   return chainId === "injective-1" || chainId === "injective-888";
@@ -40,9 +40,13 @@ export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): st
   }
 }
 
-export function prepareMessagesForInjective(
-  messages: TransactionMsg[],
-): (InjMsgExecuteContractCompat | InjMsgInstantiateContract | InjMsgMigrateContract | InjMsgTransfer)[] {
+export type InjTransactionMsg =
+  | InjMsgExecuteContractCompat
+  | InjMsgInstantiateContract
+  | InjMsgMigrateContract
+  | InjMsgTransfer;
+
+export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTransactionMsg[] {
   return messages
     .map((msg) => {
       if (msg.typeUrl === MsgExecuteContract.TYPE) {

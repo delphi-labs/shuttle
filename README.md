@@ -52,9 +52,7 @@ function App() {
 ```tsx
 import { useState } from "react";
 import QRCode from "react-qr-code";
-import { useShuttle } from "@delphi-labs/shuttle";
-
-import {isAndroid, isIOS, isMobile} from '@walletconnect/browser-utils';
+import { useShuttle, isAndroid, isIOS, isMobile } from "@delphi-labs/shuttle";
 
 const currentNetworkId = "mars-1";
 

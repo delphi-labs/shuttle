@@ -22,3 +22,7 @@ export type Fee = {
   amount: Coin[];
   gas: string;
 };
+
+export * from "./SimulateClient";
+export * from "./AminoSigningClient";
+export * from "./BroadcastClient";
