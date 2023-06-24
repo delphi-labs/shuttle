@@ -56,7 +56,7 @@
     "@walletconnect/sign-client": "^2.8.1",
     "@walletconnect/types": "^2.8.1",
     "bufferutil": "^4.0.7",
-    "cosmjs-types": "^0.7.2",
+    "cosmjs-types": "^0.8.0",
     "ethereumjs-util": "^7.1.5",
     "isomorphic-ws": "^5.0.0",
     "mobile-detect": "^1.4.5",
