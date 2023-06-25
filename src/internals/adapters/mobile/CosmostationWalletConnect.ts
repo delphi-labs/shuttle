@@ -1,4 +1,4 @@
-import { AminoSignResponse } from "@cosmjs/amino";
+import { AminoSignResponse, StdSignature } from "@cosmjs/amino";
 import SignClient from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 
@@ -17,7 +17,7 @@ type CosmosWCAccount = {
   pubkey: string;
 };
 
-export class CosmosWalletConnect implements MobileProviderAdapter {
+export class CosmostationWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;
   walletConnectProjectId?: string;
   walletConnect?: SignClient;
@@ -217,7 +217,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       }
     }
 
-    const signResponse = (await this.walletConnect.request({
+    const signature = (await this.walletConnect.request({
       topic: this.walletConnectSession.topic,
       chainId: `cosmos:${network.chainId}`,
       request: {
@@ -227,7 +227,12 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
           signDoc,
         },
       },
-    })) as AminoSignResponse;
+    })) as StdSignature;
+
+    const signResponse: AminoSignResponse = {
+      signed: signDoc,
+      signature: signature,
+    };
 
     return await AminoSigningClient.finish({
       network,
@@ -237,4 +242,4 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
   }
 }
 
-export default CosmosWalletConnect;
+export default CosmostationWalletConnect;

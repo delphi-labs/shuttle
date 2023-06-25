@@ -13,9 +13,8 @@
   ],
   "author": "Delphi Labs (delphi-labs)",
   "license": "GPL-3",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/delphi-labs/shuttle.git"
@@ -26,9 +25,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build": "tsc",
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\"",
     "test": "jest --config jestconfig.json",
@@ -52,6 +49,7 @@
     "@injectivelabs/ts-types": "^1.11.0",
     "@injectivelabs/utils": "^1.11.0",
     "@metamask/eth-sig-util": "^5.0.2",
+    "@terra-money/feather.js": "^1.0.7-beta.4",
     "@terra-money/terra.proto": "^3.0.5",
     "@walletconnect/sign-client": "^2.8.1",
     "@walletconnect/types": "^2.8.1",

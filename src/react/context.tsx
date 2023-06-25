@@ -54,7 +54,7 @@ export function ShuttleProvider({
   persistent = false,
   persistentKey = "shuttle",
   providers = [],
-  extensionProviders = [],
+  extensionProviders,
   mobileProviders = [],
   store,
   children,
@@ -272,8 +272,8 @@ export function ShuttleProvider({
     };
 
     return {
-      providers,
-      extensionProviders,
+      providers: extensionProviders ?? providers,
+      extensionProviders: extensionProviders ?? providers,
       mobileProviders,
       mobileConnect,
       connect,

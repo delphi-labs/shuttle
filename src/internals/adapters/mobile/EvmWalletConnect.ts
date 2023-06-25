@@ -1,22 +1,16 @@
-import { AminoSignResponse } from "@cosmjs/amino";
 import SignClient from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
+import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
 import type { Network } from "../../../internals/network";
-import type { WalletConnection, Algo } from "../../../internals/wallet";
-import type { WalletMobileProvider } from "../../../providers/mobile";
+import type { WalletConnection } from "../../../internals/wallet";
+import { fromInjectiveCosmosChainToEthereumChain, isInjectiveNetwork } from "../../../internals/injective";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
-import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
+import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
+import type { WalletMobileProvider } from "../../../providers/mobile";
 import { MobileProviderAdapter } from "./";
-import { fromInjectiveCosmosChainToEthereumChain } from "../../injective";
-
-type EvmWCAccount = {
-  address: string;
-  algo: string;
-  pubkey: string;
-};
 
 export class EvmWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;
@@ -24,7 +18,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
   walletConnect?: SignClient;
   walletConnectSession?: SessionTypes.Struct;
   accounts: {
-    [chainId: string]: EvmWCAccount[];
+    [chainId: string]: string[];
   };
 
   constructor({
@@ -47,7 +41,6 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     });
 
     const sessions = await this.walletConnect.session.getAll();
-    console.log("sessions", sessions);
     this.walletConnectSession = sessions.find((session) => session.peer.metadata.name === this.walletConnectPeerName);
 
     this.walletConnect.on("session_update", () => {
@@ -72,7 +65,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     return !!this.walletConnectSession;
   }
 
-  private async getAccounts({ network }: { network: Network }): Promise<EvmWCAccount[]> {
+  private async getAccounts({ network }: { network: Network }): Promise<string[]> {
     if (!this.walletConnect || !this.walletConnectSession) {
       throw new Error("Wallet Connect is not available");
     }
@@ -80,18 +73,6 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     if (this.accounts[network.chainId]) {
       return this.accounts[network.chainId];
     }
-
-    console.log(
-      "getAccounts",
-      await this.walletConnect.request({
-        topic: this.walletConnectSession.topic,
-        chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
-        request: {
-          method: "eth_requestAccounts",
-          params: {},
-        },
-      }),
-    );
 
     return await this.walletConnect.request({
       topic: this.walletConnectSession.topic,
@@ -111,33 +92,26 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       throw new Error("Wallet Connect is not available");
     }
 
-    console.group(provider.id, "getWalletConnection");
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
     this.accounts[network.chainId] = await this.getAccounts({ network });
 
     if (!this.accounts[network.chainId] || this.accounts[network.chainId].length === 0) {
       throw new Error(`No wallet connected to chain: ${network.chainId}`);
     }
 
-    const account = this.accounts[network.chainId][0];
-    console.log("walletConnection", {
-      id: `provider:${provider.id}:network:${network.chainId}:address:${account.address}`,
-      providerId: provider.id,
-      account: {
-        address: account.address,
-        pubkey: account.pubkey,
-        algo: account.algo as Algo,
-      },
-      network,
-    });
-    console.groupEnd();
+    const address = this.accounts[network.chainId][0];
+    const bech32Address = network.evm.deriveCosmosAddress(address);
 
     return {
-      id: `provider:${provider.id}:network:${network.chainId}:address:${account.address}`,
+      id: `provider:${provider.id}:network:${network.chainId}:address:${bech32Address}`,
       providerId: provider.id,
       account: {
-        address: account.address,
-        pubkey: account.pubkey,
-        algo: account.algo as Algo,
+        address: bech32Address,
+        pubkey: null,
+        algo: null,
       },
       network,
     };
@@ -151,6 +125,10 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       throw new Error("Wallet Connect is not available");
     }
 
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
     const { uri, approval } = await this.walletConnect.connect({
       requiredNamespaces: {
         eip155: {
@@ -162,7 +140,6 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     });
 
     approval().then(async (session) => {
-      console.log("walletConnectSession", session);
       this.walletConnectSession = session;
 
       const peerMetaName = session.peer.metadata.name;
@@ -199,7 +176,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
   }
 
   async sign(
-    provider: WalletMobileProvider,
+    _provider: WalletMobileProvider,
     {
       network,
       messages,
@@ -224,7 +201,19 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       throw new Error("Wallet Connect is not available");
     }
 
-    const signDoc = await AminoSigningClient.prepare({
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
+    if (!isInjectiveNetwork(network.chainId)) {
+      throw new Error("Shuttle only supports Injective network with Metamask");
+    }
+
+    const {
+      messages: preparedMessages,
+      eip712TypedData,
+      signDoc,
+    } = await InjectiveEIP712SigningClient.prepare({
       network,
       wallet,
       messages,
@@ -244,39 +233,23 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       }
     }
 
-    console.group(provider.id, "sign");
-    console.log(
-      "sign",
-      await this.walletConnect.request({
-        topic: this.walletConnectSession.topic,
-        chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
-        request: {
-          method: "eth_signTypedData",
-          params: {
-            signerAddress: wallet.account.address,
-            signDoc,
-          },
-        },
-      }),
-    );
-    console.groupEnd();
-
-    const signResponse = (await this.walletConnect.request({
+    const signature = (await this.walletConnect.request({
       topic: this.walletConnectSession.topic,
       chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
       request: {
         method: "eth_signTypedData",
-        params: {
-          signerAddress: wallet.account.address,
-          signDoc,
-        },
+        params: [getEthereumAddress(wallet.account.address), JSON.stringify(eip712TypedData)],
       },
-    })) as AminoSignResponse;
+    })) as string;
 
-    return await AminoSigningClient.finish({
+    return await InjectiveEIP712SigningClient.finish({
       network,
-      messages,
-      signResponse,
+      pubKey: hexToBase64(recoverTypedSignaturePubKey(eip712TypedData, signature)),
+      messages: preparedMessages,
+      signDoc,
+      signature: hexToBuff(signature),
     });
   }
 }
+
+export default EvmWalletConnect;

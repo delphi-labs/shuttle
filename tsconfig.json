@@ -5,13 +5,14 @@
     "node_modules"
   ],
   "compilerOptions": {
-    "module": "esnext",
+    "target": "es5",
+    "module": "CommonJS",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
     "rootDir": "./src",
-    "outDir": "./dist/esm",
+    "outDir": "./dist",
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,

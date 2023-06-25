@@ -1,3 +1,4 @@
+import { Extension } from "@terra-money/feather.js";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import { fromBase64 } from "@cosmjs/encoding";
@@ -9,6 +10,8 @@ import type { WalletConnection } from "../../../internals/wallet";
 import type { WalletExtensionProvider } from "../../../providers/extensions";
 import SimulateClient from "../../../internals/cosmos/SimulateClient";
 import { ExtensionProviderAdapter } from "./";
+
+declare type ExtensionSendDataType = "connect" | "post" | "sign" | "interchain-info" | "get-pubkey";
 
 declare global {
   interface Window {
@@ -64,6 +67,7 @@ export class Station implements ExtensionProviderAdapter {
 
     const connect = await this.extension.connect();
 
+    const isLedger = connect.ledger;
     const bech32Address = connect.addresses[network.chainId];
 
     if (!bech32Address) {
@@ -96,7 +100,7 @@ export class Station implements ExtensionProviderAdapter {
         address: accountInfo?.address || bech32Address,
         pubkey: accountInfo?.pubkey?.value || "",
         algo,
-        isLedger: false,
+        isLedger,
       },
       network,
     };
@@ -224,8 +228,8 @@ export class Station implements ExtensionProviderAdapter {
       });
 
       if (!post?.result?.txhash) {
-        reject("Broadcast failed");
-        throw new Error("Broadcast failed");
+        reject(`Broadcast failed: ${post?.error?.message || "Unknown error"}`);
+        throw new Error(`Broadcast failed: ${post?.error?.message || "Unknown error"}`);
       }
 
       const client = await CosmWasmClient.connect(network.rpc);
@@ -258,6 +262,7 @@ export default Station;
 
 export class StationExtension {
   identifier: string = "station";
+  extension?: Extension;
 
   constructor(identifier?: string) {
     if (identifier) {
@@ -265,65 +270,22 @@ export class StationExtension {
     }
   }
 
-  public init(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      try {
-        const onMessage = (event: any) => {
-          const message = event?.data;
-          if (event.origin !== location.origin) return;
-          if (event.source !== window) return;
-          if (typeof message !== "object") return;
-          if (message.target !== `${this.identifier}:inpage`) return;
-          if (!message.data) return;
-
-          if (message.data === "ACK") {
-            window.postMessage({ target: `${this.identifier}:content`, data: "ACK" }, location.origin);
-            resolve();
-          }
-        };
-        window.addEventListener("message", onMessage);
-        window.postMessage({ target: `${this.identifier}:content`, data: "SYN" }, location.origin);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  public async interchainInfo(): Promise<{
-    [key: string]: {
-      baseAsset: string;
-      chainID: string;
-      coinType: string;
-      gasAdjustment: number;
-      gasPrices: { [key: string]: number };
-      ibc: { fromTerra: string; toTerra: string };
-      icon: string;
-      lcd: string;
-      name: string;
-      prefix: string;
-      version: string;
-    };
-  }> {
-    return this.request("interchain-info");
-  }
-
-  public async info(): Promise<{
-    api: string;
-    chainID: string;
-    hive: string;
-    lcd: string;
-    name: string;
-    walletconnectID: string;
-  }> {
-    return this.request("info");
+  public async init(): Promise<void> {
+    this.extension = new Extension(this.identifier);
+    if (!this.extension.isAvailable) {
+      throw new Error(`StationExtension with identifier:${this.identifier} is not available`);
+    }
   }
 
   public async connect(): Promise<{
     address: string;
     addresses: { [key: string]: string };
     pubkey: { [coinType: number]: string };
+    ledger: boolean;
+    name: string;
+    network: "testnet" | "mainnet";
   }> {
-    return this.request("connect");
+    return this.request("connect", {});
   }
 
   public async post({
@@ -338,10 +300,15 @@ export class StationExtension {
     chainId?: string;
   }): Promise<{
     id: string;
+    chainID: string;
     msgs: string[];
     purgeQueue: boolean;
     result: { height: number; raw_log: string; txhash: string };
     success: boolean;
+    error?: {
+      code: number;
+      message: string;
+    };
   }> {
     return this.request("post", {
       msgs: messages,
@@ -380,45 +347,33 @@ export class StationExtension {
     return this.request("sign", { msgs: messages, purgeQueue: true, memo, fee, chainID: chainId });
   }
 
-  private request(type: string, data: any = {}, options: { timeout?: number } = { timeout: 30 }): Promise<any> {
+  private request(sendType: ExtensionSendDataType, payload: any = {}, options?: { timeout: number }): Promise<any> {
     return new Promise((resolve, reject) => {
-      let promiseData: any = null;
-      const onMessage = (event: any) => {
-        const mapTypeToListener: { [key: string]: string } = {
-          "interchain-info": "onInterchainInfo",
-          info: "onInfo",
-          connect: "onConnect",
-          post: "onPost",
-          sign: "onSign",
-        };
-        const message = event?.data;
-        if (event.origin !== location.origin) return;
-        if (event.source !== window) return;
-        if (typeof message !== "object") return;
-        if (message.target !== `${this.identifier}:inpage`) return;
-        if (!message.data) return;
+      let timeout = false;
+      let resolved = false;
 
-        if (message.data.name === mapTypeToListener[type]) {
-          promiseData = message.data.payload;
-        }
+      const mapSendTypeToListener: { [key: string]: string } = {
+        "interchain-info": "onInterchainInfo",
+        info: "onInfo",
+        connect: "onConnect",
+        post: "onPost",
+        sign: "onSign",
       };
-      window.addEventListener("message", onMessage);
-      const id = new Date().getTime();
-      window.postMessage({ target: `${this.identifier}:content`, data: { id, type, ...data } }, location.origin);
-      let tries = 0;
-      const interval = setInterval(() => {
-        if (tries > ((options.timeout || 15) * 1000) / 200) {
-          reject("Timeout reached");
-          clearInterval(interval);
-          return;
-        }
-        if (promiseData) {
-          resolve(promiseData);
-          window.removeEventListener("message", onMessage);
-          clearInterval(interval);
-        }
-        tries++;
-      }, 200);
+
+      this.extension?.once(mapSendTypeToListener[sendType], (response: any) => {
+        if (timeout || resolved) return;
+        resolved = true;
+        resolve(response);
+      });
+
+      this.extension?.send(sendType, payload);
+
+      setTimeout(() => {
+        if (timeout || resolved) return;
+        timeout = true;
+        reject(`${sendType} time out`);
+        throw new Error(`${sendType} time out`);
+      }, (options?.timeout ?? 15) * 1000);
     });
   }
 }

@@ -1,5 +1,5 @@
 import type { Network } from "../../internals/network";
-import { EvmWalletConnect } from "../../internals/adapters/mobile/EvmWalletConnect";
+import EvmWalletConnect from "../../internals/adapters/mobile/EvmWalletConnect";
 import WalletMobileProvider from "./WalletMobileProvider";
 
 export const MetamaskMobileProvider = class MetamaskMobileProvider extends WalletMobileProvider {
@@ -9,7 +9,7 @@ export const MetamaskMobileProvider = class MetamaskMobileProvider extends Walle
       name: "Metamask - WalletConnect",
       networks,
       mobileProviderAdapter: new EvmWalletConnect({
-        walletConnectPeerName: "MetaMask",
+        walletConnectPeerName: "MetaMask Wallet",
         walletConnectProjectId,
       }),
     });

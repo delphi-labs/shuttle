@@ -1,5 +1,5 @@
 import type { Network } from "../../internals/network";
-import { CosmosWalletConnect } from "../../internals/adapters/mobile/CosmosWalletConnect";
+import CosmosWalletConnect from "../../internals/adapters/mobile/CosmosWalletConnect";
 import WalletMobileProvider from "./WalletMobileProvider";
 
 export const KeplrMobileProvider = class KeplrMobileProvider extends WalletMobileProvider {
