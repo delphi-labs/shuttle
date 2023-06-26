@@ -18,7 +18,7 @@ export const LeapCosmosMobileProvider = class LeapCosmosMobileProvider extends W
   generateIntents(uri?: string): { qrCodeUrl: string; iosUrl: string; androidUrl: string } {
     return {
       qrCodeUrl: uri || "",
-      iosUrl: `leapwallet://wcV2?${uri}`,
+      iosUrl: `leapcosmos://wcV2?${uri}`,
       androidUrl: `intent://wcV2?${uri}#Intent;package=io.leapwallet.cosmos;scheme=leapwallet;end;`,
     };
   }

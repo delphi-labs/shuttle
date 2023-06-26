@@ -18,8 +18,8 @@ export const CosmostationMobileProvider = class CosmostationMobileProvider exten
   generateIntents(uri?: string): { qrCodeUrl: string; iosUrl: string; androidUrl: string } {
     return {
       qrCodeUrl: uri || "",
-      iosUrl: `cosmostation://wcV2?${uri}`,
-      androidUrl: `intent://wcV2?${uri}#Intent;package=wannabit.io.cosmostaion;scheme=cosmostation;end;`,
+      iosUrl: `cosmostation://wc?${uri}`,
+      androidUrl: `intent://wc?${uri}#Intent;package=wannabit.io.cosmostaion;scheme=cosmostation;end;`,
     };
   }
 };
