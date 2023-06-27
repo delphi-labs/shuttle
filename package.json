@@ -42,7 +42,7 @@
     "@cosmjs/math": "^0.30.1",
     "@cosmjs/proto-signing": "^0.30.1",
     "@cosmjs/stargate": "^0.30.1",
-    "@cosmjs/tendermint-rpc": "^0.30.1",
+    "@cosmjs/tendermint-rpc": "^0.31.0",
     "@improbable-eng/grpc-web": "^0.15.0",
     "@injectivelabs/exceptions": "^1.11.0",
     "@injectivelabs/sdk-ts": "^1.11.0",
