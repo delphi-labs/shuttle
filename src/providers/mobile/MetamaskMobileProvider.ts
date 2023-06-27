@@ -18,8 +18,8 @@ export const MetamaskMobileProvider = class MetamaskMobileProvider extends Walle
   generateIntents(uri?: string): { qrCodeUrl: string; iosUrl: string; androidUrl: string } {
     return {
       qrCodeUrl: uri || "",
-      iosUrl: `https://metamask.app.link/wc?uri=${encodeURIComponent(uri || "")}`,
-      androidUrl: `https://metamask.app.link/wc?uri=${encodeURIComponent(uri || "")}`,
+      iosUrl: `metamask://wc?uri=${encodeURIComponent(uri || "")}`,
+      androidUrl: `metamask://wc?uri=${encodeURIComponent(uri || "")}`,
     };
   }
 };
