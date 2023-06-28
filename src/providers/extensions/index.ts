@@ -7,3 +7,4 @@ export * from "./MetamaskExtensionProvider";
 export * from "./FinExtensionProvider";
 export * from "./CompassExtensionProvider";
 export * from "./WalletExtensionProvider";
+export * from "./VectisExtensionProvider";
