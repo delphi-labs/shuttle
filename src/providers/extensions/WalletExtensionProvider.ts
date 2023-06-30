@@ -43,7 +43,12 @@ export abstract class WalletExtensionProvider {
 
     this.initializing = true;
 
-    await this.extensionProviderAdapter.init(this);
+    try {
+      await this.extensionProviderAdapter.init(this);
+    } catch (error) {
+      this.initializing = false;
+      throw error;
+    }
 
     this.initialized = true;
     this.initializing = false;

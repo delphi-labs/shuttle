@@ -46,7 +46,12 @@ export abstract class WalletMobileProvider {
 
     this.initializing = true;
 
-    await this.mobileProviderAdapter.init(this, params);
+    try {
+      await this.mobileProviderAdapter.init(this, params);
+    } catch (error) {
+      this.initializing = false;
+      throw error;
+    }
 
     this.initialized = true;
     this.initializing = false;
