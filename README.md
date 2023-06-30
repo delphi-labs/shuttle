@@ -24,6 +24,8 @@ npm install @delphi-labs/shuttle
 ```tsx
 import { ShuttleProvider } from "@delphi-labs/shuttle";
 
+const WC_PROJECT_ID = "...";
+
 const providers = [
   // ...
 ];
@@ -35,6 +37,7 @@ const mobileProviders = [
 function App() {
   return (
     <ShuttleProvider
+      walletConnectProjectId={WC_PROJECT_ID}
       providers={providers}
       mobileProviders={mobileProviders}
       // Add the following prop if you want wallet connections
