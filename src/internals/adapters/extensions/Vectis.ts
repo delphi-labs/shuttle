@@ -1,119 +1,84 @@
 import { DirectSignResponse, OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
-import { AccountData, Algo, AminoSignResponse, OfflineAminoSigner, StdSignDoc } from "@cosmjs/amino";
+import { Algo, AminoSignResponse, OfflineAminoSigner, StdSignDoc } from "@cosmjs/amino";
+import { GasPrice } from "@cosmjs/stargate";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
+import { toBase64 } from "@injectivelabs/sdk-ts";
+
+import { WalletExtensionProvider } from "../../../providers";
+import { nonNullable } from "../../../utils";
 import {
+  BIP44,
   DEFAULT_BIP44_COIN_TYPE,
   DEFAULT_CHAIN_PREFIX,
   DEFAULT_CURRENCY,
   DEFAULT_GAS_PRICE,
   Network,
-} from "../../network";
-import { WalletExtensionProvider } from "../../../providers";
-import { ExtensionProviderAdapter } from ".";
-import { GasPrice } from "@cosmjs/stargate";
-import { nonNullable } from "../../../utils";
-import { toBase64 } from "@injectivelabs/sdk-ts";
-import { BroadcastResult, SigningResult, TransactionMsg } from "../../transactions";
-import { WalletConnection } from "../../wallet";
-import OfflineDirectSigningClient from "../../cosmos/OfflineDirectSigningClient";
-import { isInjectiveNetwork } from "../../injective";
-import { BroadcastClient } from "../../cosmos";
-import SignAndBroadcastClient from "../../cosmos/SignAndBroadcastClient";
+  NetworkCurrency,
+} from "../../../internals/network";
+import { WalletConnection } from "../../../internals/wallet";
+import { BroadcastResult, SigningResult, TransactionMsg } from "../../../internals/transactions";
+import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
+import { BroadcastClient } from "../../../internals/cosmos";
+import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
+import { isInjectiveNetwork } from "../../../internals/injective";
+import { ExtensionProviderAdapter } from "./";
 
-export interface KeyInfo {
+interface VectisChainInfo extends Network {
+  rpcUrl: string;
+  restUrl: string;
+  chainId: string;
+  chainName: string;
+  prettyName: string;
+  bech32Prefix: string;
+  bip44: BIP44;
+  currencies: NetworkCurrency[];
+  stakeCurrency: NetworkCurrency;
+  feeCurrencies: NetworkCurrency[];
+  features?: string[];
+  isSuggested?: boolean;
+  ecosystem?: string;
+}
+
+interface VectisKey {
   algo: Algo;
   name: string;
-  // Vectis accounts use controller pub key
   pubKey: Uint8Array;
   address: string;
   isNanoLedger: boolean;
   isVectisAccount: boolean;
 }
 
-export interface IVectisCosmosProvider {
-  suggestChains(chainsInfo: ChainInfo[]): Promise<void>;
+export type VectisWindowCosmosProvider = {
+  suggestChains(chainsInfo: VectisChainInfo[]): Promise<void>;
   enable(chainIds: string | string[]): Promise<void>;
-  getSupportedChains(): Promise<ChainInfo[]>;
-  getKey(chainId: string): Promise<KeyInfo>;
-  getAccounts(chainId: string): Promise<AccountData[]>;
+  getKey(chainId: string): Promise<VectisKey>;
   signAmino(signerAddress: string, doc: StdSignDoc): Promise<AminoSignResponse>;
   signDirect(signerAddress: string, doc: SignDoc): Promise<DirectSignResponse>;
   getOfflineSignerAmino(chainId: string): OfflineAminoSigner;
   getOfflineSignerDirect(chainId: string): OfflineDirectSigner;
   getOfflineSigner(chainId: string): OfflineSigner;
-  /**
-   * Detect what signer should use based on the key type
-   * Ex: Nano ledger only supports amino signing.
-   */
-  getOfflineSignerAuto(chainId: string): Promise<OfflineSigner>;
-}
-
-export interface ChainInfo {
-  readonly rpcUrl: string;
-  readonly restUrl: string;
-  readonly chainId: string;
-  readonly chainName: string;
-  readonly prettyName: string;
-  readonly bech32Prefix: string;
-  readonly bip44: {
-    readonly coinType: number;
-  };
-  readonly currencies: AppCurrency[];
-  readonly stakeCurrency: Currency;
-  readonly feeCurrencies: FeeCurrency[];
-  readonly features?: string[];
-  readonly isSuggested?: boolean;
-  readonly ecosystem?: string;
-}
-export interface Currency {
-  readonly coinDenom: string;
-  readonly coinMinimalDenom: string;
-  readonly coinDecimals: number;
-  readonly coinGeckoId?: string;
-  readonly coinImageUrl?: string;
-}
-
-export interface CW20Currency extends Currency {
-  readonly type: "cw20";
-  readonly contractAddress: string;
-}
-
-export interface IBCCurrency extends Currency {
-  readonly paths: {
-    portId: string;
-    channelId: string;
-  }[];
-  readonly originChainId: string | undefined;
-  readonly originCurrency: Currency | CW20Currency | undefined;
-}
-
-export type AppCurrency = Currency | CW20Currency | IBCCurrency;
-
-export type FeeCurrency = WithGasPriceStep<AppCurrency>;
-
-export type WithGasPriceStep<T> = T & {
-  readonly gasPriceStep?: {
-    readonly low: number;
-    readonly average: number;
-    readonly high: number;
-  };
 };
 
-declare global {
-  interface Window {
-    vectis?: {
-      version: string;
-      cosmos: IVectisCosmosProvider;
-    };
-  }
-}
+export type VectisWindow = {
+  version: string;
+  cosmos: VectisWindowCosmosProvider;
+};
+
+// declare global {
+//   interface Window {
+//     vectis?: {
+//       version: string;
+//       cosmos: IVectisCosmosProvider;
+//     };
+//   }
+// }
 
 export class Vectis implements ExtensionProviderAdapter {
   name: string;
   useExperimentalSuggestChain: boolean;
   isAvailable: boolean = false;
-  vectis?: IVectisCosmosProvider;
-  extensionResolver: () => IVectisCosmosProvider | undefined;
+  vectis?: VectisWindowCosmosProvider;
+  extensionResolver: () => VectisWindowCosmosProvider | undefined;
   setupOnUpdateEventListener: (callback?: () => void) => void;
 
   constructor({
@@ -124,7 +89,7 @@ export class Vectis implements ExtensionProviderAdapter {
   }: {
     name?: string;
     useExperimentalSuggestChain?: boolean;
-    extensionResolver: () => IVectisCosmosProvider | undefined;
+    extensionResolver: () => VectisWindowCosmosProvider | undefined;
     setupOnUpdateEventListener: (callback?: () => void) => void;
   }) {
     this.name = name || "Vectis";
@@ -159,6 +124,7 @@ export class Vectis implements ExtensionProviderAdapter {
     if (this.useExperimentalSuggestChain && this.vectis.suggestChains) {
       const defaultCurrency = network.defaultCurrency || DEFAULT_CURRENCY;
       const baseGasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+
       await this.vectis.suggestChains([
         {
           ...network,

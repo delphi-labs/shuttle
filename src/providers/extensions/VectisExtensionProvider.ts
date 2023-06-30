@@ -1,13 +1,10 @@
 import type { Network } from "../../internals/network";
-import { Vectis, IVectisCosmosProvider } from "../../internals/adapters/extensions/Vectis";
+import Vectis, { type VectisWindow } from "../../internals/adapters/extensions/Vectis";
 import WalletExtensionProvider from "./WalletExtensionProvider";
 
 declare global {
   interface Window {
-    vectis?: {
-      version: string;
-      cosmos: IVectisCosmosProvider;
-    };
+    vectis?: VectisWindow;
   }
 }
 
