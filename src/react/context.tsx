@@ -344,7 +344,7 @@ export function ShuttleProvider({
   // Initialize providers
   useEffect(() => {
     (extensionProviders ?? providers)
-      .filter((extensionProvider) => !extensionProvider.initializing && !extensionProvider.initialized)
+      .filter((extensionProvider) => extensionProvider.extensionProviderAdapter.isReady())
       .forEach((extensionProvider) => {
         extensionProvider
           .init()
