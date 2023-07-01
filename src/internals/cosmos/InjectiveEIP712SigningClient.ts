@@ -113,7 +113,7 @@ export class InjectiveEIP712SigningClient {
     network: Network;
     pubKey: string;
     messages: InjTransactionMsg[];
-    signDoc: StdSignDoc & { timeout_height: string };
+    signDoc: StdSignDoc & { timeout_height?: string };
     signature: Uint8Array;
   }): Promise<SigningResult> {
     const preparedTx = createTransaction({
@@ -123,7 +123,7 @@ export class InjectiveEIP712SigningClient {
       fee: signDoc.fee,
       pubKey,
       sequence: parseInt(signDoc.sequence, 10),
-      timeoutHeight: parseInt(signDoc.timeout_height, 10),
+      timeoutHeight: parseInt(signDoc.timeout_height || "0", 10),
       accountNumber: parseInt(signDoc.account_number, 10),
       chainId: network.chainId,
     });

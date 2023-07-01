@@ -271,7 +271,7 @@ export class Keplr implements ExtensionProviderAdapter {
         network,
         pubKey: wallet.account.pubkey || "",
         messages: preparedMessages,
-        signDoc,
+        signDoc: signResponse.signed,
         signature: Buffer.from(signResponse.signature.signature, "base64"),
       });
     }
