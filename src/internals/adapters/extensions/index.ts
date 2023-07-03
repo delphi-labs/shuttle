@@ -39,6 +39,23 @@ export interface ExtensionProviderAdapter {
       };
     },
   ): Promise<BroadcastResult>;
+  signArbitrary(
+    provider: WalletExtensionProvider,
+    options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+    },
+  ): Promise<SigningResult>;
+  verifyArbitrarySignature(
+    provider: WalletExtensionProvider,
+    options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean>;
 }
 
 export * from "./Keplr";

@@ -30,6 +30,24 @@ export interface MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult>;
+  signArbitrary(
+    provider: WalletMobileProvider,
+    options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      intents: { androidUrl: string; iosUrl: string };
+    },
+  ): Promise<SigningResult>;
+  verifyArbitrarySignature(
+    provider: WalletMobileProvider,
+    options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean>;
 }
 
 export * from "./CosmosWalletConnect";

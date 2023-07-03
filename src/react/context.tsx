@@ -46,6 +46,12 @@ export type ShuttleContextType = {
     wallet?: WalletConnection | null;
     mobile?: boolean;
   }) => Promise<SigningResult>;
+  signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
+  verifyArbitrarySignature: (options: {
+    wallet?: WalletConnection | null;
+    data: Uint8Array;
+    signResult: SigningResult;
+  }) => Promise<boolean>;
 };
 
 export const ShuttleContext = createContext<ShuttleContextType | undefined>(undefined);
@@ -271,6 +277,48 @@ export function ShuttleProvider({
       return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo });
     };
 
+    const signArbitrary = async ({ wallet, data }: { wallet?: WalletConnection | null; data: Uint8Array }) => {
+      const walletToUse = wallet || recentWallet;
+      if (!walletToUse) {
+        throw new Error("No wallet to sign with");
+      }
+
+      const provider =
+        availableExtensionProviders.find((extensionProvider) => extensionProvider.id === walletToUse.providerId) ||
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+
+      if (!provider) {
+        throw new Error(`Provider ${walletToUse.providerId} not found`);
+      }
+
+      return provider.signArbitrary({ wallet: walletToUse, data });
+    };
+
+    const verifyArbitrarySignature = async ({
+      wallet,
+      data,
+      signResult,
+    }: {
+      wallet?: WalletConnection | null;
+      data: Uint8Array;
+      signResult: SigningResult;
+    }) => {
+      const walletToUse = wallet || recentWallet;
+      if (!walletToUse) {
+        throw new Error("No wallet to sign with");
+      }
+
+      const provider =
+        availableExtensionProviders.find((extensionProvider) => extensionProvider.id === walletToUse.providerId) ||
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+
+      if (!provider) {
+        throw new Error(`Provider ${walletToUse.providerId} not found`);
+      }
+
+      return provider.verifyArbitrarySignature({ wallet: walletToUse, data, signResult });
+    };
+
     return {
       providers: extensionProviders ?? providers,
       extensionProviders: extensionProviders ?? providers,
@@ -285,6 +333,8 @@ export function ShuttleProvider({
       simulate,
       broadcast,
       sign,
+      signArbitrary,
+      verifyArbitrarySignature,
     };
   }, [
     providers,

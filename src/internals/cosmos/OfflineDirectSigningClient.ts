@@ -97,7 +97,7 @@ export class OfflineDirectSigningClient {
       const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       fee = {
-        amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+        amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
     }
@@ -157,7 +157,7 @@ export class OfflineDirectSigningClient {
     const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = {
-      amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+      amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
 

@@ -199,6 +199,63 @@ export abstract class WalletExtensionProvider {
       overrides,
     });
   }
+
+  async signArbitrary({ wallet, data }: { wallet: WalletConnection; data: Uint8Array }): Promise<SigningResult> {
+    if (!this.extensionProviderAdapter.isReady()) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const currentWallet = await this.connect({ chainId: network.chainId });
+
+    if (currentWallet.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    return await this.extensionProviderAdapter.signArbitrary(this, {
+      network,
+      wallet,
+      data,
+    });
+  }
+
+  async verifyArbitrarySignature({
+    wallet,
+    data,
+    signResult,
+  }: {
+    wallet: WalletConnection;
+    data: Uint8Array;
+    signResult: SigningResult;
+  }): Promise<boolean> {
+    if (!this.extensionProviderAdapter.isReady()) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const currentWallet = await this.connect({ chainId: network.chainId });
+
+    if (currentWallet.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    return await this.extensionProviderAdapter.verifyArbitrarySignature(this, {
+      network,
+      wallet,
+      data,
+      signResult,
+    });
+  }
 }
 
 export type WalletProvider = WalletExtensionProvider;

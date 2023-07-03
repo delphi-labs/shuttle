@@ -7,19 +7,9 @@ import type { WalletConnection } from "../../../internals/wallet";
 import type { WalletExtensionProvider } from "../../../providers";
 import { isInjectiveNetwork } from "../../../internals/injective";
 import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
+import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
 import { BroadcastClient } from "../../../internals/cosmos";
 import { ExtensionProviderAdapter } from "./";
-
-// export const recoverTypedSignaturePubKey = (data: any, signature: string): string => {
-//   const compressedPubKeyPrefix = Buffer.from("04", "hex");
-//   const message = TypedDataUtils.eip712Hash(data, SignTypedDataVersion.V4);
-//   const sigParams = fromRpcSig(signature);
-//   const publicKey = ecrecover(message, sigParams.v, sigParams.r, sigParams.s);
-//   const prefixedKey = Buffer.concat([compressedPubKeyPrefix, publicKey]);
-//   const compressedKey = Buffer.from(publicKeyConvert(prefixedKey));
-
-//   return `0x${compressedKey.toString("hex")}`;
-// };
 
 export type EthereumWindow = {
   isMetaMask?: boolean;
@@ -198,6 +188,76 @@ export class Metamask implements ExtensionProviderAdapter {
       network,
       signResult,
       overrides,
+    });
+  }
+
+  async signArbitrary(
+    _provider: WalletExtensionProvider,
+    {
+      network,
+      wallet,
+      data,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+    },
+  ): Promise<SigningResult> {
+    if (!this.ethereum) {
+      throw new Error("Metamask is not available");
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
+    if (!isInjectiveNetwork(network.chainId)) {
+      throw new Error("Shuttle only supports Injective network with Metamask");
+    }
+
+    const msg = EthArbitrarySigningClient.prepare(data);
+
+    const signature = (await this.ethereum.request({
+      method: "personal_sign",
+      params: [msg, getEthereumAddress(wallet.account.address)],
+    })) as string;
+
+    return {
+      signatures: [hexToBuff(signature)],
+      response: signature,
+    };
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletExtensionProvider,
+    {
+      network,
+      wallet,
+      data,
+      signResult,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    if (!this.ethereum) {
+      throw new Error("Metamask is not available");
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
+    if (!isInjectiveNetwork(network.chainId)) {
+      throw new Error("Shuttle only supports Injective network with Metamask");
+    }
+
+    return EthArbitrarySigningClient.verify({
+      wallet,
+      data,
+      signature: signResult.signatures[0],
     });
   }
 }

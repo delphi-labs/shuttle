@@ -64,15 +64,6 @@ export type VectisWindow = {
   cosmos: VectisWindowCosmosProvider;
 };
 
-// declare global {
-//   interface Window {
-//     vectis?: {
-//       version: string;
-//       cosmos: IVectisCosmosProvider;
-//     };
-//   }
-// }
-
 export class Vectis implements ExtensionProviderAdapter {
   name: string;
   useExperimentalSuggestChain: boolean;
@@ -267,6 +258,29 @@ export class Vectis implements ExtensionProviderAdapter {
       memo,
       overrides,
     });
+  }
+
+  async signArbitrary(
+    _provider: WalletExtensionProvider,
+    _options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+    },
+  ): Promise<SigningResult> {
+    throw new Error("Method not supported.");
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletExtensionProvider,
+    _options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    throw new Error("Method not supported.");
   }
 }
 

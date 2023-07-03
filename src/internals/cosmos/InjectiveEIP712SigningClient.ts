@@ -55,12 +55,12 @@ export class InjectiveEIP712SigningClient {
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
 
     let fee: Fee = {
-      amount: [{ amount: gas, denom: gasPrice.denom }],
+      amount: [{ amount: gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
     if (feeAmount && feeAmount != "auto") {
       fee = {
-        amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+        amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
     }

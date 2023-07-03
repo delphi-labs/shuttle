@@ -1,6 +1,6 @@
 import { GasPrice } from "@cosmjs/stargate";
 import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
-import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
+import { AminoSignResponse, StdSignDoc, StdSignature } from "@cosmjs/amino";
 import { toBase64 } from "@cosmjs/encoding";
 
 import { defaultBech32Config, nonNullable } from "../../../utils";
@@ -16,13 +16,13 @@ import {
 } from "../../../internals/network";
 import type { BroadcastResult, SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
-import type { Algo, WalletConnection } from "../../../internals/wallet";
+import { Algos, type Algo, type WalletConnection } from "../../../internals/wallet";
 import type WalletExtensionProvider from "../../../providers/extensions/WalletExtensionProvider";
 import { isInjectiveNetwork } from "../../../internals/injective";
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
 import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
-import { BroadcastClient } from "../../../internals/cosmos";
+import { ArbitrarySigningClient, BroadcastClient } from "../../../internals/cosmos";
 import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
 import { ExtensionProviderAdapter } from "./";
 
@@ -72,6 +72,13 @@ export type KeplrWindow = {
   ): Promise<AminoSignResponse>;
   signAmino(chainId: string, signer: string, signDoc: StdSignDoc, signOptions?: unknown): Promise<AminoSignResponse>;
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
+  signArbitrary(chainId: string, signer: string, data: string | Uint8Array): Promise<StdSignature>;
+  verifyArbitrary(
+    chainId: string,
+    signer: string,
+    data: string | Uint8Array,
+    signature: StdSignature,
+  ): Promise<boolean>;
 };
 
 export class Keplr implements ExtensionProviderAdapter {
@@ -341,6 +348,58 @@ export class Keplr implements ExtensionProviderAdapter {
       gasLimit,
       memo,
       overrides,
+    });
+  }
+
+  async signArbitrary(
+    _provider: WalletExtensionProvider,
+    {
+      network,
+      wallet,
+      data,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+    },
+  ): Promise<SigningResult> {
+    if (!this.keplr) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    const signature = await this.keplr.signArbitrary(network.chainId, wallet.account.address, data);
+
+    return {
+      signatures: [Buffer.from(signature.signature, "base64")],
+      response: signature,
+    };
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletExtensionProvider,
+    {
+      wallet,
+      data,
+      signResult,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    if (!this.keplr) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    if (wallet.account.algo !== Algos.secp256k1) {
+      throw new Error(`Unsupported algorithm: ${wallet.account.algo}`);
+    }
+
+    return await ArbitrarySigningClient.verifyEmptyDocSignature({
+      wallet,
+      data,
+      signature: signResult.signatures[0],
     });
   }
 }

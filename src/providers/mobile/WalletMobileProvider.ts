@@ -239,6 +239,64 @@ export abstract class WalletMobileProvider {
       overrides,
     });
   }
+
+  async signArbitrary({ wallet, data }: { wallet: WalletConnection; data: Uint8Array }): Promise<SigningResult> {
+    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+
+    if (currentWallet.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    return await this.mobileProviderAdapter.signArbitrary(this, {
+      network,
+      wallet,
+      data,
+      intents: this.generateIntents(),
+    });
+  }
+
+  async verifyArbitrarySignature({
+    wallet,
+    data,
+    signResult,
+  }: {
+    wallet: WalletConnection;
+    data: Uint8Array;
+    signResult: SigningResult;
+  }): Promise<boolean> {
+    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    const network = this.networks.get(wallet.network.chainId);
+
+    if (!network) {
+      throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
+    }
+
+    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+
+    if (currentWallet.account.address !== wallet.account.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    return await this.mobileProviderAdapter.verifyArbitrarySignature(this, {
+      network,
+      wallet,
+      data,
+      signResult,
+    });
+  }
 }
 
 export default WalletMobileProvider;

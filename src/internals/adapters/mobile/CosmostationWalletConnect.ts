@@ -4,12 +4,13 @@ import { SessionTypes } from "@walletconnect/types";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
 import type { Network } from "../../../internals/network";
-import type { WalletConnection, Algo } from "../../../internals/wallet";
+import { type WalletConnection, type Algo, Algos } from "../../../internals/wallet";
 import type { WalletMobileProvider } from "../../../providers/mobile";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import { MobileProviderAdapter } from "./";
+import { ArbitrarySigningClient } from "../../cosmos";
 
 type CosmosWCAccount = {
   address: string;
@@ -238,6 +239,84 @@ export class CosmostationWalletConnect implements MobileProviderAdapter {
       network,
       messages,
       signResponse,
+    });
+  }
+
+  async signArbitrary(
+    _provider: WalletMobileProvider,
+    {
+      network,
+      wallet,
+      data,
+      intents,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      intents: { androidUrl: string; iosUrl: string };
+    },
+  ): Promise<SigningResult> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    const signDoc = ArbitrarySigningClient.prepareSigningWithMemo({ network, data });
+
+    if (isMobile()) {
+      if (isIOS()) {
+        window.location.href = intents.iosUrl;
+      } else if (isAndroid()) {
+        window.location.href = intents.androidUrl;
+      } else {
+        window.location.href = intents.androidUrl;
+      }
+    }
+
+    const signResponse = (await this.walletConnect.request({
+      topic: this.walletConnectSession.topic,
+      chainId: `cosmos:${network.chainId}`,
+      request: {
+        method: "cosmos_signAmino",
+        params: {
+          signerAddress: wallet.account.address,
+          signDoc,
+        },
+      },
+    })) as AminoSignResponse;
+
+    return {
+      signatures: [Buffer.from(signResponse.signature.signature, "base64")],
+      response: signResponse,
+    };
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletMobileProvider,
+    {
+      network,
+      wallet,
+      data,
+      signResult,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    if (wallet.account.algo !== Algos.secp256k1) {
+      throw new Error(`Unsupported algorithm: ${wallet.account.algo}`);
+    }
+
+    return await ArbitrarySigningClient.verifyMemoSignature({
+      network,
+      wallet,
+      data,
+      signature: signResult.signatures[0],
     });
   }
 }

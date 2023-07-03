@@ -44,7 +44,7 @@ export class AminoSigningClient {
     let accountNumber = "";
     let sequence = "";
     let fee: Fee = {
-      amount: [{ amount: gas, denom: gasPrice.denom }],
+      amount: [{ amount: gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
 
@@ -58,7 +58,7 @@ export class AminoSigningClient {
       if (feeAmount && feeAmount != "auto") {
         feeAmount = String(new BigNumberInBase(feeAmount).times(10 ** (feeCurrency.coinDecimals - 6)).toFixed(0));
         fee = {
-          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
           gas: gasLimit || gas,
         };
       }
@@ -70,7 +70,7 @@ export class AminoSigningClient {
 
       if (feeAmount && feeAmount != "auto") {
         fee = {
-          amount: [{ amount: feeAmount || gas, denom: gasPrice.denom }],
+          amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
           gas: gasLimit || gas,
         };
       }

@@ -10,6 +10,7 @@ import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
 import type { WalletMobileProvider } from "../../../providers/mobile";
+import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
 import { MobileProviderAdapter } from "./";
 
 export class EvmWalletConnect implements MobileProviderAdapter {
@@ -261,6 +262,92 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       messages: preparedMessages,
       signDoc,
       signature: hexToBuff(signature),
+    });
+  }
+
+  async signArbitrary(
+    _provider: WalletMobileProvider,
+    {
+      network,
+      wallet,
+      data,
+      intents,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      intents: { androidUrl: string; iosUrl: string };
+    },
+  ): Promise<SigningResult> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
+    if (!isInjectiveNetwork(network.chainId)) {
+      throw new Error("Shuttle only supports Injective network with Metamask");
+    }
+
+    if (isMobile()) {
+      if (isIOS()) {
+        window.location.href = intents.iosUrl;
+      } else if (isAndroid()) {
+        window.location.href = intents.androidUrl;
+      } else {
+        window.location.href = intents.androidUrl;
+      }
+    }
+
+    const msg = EthArbitrarySigningClient.prepare(data);
+
+    const signature = (await this.walletConnect.request({
+      topic: this.walletConnectSession.topic,
+      chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
+      request: {
+        method: "personal_sign",
+        params: [getEthereumAddress(wallet.account.address), msg],
+      },
+    })) as string;
+
+    return {
+      signatures: [hexToBuff(signature)],
+      response: signature,
+    };
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletMobileProvider,
+    {
+      network,
+      wallet,
+      data,
+      signResult,
+    }: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    if (!this.walletConnect || !this.walletConnectSession) {
+      throw new Error("Wallet Connect is not available");
+    }
+
+    if (!network.evm) {
+      throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
+    }
+
+    if (!isInjectiveNetwork(network.chainId)) {
+      throw new Error("Shuttle only supports Injective network with Metamask");
+    }
+
+    return EthArbitrarySigningClient.verify({
+      wallet,
+      data,
+      signature: signResult.signatures[0],
     });
   }
 }

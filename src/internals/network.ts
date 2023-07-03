@@ -50,5 +50,5 @@ export const DEFAULT_CURRENCY = {
   coinDecimals: 6,
   coinGeckoId: "cosmos",
 };
-export const DEFAULT_GAS_PRICE = `0.2${DEFAULT_CURRENCY.coinDenom}`;
+export const DEFAULT_GAS_PRICE = `0.2${DEFAULT_CURRENCY.coinMinimalDenom}`;
 export const DEFAULT_GAS_MULTIPLIER = 1.3;

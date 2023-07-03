@@ -154,7 +154,7 @@ export class Station implements ExtensionProviderAdapter {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
-      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
+      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
       gas_limit: gasLimit || gas,
     });
 
@@ -216,7 +216,7 @@ export class Station implements ExtensionProviderAdapter {
       const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       const fee = JSON.stringify({
-        amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: gasPrice.denom }],
+        amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
         gas_limit: gasLimit || gas,
       });
 
@@ -255,6 +255,37 @@ export class Station implements ExtensionProviderAdapter {
         tries++;
       }, 400);
     });
+  }
+
+  async signArbitrary(
+    _provider: WalletExtensionProvider,
+    _options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+    },
+  ): Promise<SigningResult> {
+    if (!this.extension) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    throw new Error("Method not implemented.");
+  }
+
+  async verifyArbitrarySignature(
+    _provider: WalletExtensionProvider,
+    _options: {
+      network: Network;
+      wallet: WalletConnection;
+      data: Uint8Array;
+      signResult: SigningResult;
+    },
+  ): Promise<boolean> {
+    if (!this.extension) {
+      throw new Error(`${this.name} is not available`);
+    }
+
+    throw new Error("Method not implemented.");
   }
 }
 
