@@ -61,7 +61,7 @@
     "secp256k1": "^5.0.0",
     "tslib": "^2.4.0",
     "use-local-storage-state": "^18.1.2",
-    "utf-8-validate": "^5.0.10",
+    "utf-8-validate": "^6.0.3",
     "ws": "^8.12.0",
     "zustand": "^4.3.1"
   },
