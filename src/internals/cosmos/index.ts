@@ -23,6 +23,10 @@ export type Fee = {
   gas: string;
 };
 
-export * from "./SimulateClient";
 export * from "./AminoSigningClient";
 export * from "./BroadcastClient";
+export * from "./FakeOfflineSigner";
+export * from "./InjectiveEIP712SigningClient";
+export * from "./OfflineDirectSigningClient";
+export * from "./SignAndBroadcastClient";
+export * from "./SimulateClient";

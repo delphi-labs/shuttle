@@ -74,14 +74,11 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       return this.accounts[network.chainId];
     }
 
-    return await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
-      chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
-      request: {
-        method: "eth_requestAccounts",
-        params: {},
-      },
-    });
+    const chainPrefix = `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}:`;
+
+    return this.walletConnectSession.namespaces.eip155.accounts
+      .filter((account) => account.includes(chainPrefix))
+      .map((account) => account.replace(chainPrefix, ""));
   }
 
   async getWalletConnection(
@@ -119,7 +116,13 @@ export class EvmWalletConnect implements MobileProviderAdapter {
 
   async connect(
     provider: WalletMobileProvider,
-    { network, callback }: { network: Network; callback?: ((walletConnection: WalletConnection) => void) | undefined },
+    {
+      network,
+      callback,
+    }: {
+      network: Network;
+      callback?: ((walletConnection: WalletConnection) => void) | undefined;
+    },
   ): Promise<string> {
     if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
@@ -132,7 +135,15 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     const { uri, approval } = await this.walletConnect.connect({
       requiredNamespaces: {
         eip155: {
-          methods: ["eth_requestAccounts", "eth_signTypedData"],
+          methods: [
+            "eth_sendTransaction",
+            "eth_signTransaction",
+            "eth_sign",
+            "personal_sign",
+            "eth_signTypedData",
+            "eth_signTypedData_v4",
+            "eth_requestAccounts",
+          ],
           chains: [`eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`],
           events: ["chainChanged", "accountsChanged"],
         },
@@ -149,7 +160,9 @@ export class EvmWalletConnect implements MobileProviderAdapter {
         );
       }
 
-      const walletConnection = await this.getWalletConnection(provider, { network });
+      const walletConnection = await this.getWalletConnection(provider, {
+        network,
+      });
 
       callback?.(walletConnection);
     });
@@ -237,7 +250,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       topic: this.walletConnectSession.topic,
       chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
       request: {
-        method: "eth_signTypedData",
+        method: "eth_signTypedData_v4",
         params: [getEthereumAddress(wallet.account.address), JSON.stringify(eip712TypedData)],
       },
     })) as string;
