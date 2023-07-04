@@ -271,7 +271,7 @@ export class Vectis implements ExtensionProviderAdapter {
     throw new Error("Method not supported.");
   }
 
-  async verifyArbitrarySignature(
+  async verifyArbitrary(
     _provider: WalletExtensionProvider,
     _options: {
       network: Network;

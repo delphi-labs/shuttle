@@ -285,7 +285,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     };
   }
 
-  async verifyArbitrarySignature(
+  async verifyArbitrary(
     _provider: WalletMobileProvider,
     {
       network,

@@ -224,7 +224,7 @@ export abstract class WalletExtensionProvider {
     });
   }
 
-  async verifyArbitrarySignature({
+  async verifyArbitrary({
     wallet,
     data,
     signResult,
@@ -249,7 +249,7 @@ export abstract class WalletExtensionProvider {
       throw new Error("Wallet not connected");
     }
 
-    return await this.extensionProviderAdapter.verifyArbitrarySignature(this, {
+    return await this.extensionProviderAdapter.verifyArbitrary(this, {
       network,
       wallet,
       data,

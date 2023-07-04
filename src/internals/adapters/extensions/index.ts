@@ -47,7 +47,7 @@ export interface ExtensionProviderAdapter {
       data: Uint8Array;
     },
   ): Promise<SigningResult>;
-  verifyArbitrarySignature(
+  verifyArbitrary(
     provider: WalletExtensionProvider,
     options: {
       network: Network;

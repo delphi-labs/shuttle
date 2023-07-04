@@ -228,7 +228,7 @@ export class Metamask implements ExtensionProviderAdapter {
     };
   }
 
-  async verifyArbitrarySignature(
+  async verifyArbitrary(
     _provider: WalletExtensionProvider,
     {
       network,

@@ -375,7 +375,7 @@ export class Keplr implements ExtensionProviderAdapter {
     };
   }
 
-  async verifyArbitrarySignature(
+  async verifyArbitrary(
     _provider: WalletExtensionProvider,
     {
       wallet,

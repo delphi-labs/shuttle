@@ -39,7 +39,7 @@ export interface MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult>;
-  verifyArbitrarySignature(
+  verifyArbitrary(
     provider: WalletMobileProvider,
     options: {
       network: Network;

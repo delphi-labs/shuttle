@@ -272,7 +272,7 @@ export class Station implements ExtensionProviderAdapter {
     throw new Error("Method not implemented.");
   }
 
-  async verifyArbitrarySignature(
+  async verifyArbitrary(
     _provider: WalletExtensionProvider,
     _options: {
       network: Network;

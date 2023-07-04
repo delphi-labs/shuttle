@@ -47,7 +47,7 @@ export type ShuttleContextType = {
     mobile?: boolean;
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
-  verifyArbitrarySignature: (options: {
+  verifyArbitrary: (options: {
     wallet?: WalletConnection | null;
     data: Uint8Array;
     signResult: SigningResult;
@@ -294,7 +294,7 @@ export function ShuttleProvider({
       return provider.signArbitrary({ wallet: walletToUse, data });
     };
 
-    const verifyArbitrarySignature = async ({
+    const verifyArbitrary = async ({
       wallet,
       data,
       signResult,
@@ -316,7 +316,7 @@ export function ShuttleProvider({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.verifyArbitrarySignature({ wallet: walletToUse, data, signResult });
+      return provider.verifyArbitrary({ wallet: walletToUse, data, signResult });
     };
 
     return {
@@ -334,7 +334,7 @@ export function ShuttleProvider({
       broadcast,
       sign,
       signArbitrary,
-      verifyArbitrarySignature,
+      verifyArbitrary,
     };
   }, [
     providers,
