@@ -133,10 +133,13 @@ export class Keplr implements ExtensionProviderAdapter {
       const defaultCurrency = network.defaultCurrency || DEFAULT_CURRENCY;
       const baseGasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
       await this.keplr.experimentalSuggestChain({
-        ...network,
+        name: network.name,
         chainName: network.name,
+        chainId: network.chainId,
+        chainPrefix: network.chainPrefix,
         rpc: network.rpc,
         rest: network.rest,
+        gasPrice: network.gasPrice,
         bip44: {
           coinType: network.bip44?.coinType || DEFAULT_BIP44_COIN_TYPE,
         },
