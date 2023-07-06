@@ -169,6 +169,7 @@ export class Vectis implements ExtensionProviderAdapter {
         isLedger: account.isNanoLedger,
       },
       network,
+      mobileSession: {},
     };
   }
 

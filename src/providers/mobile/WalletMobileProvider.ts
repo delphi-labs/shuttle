@@ -2,7 +2,7 @@ import type { MobileProviderAdapter } from "../../internals/adapters/mobile";
 import type { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
 import type { Network } from "../../internals/network";
 import type { MobileConnectResponse } from "../../internals/providers";
-import type { WalletConnection } from "../../internals/wallet";
+import type { WalletConnection, WalletMobileSession } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
 import BroadcastClient from "../../internals/cosmos/BroadcastClient";
 
@@ -86,7 +86,7 @@ export abstract class WalletMobileProvider {
   }
 
   async disconnect({ wallet }: { wallet: WalletConnection }): Promise<void> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady() || this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
       return;
     }
 
@@ -96,12 +96,22 @@ export abstract class WalletMobileProvider {
       return;
     }
 
-    void this.mobileProviderAdapter.disconnect(this, { network });
+    void this.mobileProviderAdapter.disconnect(this, { wallet, network });
   }
 
-  async getWalletConnection({ chainId }: { chainId: string }): Promise<WalletConnection> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+  async getWalletConnection({
+    chainId,
+    mobileSession,
+  }: {
+    chainId: string;
+    mobileSession: WalletMobileSession;
+  }): Promise<WalletConnection> {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(chainId);
@@ -110,7 +120,7 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${chainId}" not found`);
     }
 
-    return await this.mobileProviderAdapter.getWalletConnection(this, { network });
+    return await this.mobileProviderAdapter.getWalletConnection(this, { network, mobileSession });
   }
 
   async simulate({
@@ -120,8 +130,12 @@ export abstract class WalletMobileProvider {
     messages: TransactionMsg[];
     wallet: WalletConnection;
   }): Promise<SimulateResult> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -130,7 +144,10 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+    const currentWallet = await this.getWalletConnection({
+      chainId: network.chainId,
+      mobileSession: wallet.mobileSession,
+    });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -161,8 +178,12 @@ export abstract class WalletMobileProvider {
       rest?: string;
     };
   }): Promise<SigningResult> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -171,7 +192,10 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+    const currentWallet = await this.getWalletConnection({
+      chainId: network.chainId,
+      mobileSession: wallet.mobileSession,
+    });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -207,8 +231,12 @@ export abstract class WalletMobileProvider {
       rest?: string;
     };
   }): Promise<BroadcastResult> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -217,7 +245,10 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+    const currentWallet = await this.getWalletConnection({
+      chainId: network.chainId,
+      mobileSession: wallet.mobileSession,
+    });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -241,8 +272,12 @@ export abstract class WalletMobileProvider {
   }
 
   async signArbitrary({ wallet, data }: { wallet: WalletConnection; data: Uint8Array }): Promise<SigningResult> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -251,7 +286,10 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+    const currentWallet = await this.getWalletConnection({
+      chainId: network.chainId,
+      mobileSession: wallet.mobileSession,
+    });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");
@@ -274,8 +312,12 @@ export abstract class WalletMobileProvider {
     data: Uint8Array;
     signResult: SigningResult;
   }): Promise<boolean> {
-    if (!this.mobileProviderAdapter.isReady() || !this.mobileProviderAdapter.isConnected()) {
+    if (!this.mobileProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
+    }
+
+    if (this.mobileProviderAdapter.isSessionExpired(wallet.mobileSession)) {
+      throw new Error(`${this.name} connection has expired, please reconnect.`);
     }
 
     const network = this.networks.get(wallet.network.chainId);
@@ -284,7 +326,10 @@ export abstract class WalletMobileProvider {
       throw new Error(`Network with chainId "${wallet.network.chainId}" not found`);
     }
 
-    const currentWallet = await this.getWalletConnection({ chainId: network.chainId });
+    const currentWallet = await this.getWalletConnection({
+      chainId: network.chainId,
+      mobileSession: wallet.mobileSession,
+    });
 
     if (currentWallet.account.address !== wallet.account.address) {
       throw new Error("Wallet not connected");

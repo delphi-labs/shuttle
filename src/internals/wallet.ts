@@ -19,4 +19,12 @@ export type WalletConnection = {
   providerId: string;
   network: Network;
   account: Account;
+  mobileSession: WalletMobileSession;
+};
+
+export type WalletMobileSession = {
+  walletConnectSession?: {
+    topic: string;
+    expiry: number;
+  };
 };

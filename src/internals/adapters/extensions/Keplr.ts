@@ -185,6 +185,7 @@ export class Keplr implements ExtensionProviderAdapter {
         isLedger: account.isNanoLedger,
       },
       network,
+      mobileSession: {},
     };
   }
 

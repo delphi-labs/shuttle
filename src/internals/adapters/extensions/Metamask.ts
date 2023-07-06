@@ -75,6 +75,7 @@ export class Metamask implements ExtensionProviderAdapter {
         algo: null,
       },
       network,
+      mobileSession: {},
     };
   }
 

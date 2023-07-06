@@ -77,7 +77,7 @@ export abstract class WalletExtensionProvider {
       return;
     }
 
-    return await this.extensionProviderAdapter.disconnect(this, { network });
+    return await this.extensionProviderAdapter.disconnect(this, { network, wallet });
   }
 
   async simulate({

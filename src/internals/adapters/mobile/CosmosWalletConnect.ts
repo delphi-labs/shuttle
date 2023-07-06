@@ -1,16 +1,15 @@
 import { AminoSignResponse } from "@cosmjs/amino";
 import SignClient from "@walletconnect/sign-client";
-import { SessionTypes } from "@walletconnect/types";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
 import type { Network } from "../../../internals/network";
-import { type WalletConnection, type Algo, Algos } from "../../../internals/wallet";
+import { type WalletConnection, type Algo, Algos, WalletMobileSession } from "../../../internals/wallet";
 import type { WalletMobileProvider } from "../../../providers/mobile";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import ArbitrarySigningClient from "../../cosmos/ArbitrarySigningClient";
-import { MobileProviderAdapter } from "./";
+import { MobileProviderAdapter, setupWalletConnect } from "./";
 
 type CosmosWCAccount = {
   address: string;
@@ -22,10 +21,6 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;
   walletConnectProjectId?: string;
   walletConnect?: SignClient;
-  walletConnectSession?: SessionTypes.Struct;
-  accounts: {
-    [chainId: string]: CosmosWCAccount[];
-  };
 
   constructor({
     walletConnectPeerName,
@@ -36,29 +31,18 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
   }) {
     this.walletConnectPeerName = walletConnectPeerName;
     this.walletConnectProjectId = walletConnectProjectId;
-    this.accounts = {};
   }
 
   async init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void> {
     this.walletConnectProjectId = params.walletConnectProjectId ?? this.walletConnectProjectId;
 
-    this.walletConnect = await SignClient.init({
-      projectId: this.walletConnectProjectId,
-    });
-
-    const sessions = await this.walletConnect.session.getAll();
-    this.walletConnectSession = sessions.find((session) => session.peer.metadata.name === this.walletConnectPeerName);
+    this.walletConnect = await setupWalletConnect(this.walletConnectProjectId || "");
 
     this.walletConnect.on("session_update", () => {
-      this.accounts = {};
       provider.onUpdate?.();
     });
 
-    this.walletConnect.on("session_delete", async (session) => {
-      if (this.walletConnectSession?.topic === session.topic) {
-        await this.disconnect(provider);
-      }
-      this.accounts = {};
+    this.walletConnect.on("session_delete", () => {
       provider.onUpdate?.();
     });
   }
@@ -67,21 +51,31 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     return !!this.walletConnect;
   }
 
-  isConnected(): boolean {
-    return !!this.walletConnectSession;
+  isSessionExpired(mobileSession: WalletMobileSession): boolean {
+    if (!mobileSession.walletConnectSession) {
+      return true;
+    }
+
+    return mobileSession.walletConnectSession.expiry < Date.now() / 1000;
   }
 
-  private async getAccounts({ network }: { network: Network }): Promise<CosmosWCAccount[]> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+  private async getAccounts({
+    network,
+    mobileSession,
+  }: {
+    network: Network;
+    mobileSession: WalletMobileSession;
+  }): Promise<CosmosWCAccount[] | null> {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
     }
 
-    if (this.accounts[network.chainId]) {
-      return this.accounts[network.chainId];
+    if (!mobileSession.walletConnectSession || this.isSessionExpired(mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     return await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
+      topic: mobileSession.walletConnectSession?.topic,
       chainId: `cosmos:${network.chainId}`,
       request: {
         method: "cosmos_getAccounts",
@@ -92,29 +86,32 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
 
   async getWalletConnection(
     provider: WalletMobileProvider,
-    { network }: { network: Network },
+    { network, mobileSession }: { network: Network; mobileSession: WalletMobileSession },
   ): Promise<WalletConnection> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
     }
 
-    this.accounts[network.chainId] = await this.getAccounts({ network });
+    if (!mobileSession.walletConnectSession || this.isSessionExpired(mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
+    }
 
-    if (!this.accounts[network.chainId] || this.accounts[network.chainId].length === 0) {
+    const accounts = await this.getAccounts({ network, mobileSession });
+
+    if (!accounts || accounts.length === 0) {
       throw new Error(`No wallet connected to chain: ${network.chainId}`);
     }
 
-    const account = this.accounts[network.chainId][0];
-
     return {
-      id: `provider:${provider.id}:network:${network.chainId}:address:${account.address}`,
+      id: `provider:${provider.id}:network:${network.chainId}:address:${accounts[0].address}`,
       providerId: provider.id,
       account: {
-        address: account.address,
-        pubkey: account.pubkey,
-        algo: account.algo as Algo,
+        address: accounts[0].address,
+        pubkey: accounts[0].pubkey,
+        algo: accounts[0].algo as Algo,
       },
       network,
+      mobileSession: mobileSession,
     };
   }
 
@@ -137,8 +134,6 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     });
 
     approval().then(async (session) => {
-      this.walletConnectSession = session;
-
       const peerMetaName = session.peer.metadata.name;
       if (peerMetaName !== this.walletConnectPeerName) {
         throw new Error(
@@ -146,7 +141,15 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
         );
       }
 
-      const walletConnection = await this.getWalletConnection(provider, { network });
+      const walletConnection = await this.getWalletConnection(provider, {
+        network,
+        mobileSession: {
+          walletConnectSession: {
+            topic: session.topic,
+            expiry: session.expiry,
+          },
+        },
+      });
 
       callback?.(walletConnection);
     });
@@ -154,11 +157,14 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     return uri || "";
   }
 
-  async disconnect(_provider: WalletMobileProvider, _options?: { network: Network }): Promise<void> {
-    if (this.walletConnect && this.walletConnectSession) {
+  async disconnect(
+    _provider: WalletMobileProvider,
+    { wallet }: { network: Network; wallet: WalletConnection },
+  ): Promise<void> {
+    if (this.walletConnect && wallet.mobileSession.walletConnectSession) {
       try {
         await this.walletConnect.disconnect({
-          topic: this.walletConnectSession.topic,
+          topic: wallet.mobileSession.walletConnectSession.topic,
           reason: {
             code: -1,
             message: "Disconnected by user",
@@ -167,8 +173,6 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       } catch {
         /* empty */
       }
-      this.walletConnectSession = undefined;
-      this.accounts = {};
     }
   }
 
@@ -194,8 +198,12 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
+    }
+
+    if (!wallet.mobileSession.walletConnectSession || this.isSessionExpired(wallet.mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     const signDoc = await AminoSigningClient.prepare({
@@ -219,7 +227,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     }
 
     const signResponse = (await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
+      topic: wallet.mobileSession.walletConnectSession.topic,
       chainId: `cosmos:${network.chainId}`,
       request: {
         method: "cosmos_signAmino",
@@ -251,8 +259,12 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
+    }
+
+    if (!wallet.mobileSession.walletConnectSession || this.isSessionExpired(wallet.mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     const signDoc = ArbitrarySigningClient.prepareSigningWithMemo({ network, data });
@@ -268,7 +280,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
     }
 
     const signResponse = (await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
+      topic: wallet.mobileSession.walletConnectSession.topic,
       chainId: `cosmos:${network.chainId}`,
       request: {
         method: "cosmos_signAmino",
@@ -299,10 +311,6 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       signResult: SigningResult;
     },
   ): Promise<boolean> {
-    if (!this.walletConnect || !this.walletConnectSession) {
-      throw new Error("Wallet Connect is not available");
-    }
-
     if (wallet.account.algo !== Algos.secp256k1) {
       throw new Error(`Unsupported algorithm: ${wallet.account.algo}`);
     }

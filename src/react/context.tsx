@@ -369,8 +369,14 @@ export function ShuttleProvider({
 
   const updateMobileWallets = (mobileProvider: WalletMobileProvider) => {
     getWallets({ providerId: mobileProvider.id }).forEach((mobileProviderWallet) => {
+      if (!mobileProviderWallet.mobileSession) {
+        return;
+      }
       mobileProvider
-        .getWalletConnection({ chainId: mobileProviderWallet.network.chainId })
+        .getWalletConnection({
+          chainId: mobileProviderWallet.network.chainId,
+          mobileSession: mobileProviderWallet.mobileSession,
+        })
         .then((wallet) => {
           if (mobileProviderWallet.id !== wallet.id) {
             removeWallet(mobileProviderWallet);

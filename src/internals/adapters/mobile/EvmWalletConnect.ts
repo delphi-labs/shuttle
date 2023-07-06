@@ -1,26 +1,21 @@
 import SignClient from "@walletconnect/sign-client";
-import { SessionTypes } from "@walletconnect/types";
 import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
 import type { Network } from "../../../internals/network";
-import type { WalletConnection } from "../../../internals/wallet";
+import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
 import { fromInjectiveCosmosChainToEthereumChain, isInjectiveNetwork } from "../../../internals/injective";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
 import type { WalletMobileProvider } from "../../../providers/mobile";
 import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
-import { MobileProviderAdapter } from "./";
+import { MobileProviderAdapter, setupWalletConnect } from "./";
 
 export class EvmWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;
   walletConnectProjectId?: string;
   walletConnect?: SignClient;
-  walletConnectSession?: SessionTypes.Struct;
-  accounts: {
-    [chainId: string]: string[];
-  };
 
   constructor({
     walletConnectPeerName,
@@ -31,29 +26,18 @@ export class EvmWalletConnect implements MobileProviderAdapter {
   }) {
     this.walletConnectPeerName = walletConnectPeerName;
     this.walletConnectProjectId = walletConnectProjectId;
-    this.accounts = {};
   }
 
   async init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void> {
     this.walletConnectProjectId = params.walletConnectProjectId ?? this.walletConnectProjectId;
 
-    this.walletConnect = await SignClient.init({
-      projectId: this.walletConnectProjectId,
-    });
-
-    const sessions = await this.walletConnect.session.getAll();
-    this.walletConnectSession = sessions.find((session) => session.peer.metadata.name === this.walletConnectPeerName);
+    this.walletConnect = await setupWalletConnect(this.walletConnectProjectId || "");
 
     this.walletConnect.on("session_update", () => {
-      this.accounts = {};
       provider.onUpdate?.();
     });
 
-    this.walletConnect.on("session_delete", async (session) => {
-      if (this.walletConnectSession?.topic === session.topic) {
-        await this.disconnect(provider);
-      }
-      this.accounts = {};
+    this.walletConnect.on("session_delete", () => {
       provider.onUpdate?.();
     });
   }
@@ -62,45 +46,61 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     return !!this.walletConnect;
   }
 
-  isConnected(): boolean {
-    return !!this.walletConnectSession;
+  isSessionExpired(mobileSession: WalletMobileSession): boolean {
+    if (!mobileSession.walletConnectSession) {
+      return true;
+    }
+
+    return mobileSession.walletConnectSession.expiry < Date.now() / 1000;
   }
 
-  private async getAccounts({ network }: { network: Network }): Promise<string[]> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+  private async getAccounts({
+    network,
+    mobileSession,
+  }: {
+    network: Network;
+    mobileSession: WalletMobileSession;
+  }): Promise<string[]> {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
     }
 
-    if (this.accounts[network.chainId]) {
-      return this.accounts[network.chainId];
+    if (!mobileSession.walletConnectSession || this.isSessionExpired(mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     const chainPrefix = `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}:`;
 
-    return this.walletConnectSession.namespaces.eip155.accounts
+    const currentSession = this.walletConnect.session.get(mobileSession.walletConnectSession.topic);
+
+    return currentSession.namespaces.eip155.accounts
       .filter((account) => account.includes(chainPrefix))
       .map((account) => account.replace(chainPrefix, ""));
   }
 
   async getWalletConnection(
     provider: WalletMobileProvider,
-    { network }: { network: Network },
+    { network, mobileSession }: { network: Network; mobileSession: WalletMobileSession },
   ): Promise<WalletConnection> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
+    }
+
+    if (!mobileSession.walletConnectSession || this.isSessionExpired(mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     if (!network.evm) {
       throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
     }
 
-    this.accounts[network.chainId] = await this.getAccounts({ network });
+    const accounts = await this.getAccounts({ network, mobileSession });
 
-    if (!this.accounts[network.chainId] || this.accounts[network.chainId].length === 0) {
+    if (!accounts || accounts.length === 0) {
       throw new Error(`No wallet connected to chain: ${network.chainId}`);
     }
 
-    const address = this.accounts[network.chainId][0];
+    const address = accounts[0];
     const bech32Address = network.evm.deriveCosmosAddress(address);
 
     return {
@@ -112,6 +112,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
         algo: null,
       },
       network,
+      mobileSession: mobileSession,
     };
   }
 
@@ -152,8 +153,6 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     });
 
     approval().then(async (session) => {
-      this.walletConnectSession = session;
-
       const peerMetaName = session.peer.metadata.name;
       if (peerMetaName !== this.walletConnectPeerName) {
         throw new Error(
@@ -163,6 +162,12 @@ export class EvmWalletConnect implements MobileProviderAdapter {
 
       const walletConnection = await this.getWalletConnection(provider, {
         network,
+        mobileSession: {
+          walletConnectSession: {
+            topic: session.topic,
+            expiry: session.expiry,
+          },
+        },
       });
 
       callback?.(walletConnection);
@@ -171,21 +176,25 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     return uri || "";
   }
 
-  async disconnect(_provider: WalletMobileProvider, _options?: { network: Network }): Promise<void> {
-    if (this.walletConnect && this.walletConnectSession) {
+  async disconnect(
+    _provider: WalletMobileProvider,
+    { wallet }: { network: Network; wallet: WalletConnection },
+  ): Promise<void> {
+    if (this.walletConnect && wallet.mobileSession.walletConnectSession) {
       try {
-        await this.walletConnect.disconnect({
-          topic: this.walletConnectSession.topic,
-          reason: {
-            code: -1,
-            message: "Disconnected by user",
-          },
-        });
+        const session = this.walletConnect.session.get(wallet.mobileSession.walletConnectSession.topic);
+        if (session) {
+          await this.walletConnect.disconnect({
+            topic: wallet.mobileSession.walletConnectSession.topic,
+            reason: {
+              code: -1,
+              message: "Disconnected by user",
+            },
+          });
+        }
       } catch {
         /* empty */
       }
-      this.walletConnectSession = undefined;
-      this.accounts = {};
     }
   }
 
@@ -211,8 +220,12 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
+    }
+
+    if (!wallet.mobileSession.walletConnectSession || this.isSessionExpired(wallet.mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     if (!network.evm) {
@@ -248,7 +261,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     }
 
     const signature = (await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
+      topic: wallet.mobileSession.walletConnectSession.topic,
       chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
       request: {
         method: "eth_signTypedData_v4",
@@ -279,8 +292,12 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {
-    if (!this.walletConnect || !this.walletConnectSession) {
+    if (!this.walletConnect) {
       throw new Error("Wallet Connect is not available");
+    }
+
+    if (!wallet.mobileSession.walletConnectSession || this.isSessionExpired(wallet.mobileSession)) {
+      throw new Error("Wallet Connect session is not available");
     }
 
     if (!network.evm) {
@@ -304,7 +321,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
     const msg = EthArbitrarySigningClient.prepare(data);
 
     const signature = (await this.walletConnect.request({
-      topic: this.walletConnectSession.topic,
+      topic: wallet.mobileSession.walletConnectSession.topic,
       chainId: `eip155:${fromInjectiveCosmosChainToEthereumChain(network.chainId)}`,
       request: {
         method: "personal_sign",
@@ -332,10 +349,6 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       signResult: SigningResult;
     },
   ): Promise<boolean> {
-    if (!this.walletConnect || !this.walletConnectSession) {
-      throw new Error("Wallet Connect is not available");
-    }
-
     if (!network.evm) {
       throw new Error(`Network with chainId "${network.chainId}" is not an EVM compatible network`);
     }

@@ -103,6 +103,7 @@ export class Station implements ExtensionProviderAdapter {
         isLedger,
       },
       network,
+      mobileSession: {},
     };
   }
 

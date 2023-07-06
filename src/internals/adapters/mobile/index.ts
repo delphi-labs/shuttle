@@ -1,5 +1,5 @@
 import type { Network } from "../../../internals/network";
-import type { WalletConnection } from "../../../internals/wallet";
+import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import type WalletMobileProvider from "../../../providers/mobile/WalletMobileProvider";
@@ -7,13 +7,16 @@ import type WalletMobileProvider from "../../../providers/mobile/WalletMobilePro
 export interface MobileProviderAdapter {
   init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void>;
   isReady(): boolean;
-  isConnected(): boolean;
-  getWalletConnection(provider: WalletMobileProvider, options: { network: Network }): Promise<WalletConnection>;
+  isSessionExpired(mobileSession: WalletMobileSession): boolean;
+  getWalletConnection(
+    provider: WalletMobileProvider,
+    options: { network: Network; mobileSession: WalletMobileSession },
+  ): Promise<WalletConnection>;
   connect(
     provider: WalletMobileProvider,
     options: { network: Network; callback?: ((wallet: WalletConnection) => void) | undefined },
   ): Promise<string>;
-  disconnect(provider: WalletMobileProvider, options: { network: Network }): Promise<void>;
+  disconnect(provider: WalletMobileProvider, options: { network: Network; wallet: WalletConnection }): Promise<void>;
   sign(
     provider: WalletMobileProvider,
     options: {
@@ -50,5 +53,6 @@ export interface MobileProviderAdapter {
   ): Promise<boolean>;
 }
 
+export * from "./wallet-connect";
 export * from "./CosmosWalletConnect";
 export * from "./EvmWalletConnect";

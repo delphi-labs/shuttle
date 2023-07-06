@@ -8,7 +8,10 @@ export interface ExtensionProviderAdapter {
   init(provider: WalletExtensionProvider): Promise<void>;
   isReady(): boolean;
   connect(provider: WalletExtensionProvider, options: { network: Network }): Promise<WalletConnection>;
-  disconnect(provider: WalletExtensionProvider, options?: { network: Network }): Promise<void>;
+  disconnect(
+    provider: WalletExtensionProvider,
+    options?: { network: Network; wallet: WalletConnection },
+  ): Promise<void>;
   sign(
     provider: WalletExtensionProvider,
     options: {
