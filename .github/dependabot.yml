@@ -5,6 +5,21 @@ updates:
     schedule:
       interval: "weekly" # Monday
     target-branch: "main"
+  - package-ecosystem: "npm"
+    directory: "/packages/core/"
+    schedule:
+      interval: "weekly" # Monday
+    target-branch: "main"
+  - package-ecosystem: "npm"
+    directory: "/packages/react/"
+    schedule:
+      interval: "weekly" # Monday
+    target-branch: "main"
+  - package-ecosystem: "npm"
+    directory: "/packages/vue/"
+    schedule:
+      interval: "weekly" # Monday
+    target-branch: "main"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

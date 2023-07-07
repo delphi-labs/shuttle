@@ -1,0 +1,32 @@
+{
+  "name": "@delphi-labs/shuttle-vue",
+  "version": "3.2.0",
+  "description": "Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos Dapps.",
+  "keywords": [
+    "dapp",
+    "blockchain",
+    "wallets",
+    "cosmos-sdk",
+    "cosmos",
+    "typescript",
+    "vue"
+  ],
+  "author": "Delphi Labs (delphi-labs)",
+  "license": "GPL-3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delphi-labs/shuttle.git"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "commonjs",
+  "scripts": {
+    "test": "npx nx test vue",
+    "lint": "npx nx lint vue",
+    "prettier": "prettier --write \"{src,tests}/**/*.{js,ts,jsx,tsx}\"",
+    "prepublishOnly": "npm run prettier && npm run lint && npm test"
+  }
+}

@@ -16,13 +16,13 @@ You can check out the [documentation](https://shuttle.delphilabs.io/) for more i
 ### Install
 
 ```bash
-npm install @delphi-labs/shuttle
+npm install @delphi-labs/shuttle-react
 ```
 
 ### Setup
 
 ```tsx
-import { ShuttleProvider } from "@delphi-labs/shuttle";
+import { ShuttleProvider } from "@delphi-labs/shuttle-react";
 
 const providers = [
   // ...
@@ -52,7 +52,7 @@ function App() {
 ```tsx
 import { useState } from "react";
 import QRCode from "react-qr-code";
-import { useShuttle, isAndroid, isIOS, isMobile } from "@delphi-labs/shuttle";
+import { useShuttle, isAndroid, isIOS, isMobile } from "@delphi-labs/shuttle-react";
 
 const currentNetworkId = "mars-1";
 
@@ -132,16 +132,8 @@ function Header() {
 
 ### Install
 
-Install dependencies in the raw way:
-
 ```bash
-npm install && cd packages/core && npm install && cd ../../packages/react && npm install && cd ../../packages/vue && npm install && cd ../..
-```
-
-Or use the makefile:
-
-```bash
-make install
+npm install
 ```
 
 ### Test
@@ -168,11 +160,11 @@ npm run lint
 npm run build
 ```
 
-<!-- ### Publish
+### Publish
 
 ```bash
 npm publish
-``` -->
+```
 
 [npm-url]: https://www.npmjs.com/package/@delphi-labs/shuttle
 [npm-image]: https://img.shields.io/npm/v/@delphi-labs/shuttle

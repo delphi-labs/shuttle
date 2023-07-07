@@ -1,0 +1,58 @@
+{
+  "name": "@delphi-labs/shuttle",
+  "version": "3.2.0",
+  "description": "Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos Dapps.",
+  "keywords": [
+    "dapp",
+    "blockchain",
+    "wallets",
+    "cosmos-sdk",
+    "cosmos",
+    "typescript",
+    "core",
+    "node",
+    "react",
+    "vue"
+  ],
+  "author": "Delphi Labs (delphi-labs)",
+  "license": "GPL-3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delphi-labs/shuttle.git"
+  },
+  "files": [
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "commonjs",
+  "scripts": {
+    "test": "npx nx test core",
+    "lint": "npx nx lint core",
+    "prettier": "prettier --write \"{src,tests}/**/*.{js,ts}\"",
+    "prepublishOnly": "npm run prettier && npm run lint && npm test"
+  },
+  "dependencies": {
+    "@cosmjs/amino": "^0.31.0",
+    "@cosmjs/cosmwasm-stargate": "^0.31.0",
+    "@cosmjs/encoding": "^0.31.0",
+    "@cosmjs/proto-signing": "^0.31.0",
+    "@cosmjs/stargate": "^0.31.0",
+    "@cosmjs/tendermint-rpc": "^0.31.0",
+    "@injectivelabs/sdk-ts": "^1.11.0",
+    "@injectivelabs/utils": "^1.11.0",
+    "@metamask/eth-sig-util": "^6.0.0",
+    "@terra-money/feather.js": "^1.0.8",
+    "@terra-money/terra.proto": "^3.0.5",
+    "@walletconnect/sign-client": "^2.9.0",
+    "ethereumjs-util": "^7.1.5",
+    "long": "^5.2.3",
+    "mobile-detect": "^1.4.5"
+  },
+  "devDependencies": {
+    "@injectivelabs/ts-types": "^1.11.0",
+    "@walletconnect/types": "^2.8.2",
+    "@terra-money/terra.proto": "^3.0.5",
+    "cosmjs-types": "^0.8.0"
+  }
+}
