@@ -31,8 +31,7 @@
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\"",
     "test": "jest --config jestconfig.json",
-    "prepare": "pnpm run build",
-    "prepublishOnly": "pnpm run test && pnpm run prettier && pnpm run lint"
+    "prepublishOnly": "pnpm run test && pnpm run lint"
   },
   "peerDependencies": {
     "react": ">=18"

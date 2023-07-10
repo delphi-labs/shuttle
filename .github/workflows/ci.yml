@@ -31,8 +31,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run lint
-        run: pnpm --filter "@delphi-labs/*" lint
-
       - name: Run tests
         run: pnpm --filter "@delphi-labs/*" test
+
+      - name: Run lint
+        run: pnpm --filter "@delphi-labs/*" lint
