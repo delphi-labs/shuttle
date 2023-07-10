@@ -10,7 +10,6 @@ export default defineConfig({
     vue(),
     nodePolyfills({
       globals: {
-        Buffer: true,
         global: true
       }
     })
@@ -21,11 +20,11 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['@delphi-labs/shuttle-vue']
+    include: ['@delphi-labs/shuttle']
   },
   build: {
     commonjsOptions: {
-      include: [/shuttle-vue/, /node_modules/]
+      include: [/delphi-labs\/shuttle/, /node_modules/]
     }
   }
 })

@@ -32,9 +32,10 @@ import {
 export const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
 
+const WC_PROJECT_ID = import.meta.env.VITE_WC_PROJECT_ID
 const shuttle = createShuttle({
   pinia,
-  walletConnectProjectId: '741d8946b4772367e3be7fc021071eee',
+  walletConnectProjectId: WC_PROJECT_ID,
   extensionProviders: [
     new XDEFICosmosExtensionProvider({
       networks: [TERRA_MAINNET, TERRA_TESTNET, OSMOSIS_MAINNET, MARS_MAINNET]

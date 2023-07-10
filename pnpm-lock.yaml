@@ -9548,7 +9548,7 @@ packages:
       bs-logger: 0.2.6
       esbuild: 0.18.11
       fast-json-stable-stringify: 2.1.0
-      jest: 29.6.1(@types/node@18.16.19)
+      jest: 29.6.1(@types/node@17.0.45)
       jest-util: 29.6.1
       json5: 2.2.3
       lodash.memoize: 4.1.2

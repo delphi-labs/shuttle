@@ -19,7 +19,6 @@ export default function useFeeEstimate(messages: Ref<TransactionMsg[]>) {
         return null
       }
 
-      console.log('messages.value', messages.value)
       const response: SimulateResult = await shuttle.simulate({
         messages: messages.value,
         wallet: wallet.value
