@@ -29,6 +29,6 @@ jobs:
         run: pnpm run build
 
       - name: Publish
-        run: pnpm publish
+        run: pnpm publish --filter "@delphi-labs/*"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
