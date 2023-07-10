@@ -4,12 +4,13 @@ import { useShuttle } from '@delphi-labs/shuttle-vue'
 
 import { useShuttlePortStore } from '@/stores/shuttle-port'
 import { POOLS } from '@/config/pools'
-import { TOKENS } from '@/config/tokens'
+import { DEFAULT_TOKEN_DECIMALS, TOKENS } from '@/config/tokens'
 import { fromNetworkToNativeSymbol } from '@/config/networks'
 import useWallet from '@/composables/useWallet'
 import useBalance from '@/composables/useBalance'
 import useSwap from '@/composables/useSwap'
 import useFeeEstimate from '@/composables/useFeeEstimate'
+import BigNumber from 'bignumber.js'
 
 const shuttle = useShuttle()
 const shuttlePortStore = useShuttlePortStore()
@@ -115,20 +116,12 @@ async function onSubmit() {
       <p>Balance: {{ token2Balance.data }}</p>
     </div>
     <div>
-      <!-- <button onClick={onSubmit} disabled={!(swapFeeEstimate && swapFeeEstimate.fee) || isSwapping}> -->
-      <button @click="onSubmit" :disabled="isSwapping">
+      <button @click="onSubmit" :disabled="isSwapping || !(swapFeeEstimate && swapFeeEstimate.fee)">
         {{ isSwapping ? 'Processing...' : 'Swap' }}
       </button>
-
-      <!-- {swapFeeEstimate && swapFeeEstimate.fee && (
-            <p>
-              Fee:{" "}
-              {BigNumber(swapFeeEstimate.fee.amount)
-                .div(DEFAULT_TOKEN_DECIMALS || 1)
-                .toString()}{" "}
-              {swapFeeEstimate.fee.denom}
-            </p>
-          )} -->
+      <p v-if="swapFeeEstimate && swapFeeEstimate.fee">
+        Fee: {{ BigNumber(swapFeeEstimate.fee.amount).div(DEFAULT_TOKEN_DECIMALS || 1).toString() }} {{ swapFeeEstimate.fee.denom }}
+      </p>
     </div>
   </template>
 </template>
