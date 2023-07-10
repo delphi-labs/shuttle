@@ -32,7 +32,7 @@ jobs:
         run: pnpm install
 
       - name: Run lint
-        run: pnpm run lint
+        run: pnpm --filter "@delphi-labs/*" lint
 
       - name: Run tests
-        run: pnpm run test
+        run: pnpm --filter "@delphi-labs/*" test

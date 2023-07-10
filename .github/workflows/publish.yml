@@ -26,7 +26,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm run build
+        run: pnpm --filter "@delphi-labs/*" build
 
       - name: Publish
         run: pnpm publish --filter "@delphi-labs/*"
