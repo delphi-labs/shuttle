@@ -62,7 +62,7 @@ export const ShuttleContext = createContext<ShuttleContextType | undefined>(unde
 export function ShuttleProvider({
   persistent = false,
   persistentKey = "shuttle",
-  extensionProviders,
+  extensionProviders = [],
   mobileProviders = [],
   store,
   children,

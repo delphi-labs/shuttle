@@ -26,7 +26,7 @@ import { ShuttleProvider } from "@delphi-labs/shuttle-react";
 
 const WC_PROJECT_ID = "...";
 
-const providers = [
+const extensionProviders = [
   // ...
 ];
 
@@ -38,7 +38,7 @@ function App() {
   return (
     <ShuttleProvider
       walletConnectProjectId={WC_PROJECT_ID}
-      providers={providers}
+      extensionProviders={extensionProviders}
       mobileProviders={mobileProviders}
       // Add the following prop if you want wallet connections
       // to be persisted to local storage.

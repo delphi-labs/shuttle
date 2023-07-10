@@ -29,7 +29,7 @@ import "./globals.css";
 
 const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID;
 
-const providers = [
+const extensionProviders = [
   new XDEFICosmosExtensionProvider({
     networks: [TERRA_MAINNET, TERRA_TESTNET, OSMOSIS_MAINNET, MARS_MAINNET],
   }),
@@ -74,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ShuttleProvider
           walletConnectProjectId={WC_PROJECT_ID}
           mobileProviders={mobileProviders}
-          extensionProviders={providers}
+          extensionProviders={extensionProviders}
           persistent
         >
           <QueryClientProvider client={queryClient}>
