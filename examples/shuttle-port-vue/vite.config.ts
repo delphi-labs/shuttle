@@ -20,11 +20,11 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['@delphi-labs/shuttle']
+    include: ['@delphi-labs/shuttle', '@delphi-labs/shuttle-vue']
   },
   build: {
     commonjsOptions: {
-      include: [/delphi-labs\/shuttle/, /node_modules/]
+      include: [/delphi-labs\/shuttle-vue/, /delphi-labs\/shuttle/, /node_modules/]
     }
   }
 })
