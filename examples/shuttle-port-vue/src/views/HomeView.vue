@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import ArbitrarySign from '@/components/ArbitrarySign.vue';
-import Swap from '@/components/Swap.vue';
-
-
+import ArbitrarySign from '@/components/ArbitrarySign.vue'
+import Swap from '@/components/Swap.vue'
 </script>
 
 <template>

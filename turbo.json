@@ -7,6 +7,7 @@
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "lint": {},
+    "prettier": {},
     "dev": {
       "cache": false,
       "persistent": true

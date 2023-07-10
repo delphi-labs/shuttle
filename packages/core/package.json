@@ -17,7 +17,8 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/delphi-labs/shuttle.git"
+    "url": "https://github.com/delphi-labs/shuttle.git",
+    "directory": "packages/core"
   },
   "files": [
     "dist",
