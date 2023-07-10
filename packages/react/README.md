@@ -61,7 +61,7 @@ const currentNetworkId = "mars-1";
 
 function Header() {
   const { providers, connect, mobileProviders, mobileConnect, getWallets } = useShuttle();
-  const [walletconnectUrl, setWalletconnectUrl] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const wallet = getWallets({ chainId: currentNetworkId })[0];
 
   return (<>
@@ -98,7 +98,7 @@ function Header() {
                 mobileProviderId: mobileProvider.id,
                 chainId: currentNetworkId,
                 callback: () => {
-                  setWalletconnectUrl("");
+                  setQrCodeUrl("");
                 },
               });
 
@@ -111,7 +111,7 @@ function Header() {
                   window.location.href = urls.androidUrl;
                 }
               } else {
-                setWalletconnectUrl(urls.walletconnectUrl);
+                setQrCodeUrl(urls.qrCodeUrl);
               }
             }}
             disabled={!mobileProvider.initialized}
@@ -121,9 +121,9 @@ function Header() {
         );
       })}
 
-      {walletconnectUrl && (
+      {qrCodeUrl && (
         <>
-          <QRCode value={walletconnectUrl} />
+          <QRCode value={qrCodeUrl} />
         </>
       )}
     </>)}

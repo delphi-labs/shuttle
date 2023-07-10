@@ -78,7 +78,6 @@ export abstract class WalletMobileProvider {
     const intents = this.generateIntents(uri);
 
     return {
-      walletconnectUrl: uri,
       qrCodeUrl: intents.qrCodeUrl,
       iosUrl: intents.iosUrl,
       androidUrl: intents.androidUrl,

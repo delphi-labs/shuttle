@@ -14,7 +14,7 @@ export default function Header() {
     state.switchNetwork,
   ]);
   const { connect, mobileConnect, disconnectWallet, extensionProviders, mobileProviders } = useShuttle();
-  const [walletconnectUrl, setWalletconnectUrl] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const wallet = useWallet();
 
   return (
@@ -68,7 +68,7 @@ export default function Header() {
                       mobileProviderId: mobileProvider.id,
                       chainId: currentNetworkId,
                       callback: () => {
-                        setWalletconnectUrl("");
+                        setQrCodeUrl("");
                       },
                     });
 
@@ -81,7 +81,7 @@ export default function Header() {
                         window.location.href = urls.androidUrl;
                       }
                     } else {
-                      setWalletconnectUrl(urls.qrCodeUrl);
+                      setQrCodeUrl(urls.qrCodeUrl);
                     }
                   }}
                   disabled={!mobileProvider.initialized}
@@ -103,13 +103,13 @@ export default function Header() {
         <hr />
       </header>
 
-      {walletconnectUrl && (
+      {qrCodeUrl && (
         <div className="fixed inset-0 flex flex-col items-center justify-center">
-          <div className="absolute inset-0 z-0 bg-black opacity-20" onClick={() => setWalletconnectUrl("")}></div>
+          <div className="absolute inset-0 z-0 bg-black opacity-20" onClick={() => setQrCodeUrl("")}></div>
           <div className="relative flex min-h-[408px] min-w-[384px] flex-col items-center rounded-lg bg-white py-10 px-14 shadow-md">
             <button
               className="absolute top-3 right-3 rounded bg-black p-1.5 text-white"
-              onClick={() => setWalletconnectUrl("")}
+              onClick={() => setQrCodeUrl("")}
             >
               Close
             </button>
@@ -118,7 +118,7 @@ export default function Header() {
 
             <div className="flex flex-col items-center">
               <p className="mb-4 text-center text-sm text-gray-600">Scan this QR code with your mobile wallet</p>
-              <QRCode value={walletconnectUrl} />
+              <QRCode value={qrCodeUrl} />
             </div>
           </div>
         </div>
