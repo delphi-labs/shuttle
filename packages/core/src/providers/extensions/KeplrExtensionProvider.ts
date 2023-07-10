@@ -28,6 +28,4 @@ export const KeplrExtensionProvider = class KeplrExtensionProvider extends Walle
   }
 };
 
-export const KeplrProvider = KeplrExtensionProvider;
-
 export default KeplrExtensionProvider;

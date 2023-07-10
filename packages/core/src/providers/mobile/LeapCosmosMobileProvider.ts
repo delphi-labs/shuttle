@@ -24,6 +24,4 @@ export const LeapCosmosMobileProvider = class LeapCosmosMobileProvider extends W
   }
 };
 
-export const MobileLeapCosmosProvider = LeapCosmosMobileProvider;
-
 export default LeapCosmosMobileProvider;

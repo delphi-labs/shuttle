@@ -28,6 +28,4 @@ export const FinExtensionProvider = class FinExtensionProvider extends WalletExt
   }
 };
 
-export const FinProvider = FinExtensionProvider;
-
 export default FinExtensionProvider;

@@ -27,6 +27,4 @@ export const CompassExtensionProvider = class CompassExtensionProvider extends W
   }
 };
 
-export const CompassProvider = CompassExtensionProvider;
-
 export default CompassExtensionProvider;

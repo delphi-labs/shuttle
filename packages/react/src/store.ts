@@ -1,5 +1,5 @@
-import { create, StateCreator } from "zustand";
 import type { WalletConnection } from "@delphi-labs/shuttle";
+import { create, StateCreator } from "zustand";
 
 export type ShuttleStore = {
   wallets: WalletConnection[];
@@ -10,6 +10,7 @@ export type ShuttleStore = {
   getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
   removeWallets: (filters?: { providerId?: string; chainId?: string }) => void;
 };
+
 export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
   recentWallet: null,
   wallets: [],

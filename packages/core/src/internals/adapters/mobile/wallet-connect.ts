@@ -27,7 +27,6 @@ export async function setupWalletConnect(walletConnectProjectId: string) {
   }
 
   globalThis.initializingWalletConnect = true;
-  console.log("init walletConnect");
   globalThis.walletConnect = await SignClient.init({
     projectId: walletConnectProjectId,
   });

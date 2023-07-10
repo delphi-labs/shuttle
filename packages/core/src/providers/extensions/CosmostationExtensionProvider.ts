@@ -38,6 +38,4 @@ export const CosmostationExtensionProvider = class CosmostationExtensionProvider
   }
 };
 
-export const CosmostationProvider = CosmostationExtensionProvider;
-
 export default CosmostationExtensionProvider;

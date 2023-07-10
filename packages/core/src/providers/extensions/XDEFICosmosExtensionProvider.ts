@@ -34,6 +34,4 @@ export const XDEFICosmosExtensionProvider = class XDEFICosmosExtensionProvider e
   }
 };
 
-export const XDEFICosmosProvider = XDEFICosmosExtensionProvider;
-
 export default XDEFICosmosExtensionProvider;

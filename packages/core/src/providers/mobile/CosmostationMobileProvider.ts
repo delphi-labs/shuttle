@@ -24,6 +24,4 @@ export const CosmostationMobileProvider = class CosmostationMobileProvider exten
   }
 };
 
-export const MobileCosmostationProvider = CosmostationMobileProvider;
-
 export default CosmostationMobileProvider;

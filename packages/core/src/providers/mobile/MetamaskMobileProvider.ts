@@ -24,6 +24,4 @@ export const MetamaskMobileProvider = class MetamaskMobileProvider extends Walle
   }
 };
 
-export const MobileMetamaskProvider = MetamaskMobileProvider;
-
 export default MetamaskMobileProvider;

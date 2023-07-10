@@ -26,7 +26,4 @@ export const StationExtensionProvider = class StationExtensionProvider extends W
   }
 };
 
-export const StationProvider = StationExtensionProvider;
-export const TerraStationProvider = StationExtensionProvider;
-
 export default StationExtensionProvider;

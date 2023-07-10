@@ -6,7 +6,6 @@ import useLocalStorageState from "use-local-storage-state";
 import {
   WalletMobileProvider,
   WalletExtensionProvider,
-  WalletProvider,
   WalletConnection,
   MobileConnectResponse,
   TransactionMsg,
@@ -18,15 +17,14 @@ import {
 import { ShuttleStore, useShuttleStore } from "./store";
 
 export type ShuttleContextType = {
-  providers: WalletExtensionProvider[];
-  extensionProviders?: WalletExtensionProvider[];
+  extensionProviders: WalletExtensionProvider[];
   mobileProviders: WalletMobileProvider[];
   mobileConnect: (options: {
     mobileProviderId: string;
     chainId: string;
     callback?: (walletConnection: WalletConnection) => void;
   }) => Promise<MobileConnectResponse>;
-  connect: (options: { providerId: string; chainId: string }) => Promise<WalletConnection>;
+  connect: (options: { extensionProviderId: string; chainId: string }) => Promise<WalletConnection>;
   wallets: WalletConnection[];
   getWallets: (filters?: { providerId?: string; chainId?: string }) => WalletConnection[];
   recentWallet: WalletConnection | null;
@@ -39,7 +37,6 @@ export type ShuttleContextType = {
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
-    mobile?: boolean;
     overrides?: {
       rpc?: string;
       rest?: string;
@@ -51,7 +48,6 @@ export type ShuttleContextType = {
     gasLimit?: string | null;
     memo?: string | null;
     wallet?: WalletConnection | null;
-    mobile?: boolean;
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
   verifyArbitrary: (options: {
@@ -66,7 +62,6 @@ export const ShuttleContext = createContext<ShuttleContextType | undefined>(unde
 export function ShuttleProvider({
   persistent = false,
   persistentKey = "shuttle",
-  providers = [],
   extensionProviders,
   mobileProviders = [],
   store,
@@ -76,8 +71,7 @@ export function ShuttleProvider({
 }: {
   persistent?: boolean;
   persistentKey?: string;
-  providers: WalletProvider[];
-  extensionProviders?: WalletExtensionProvider[];
+  extensionProviders: WalletExtensionProvider[];
   mobileProviders: WalletMobileProvider[];
   store?: ShuttleStore;
   children?: React.ReactNode;
@@ -163,15 +157,17 @@ export function ShuttleProvider({
     };
 
     const connect = async ({
-      providerId,
+      extensionProviderId,
       chainId,
     }: {
-      providerId: string;
+      extensionProviderId: string;
       chainId: string;
     }): Promise<WalletConnection> => {
-      const provider = availableExtensionProviders.find((extensionProvider) => extensionProvider.id === providerId);
+      const provider = availableExtensionProviders.find(
+        (extensionProvider) => extensionProvider.id === extensionProviderId,
+      );
       if (!provider) {
-        throw new Error(`Provider ${providerId} not found`);
+        throw new Error(`Provider ${extensionProviderId} not found`);
       }
       const wallet = await provider.connect({ chainId });
 
@@ -327,8 +323,7 @@ export function ShuttleProvider({
     };
 
     return {
-      providers: extensionProviders ?? providers,
-      extensionProviders: extensionProviders ?? providers,
+      extensionProviders,
       mobileProviders,
       mobileConnect,
       connect,
@@ -344,7 +339,6 @@ export function ShuttleProvider({
       verifyArbitrary,
     };
   }, [
-    providers,
     extensionProviders,
     mobileProviders,
     wallets,
@@ -406,7 +400,7 @@ export function ShuttleProvider({
 
   // Initialize providers
   useEffect(() => {
-    (extensionProviders ?? providers)
+    extensionProviders
       .filter((extensionProvider) => !extensionProvider.initializing && !extensionProvider.initialized)
       .forEach((extensionProvider) => {
         extensionProvider

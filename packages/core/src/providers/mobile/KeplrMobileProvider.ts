@@ -24,6 +24,4 @@ export const KeplrMobileProvider = class KeplrMobileProvider extends WalletMobil
   }
 };
 
-export const MobileKeplrProvider = KeplrMobileProvider;
-
 export default KeplrMobileProvider;

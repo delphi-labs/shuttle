@@ -7,6 +7,6 @@ import { ShuttleProvider } from "../src";
 
 describe("ShuttleProvider render", () => {
   it("renders without crashing", () => {
-    render(<ShuttleProvider mobileProviders={[]} providers={[]} />);
+    render(<ShuttleProvider mobileProviders={[]} extensionProviders={[]} />);
   });
 });

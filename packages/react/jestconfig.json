@@ -1,0 +1,10 @@
+{
+  "resolver": "jest-resolver-enhanced",
+  "setupFilesAfterEnv": ["<rootDir>/jest.setup.ts"],
+  "transform": {
+    "^.+\\.(t|j)sx?$": "ts-jest"
+  },
+  "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+  "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json", "node"],
+  "testEnvironment": "jsdom"
+}

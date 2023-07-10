@@ -1,50 +1,18 @@
 {
-  "name": "shuttle",
-  "version": "3.2.0",
-  "description": "Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos Dapps.",
-  "keywords": [
-    "dapp",
-    "blockchain",
-    "wallets",
-    "cosmos-sdk",
-    "cosmos",
-    "typescript",
-    "react"
-  ],
-  "author": "Delphi Labs (delphi-labs)",
-  "license": "GPL-3",
-  "scripts": {
-    "prettier": "nx run-many -t prettier --exclude shuttle",
-    "lint": "nx run-many -t lint --exclude shuttle",
-    "test": "nx run-many -t test --exclude shuttle",
-    "build": "nx run-many -t build --exclude shuttle",
-    "production": "nx run-many --targets=prettier,lint,test,build --all --exclude shuttle"
-  },
+  "name": "shuttle-turbo",
   "private": true,
-  "dependencies": {
-    "tslib": "^2.6.0"
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@nx/eslint-plugin": "16.3.2",
-    "@nx/jest": "16.3.2",
-    "@nx/js": "16.3.2",
-    "@nx/linter": "16.3.2",
-    "@nx/workspace": "16.3.2",
-    "@types/jest": "^29.4.0",
-    "@types/node": "18.7.1",
-    "@typescript-eslint/eslint-plugin": "^5.60.0",
-    "@typescript-eslint/parser": "^5.61.0",
-    "eslint": "~8.15.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "jest": "^29.4.1",
-    "jest-environment-jsdom": "^29.6.1",
-    "nx": "16.3.2",
-    "nx-cloud": "latest",
-    "prettier": "^2.8.8",
-    "ts-jest": "^29.1.1",
-    "ts-node": "10.9.1",
-    "typescript": "~5.0.2",
-    "verdaccio": "^5.0.4"
-  }
+    "@turbo/gen": "^1.9.7",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "turbo": "latest"
+  },
+  "packageManager": "pnpm@7.15.0"
 }

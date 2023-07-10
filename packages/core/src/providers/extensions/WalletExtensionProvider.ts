@@ -258,6 +258,4 @@ export abstract class WalletExtensionProvider {
   }
 }
 
-export type WalletProvider = WalletExtensionProvider;
-
 export default WalletExtensionProvider;

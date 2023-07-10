@@ -29,6 +29,4 @@ export const VectisCosmosExtensionProvider = class VectisCosmosExtensionProvider
   }
 };
 
-export const VectisCosmosProvider = VectisCosmosExtensionProvider;
-
 export default VectisCosmosExtensionProvider;

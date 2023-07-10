@@ -29,6 +29,4 @@ export const LeapCosmosExtensionProvider = class LeapCosmosExtensionProvider ext
   }
 };
 
-export const LeapCosmosProvider = LeapCosmosExtensionProvider;
-
 export default LeapCosmosExtensionProvider;

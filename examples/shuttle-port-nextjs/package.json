@@ -1,0 +1,33 @@
+{
+  "name": "@delphi-labs/shuttle-port-nextjs",
+  "version": "1.0.0",
+  "author": "Delphi Labs (delphi-labs)",
+  "license": "GPL-3",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@cosmjs/cosmwasm-stargate": "^0.30.1",
+    "@delphi-labs/shuttle-react": "workspace:*",
+    "@tanstack/react-query": "^4.29.12",
+    "bech32": "^2.0.0",
+    "bignumber.js": "^9.1.1",
+    "eslint": "8.42.0",
+    "eslint-config-next": "13.4.4",
+    "ethereumjs-util": "^7.1.5",
+    "next": "13.4.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-qr-code": "^2.0.11",
+    "zustand": "^4.3.8"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.12",
+    "@types/react": "^18.0.22",
+    "@types/react-dom": "^18.0.7",
+    "typescript": "^4.5.3"
+  }
+}

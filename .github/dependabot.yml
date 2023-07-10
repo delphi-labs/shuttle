@@ -1,22 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly" # Monday
-    target-branch: "main"
-  - package-ecosystem: "npm"
-    directory: "/packages/core/"
-    schedule:
-      interval: "weekly" # Monday
-    target-branch: "main"
-  - package-ecosystem: "npm"
-    directory: "/packages/react/"
-    schedule:
-      interval: "weekly" # Monday
-    target-branch: "main"
-  - package-ecosystem: "npm"
-    directory: "/packages/vue/"
+    directory: "/packages/*"
     schedule:
       interval: "weekly" # Monday
     target-branch: "main"

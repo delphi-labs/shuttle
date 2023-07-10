@@ -33,6 +33,4 @@ export const MetamaskExtensionProvider = class MetamaskExtensionProvider extends
   }
 };
 
-export const MetamaskProvider = MetamaskExtensionProvider;
-
 export default MetamaskExtensionProvider;

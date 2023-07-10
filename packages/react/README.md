@@ -1,11 +1,11 @@
-# Shuttle
+# Shuttle (React)
 
 [![NPM version][npm-image]][npm-url]
 [![Build][github-build]][github-build-url]
 ![npm-typescript]
 [![License][github-license]][github-license-url]
 
-Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos dApps.
+Shuttle is an open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos dApps.
 
 ## Docs
 
@@ -24,6 +24,8 @@ npm install @delphi-labs/shuttle-react
 ```tsx
 import { ShuttleProvider } from "@delphi-labs/shuttle-react";
 
+const WC_PROJECT_ID = "...";
+
 const providers = [
   // ...
 ];
@@ -35,6 +37,7 @@ const mobileProviders = [
 function App() {
   return (
     <ShuttleProvider
+      walletConnectProjectId={WC_PROJECT_ID}
       providers={providers}
       mobileProviders={mobileProviders}
       // Add the following prop if you want wallet connections
@@ -133,42 +136,42 @@ function Header() {
 ### Install
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Test
 
 ```bash
-npm run test
+pnpm run test
 ```
 
 ### Prettier
 
 ```bash
-npm run prettier
+pnpm run prettier
 ```
 
 ### Lint
 
 ```bash
-npm run lint
+pnpm run lint
 ```
 
 ### Build
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Publish
 
 ```bash
-npm publish
+pnpm publish
 ```
 
-[npm-url]: https://www.npmjs.com/package/@delphi-labs/shuttle
-[npm-image]: https://img.shields.io/npm/v/@delphi-labs/shuttle
-[npm-typescript]: https://img.shields.io/npm/types/@delphi-labs/shuttle
+[npm-url]: https://www.npmjs.com/package/@delphi-labs/shuttle-react
+[npm-image]: https://img.shields.io/npm/v/@delphi-labs/shuttle-react
+[npm-typescript]: https://img.shields.io/npm/types/@delphi-labs/shuttle-react
 [github-license]: https://img.shields.io/github/license/delphi-labs/shuttle
 [github-license-url]: https://github.com/delphi-labs/shuttle/blob/main/LICENSE
 [github-build]: https://github.com/delphi-labs/shuttle/actions/workflows/publish.yml/badge.svg
