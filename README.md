@@ -46,6 +46,12 @@ This is the core package of Shuttle, contains all the raw logic for connecting t
 pnpm install
 ```
 
+### Build
+
+```bash
+pnpm run build --filter="@delphi-labs/*"
+```
+
 ### Local dev
 
 ```bash
@@ -68,12 +74,6 @@ pnpm run prettier
 
 ```bash
 pnpm run lint
-```
-
-### Build
-
-```bash
-pnpm run build
 ```
 
 ### Publish
