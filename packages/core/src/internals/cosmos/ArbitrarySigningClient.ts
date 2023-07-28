@@ -83,6 +83,22 @@ export class ArbitrarySigningClient {
       Buffer.from(wallet.account.pubkey || "", "base64"),
     );
   }
+
+  static async verifyBytesSignature({
+    wallet,
+    data,
+    signature,
+  }: {
+    wallet: WalletConnection;
+    data: Uint8Array;
+    signature: Uint8Array;
+  }) {
+    return await Secp256k1.verifySignature(
+      Secp256k1Signature.fromFixedLength(signature),
+      sha256(data),
+      Buffer.from(wallet.walletAccount?.pubkey || "", "base64"),
+    );
+  }
 }
 
 export default ArbitrarySigningClient;

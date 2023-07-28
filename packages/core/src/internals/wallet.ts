@@ -19,6 +19,7 @@ export type WalletConnection = {
   providerId: string;
   network: Network;
   account: Account;
+  walletAccount?: Account;
   mobileSession: WalletMobileSession;
 };
 

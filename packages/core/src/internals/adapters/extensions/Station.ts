@@ -1,29 +1,62 @@
-import { Extension } from "@terra-money/feather.js";
-import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, type Network } from "../../../internals/network";
 import type { SigningResult, BroadcastResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
-import type { WalletConnection } from "../../../internals/wallet";
-import type { WalletExtensionProvider } from "../../../providers/extensions";
+import { Algos, type WalletConnection } from "../../../internals/wallet";
 import SimulateClient from "../../../internals/cosmos/SimulateClient";
+import TxWatcher from "../../../internals/transactions/TxWatcher";
+import type { WalletExtensionProvider } from "../../../providers/extensions";
 import { ExtensionProviderAdapter } from "./";
+import { ArbitrarySigningClient } from "../../cosmos";
 
-declare type ExtensionSendDataType = "connect" | "post" | "sign" | "interchain-info" | "get-pubkey";
+export type StationAccount = {
+  address: string;
+  addresses: {
+    [key: string]: string;
+  };
+  ledger: boolean;
+  name: string;
+  network: "mainnet" | "testnet";
+  pubkey: {
+    118: string;
+    330: string;
+    [key: number]: string;
+  };
+};
 
-declare global {
-  interface Window {
-    isStationExtensionAvailable: boolean;
-  }
-}
+export type StationWindow = {
+  connect(): Promise<StationAccount>;
+  sign(
+    tx: { chainID: string; msgs: string[]; fee?: string; memo?: string },
+    purgeQueue?: boolean,
+  ): Promise<{
+    auth_info: {
+      fee: { amount: { amount: string; denom: string }[]; gas_limit: string; granter: string; payer: string };
+      signer_infos: { mode_info: any; public_key: { ["@type"]: string; key: string }; sequence: string }[];
+    };
+    body: { memo: string; messages: any[]; timeout_height: string };
+    signatures: string[];
+  }>;
+  post(
+    tx: { chainID: string; msgs: string[]; fee?: string; memo?: string },
+    purgeQueue?: boolean,
+  ): Promise<{
+    height: string | number;
+    raw_log: string;
+    txhash: string;
+    code?: number | string;
+    codespace?: string;
+  }>;
+  signBytes(bytes: string, purgeQueue?: boolean): Promise<{ public_key: string; recid: number; signature: string }>;
+};
 
 export class Station implements ExtensionProviderAdapter {
   name: string;
-  extension?: StationExtension;
+  extension?: StationWindow;
   isAvailable: boolean = false;
-  extensionResolver: () => StationExtension;
+  extensionResolver: () => StationWindow | undefined;
   setupOnUpdateEventListener: (callback?: () => void) => void;
 
   constructor({
@@ -32,7 +65,7 @@ export class Station implements ExtensionProviderAdapter {
     setupOnUpdateEventListener,
   }: {
     name?: string;
-    extensionResolver: () => StationExtension;
+    extensionResolver: () => StationWindow | undefined;
     setupOnUpdateEventListener: (callback?: () => void) => void;
   }) {
     this.name = name || "Station";
@@ -46,8 +79,6 @@ export class Station implements ExtensionProviderAdapter {
     if (!this.extension) {
       throw new Error(`${this.name} is not available`);
     }
-
-    await this.extension.init();
 
     this.setupOnUpdateEventListener?.(() => {
       provider.onUpdate?.();
@@ -68,39 +99,33 @@ export class Station implements ExtensionProviderAdapter {
     const connect = await this.extension.connect();
 
     const isLedger = connect.ledger;
-    const bech32Address = connect.addresses[network.chainId];
 
+    const bech32Address = connect.addresses[network.chainId];
     if (!bech32Address) {
       throw new Error(`Wallet not connected to the network "${network.name}" with chainId "${network.chainId}"`);
     }
 
-    const client = await CosmWasmClient.connect(network.rpc);
+    const terraAddress = connect.address;
+    const terraPubkey = connect.pubkey[330];
 
-    const accountInfo = await client.getAccount(bech32Address);
-
-    let algo: "secp256k1" | "ed25519" | "sr25519" = "secp256k1";
-    if (accountInfo?.pubkey?.type === "tendermint/PubKeySecp256k1" || accountInfo?.pubkey?.type.match(/secp256k1/i)) {
-      algo = "secp256k1";
-    } else if (
-      accountInfo?.pubkey?.type === "tendermint/PubKeyEd25519" ||
-      accountInfo?.pubkey?.type.match(/ed25519/i)
-    ) {
-      algo = "ed25519";
-    } else if (
-      accountInfo?.pubkey?.type === "tendermint/PubKeySr25519" ||
-      accountInfo?.pubkey?.type.match(/sr25519/i)
-    ) {
-      algo = "sr25519";
+    let pubkey = connect.pubkey[118];
+    if (network.chainId === "phoenix-1" || network.chainId === "pisco-1") {
+      pubkey = terraPubkey;
     }
 
     return {
       id: `provider:${provider.id}:network:${network.chainId}:address:${bech32Address}`,
       providerId: provider.id,
       account: {
-        address: accountInfo?.address || bech32Address,
-        pubkey: accountInfo?.pubkey?.value || "",
-        algo,
+        address: bech32Address,
+        pubkey,
+        algo: "secp256k1",
         isLedger,
+      },
+      walletAccount: {
+        address: terraAddress,
+        algo: "secp256k1",
+        pubkey: terraPubkey,
       },
       network,
       mobileSession: {},
@@ -141,7 +166,6 @@ export class Station implements ExtensionProviderAdapter {
           wallet,
           messages,
         });
-
         if (simulate.success) {
           feeAmount = simulate.fee?.amount[0].amount;
           gasLimit = simulate.fee?.gas;
@@ -160,19 +184,19 @@ export class Station implements ExtensionProviderAdapter {
     });
 
     const signing = await this.extension.sign({
-      messages: messages.map((message) => message.toTerraExtensionMsg()),
+      msgs: messages.map((message) => message.toTerraExtensionMsg()),
       fee,
       memo: memo || "",
-      chainId: network.chainId,
+      chainID: network.chainId,
     });
 
     return {
-      signatures: signing?.result.signatures.map((signature) => fromBase64(signature)),
-      response: signing?.result,
+      signatures: signing.signatures.map((signature) => fromBase64(signature)),
+      response: signing,
     };
   }
 
-  signAndBroadcast(
+  async signAndBroadcast(
     _provider: WalletExtensionProvider,
     {
       network,
@@ -191,76 +215,65 @@ export class Station implements ExtensionProviderAdapter {
       overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
     },
   ): Promise<BroadcastResult> {
-    return new Promise(async (resolve, reject) => {
-      if (!this.extension) {
-        throw new Error(`${this.name} is not available`);
-      }
+    if (!this.extension) {
+      throw new Error(`${this.name} is not available`);
+    }
 
-      if (feeAmount === "auto") {
-        try {
-          const simulate = await SimulateClient.run({
-            network,
-            wallet,
-            messages,
-          });
-
-          if (simulate.success) {
-            feeAmount = simulate.fee?.amount[0].amount;
-            gasLimit = simulate.fee?.gas;
-          }
-        } catch (error: any) {
-          /* empty */
+    if (feeAmount === "auto") {
+      try {
+        const simulate = await SimulateClient.run({
+          network,
+          wallet,
+          messages,
+        });
+        if (simulate.success) {
+          feeAmount = simulate.fee?.amount[0].amount;
+          gasLimit = simulate.fee?.gas;
         }
+      } catch (error: any) {
+        /* empty */
       }
+    }
+    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
+    const fee = JSON.stringify({
+      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
+      gas_limit: gasLimit || gas,
+    });
 
-      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
-      const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-      const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-      const fee = JSON.stringify({
-        amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
-        gas_limit: gasLimit || gas,
-      });
-
-      const post = await this.extension.post({
-        messages: messages.map((message) => message.toTerraExtensionMsg()),
+    const post = await this.extension.post(
+      {
+        msgs: messages.map((message) => message.toTerraExtensionMsg()),
         fee,
         memo: memo || "",
-        chainId: network.chainId,
-      });
+        chainID: network.chainId,
+      },
+      true,
+    );
 
-      if (!post?.result?.txhash) {
-        reject(`Broadcast failed: ${post?.error?.message || "Unknown error"}`);
-        throw new Error(`Broadcast failed: ${post?.error?.message || "Unknown error"}`);
-      }
+    if (!post?.txhash) {
+      throw new Error(`Broadcast failed: ${post?.code || "Unknown:"}: ${post?.codespace || "error"}`);
+    }
 
-      const client = await CosmWasmClient.connect(network.rpc);
+    const tx = await TxWatcher.findTx(network.rpc, post.txhash);
 
-      let tries = 0;
-      const interval = setInterval(async () => {
-        const tx = await client.getTx(post?.result?.txhash);
-        if (tx) {
-          clearInterval(interval);
-          resolve({
-            hash: tx.hash,
-            rawLogs: tx.rawLog,
-            response: tx,
-          });
-          return;
-        }
-        if (tries > 150) {
-          // 1 minute
-          clearInterval(interval);
-          reject("Broadcast time out");
-          throw new Error("Broadcast time out");
-        }
-        tries++;
-      }, 400);
-    });
+    if (!tx) {
+      throw new Error(`Broadcast failed: Tx not found`);
+    }
+
+    return {
+      hash: tx.hash,
+      rawLogs: tx.rawLog,
+      response: tx,
+    };
   }
 
   async signArbitrary(
     _provider: WalletExtensionProvider,
-    _options: {
+    {
+      data,
+    }: {
       network: Network;
       wallet: WalletConnection;
       data: Uint8Array;
@@ -270,12 +283,25 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    throw new Error("Method not implemented.");
+    console.log(data);
+    console.log(Buffer.from(data).toString("base64"));
+    console.log(Buffer.from(data).toString("utf-8"));
+
+    const signature = await this.extension.signBytes(Buffer.from(data).toString("base64"), true);
+
+    return {
+      signatures: [Buffer.from(signature.signature, "base64")],
+      response: signature,
+    };
   }
 
   async verifyArbitrary(
     _provider: WalletExtensionProvider,
-    _options: {
+    {
+      wallet,
+      data,
+      signResult,
+    }: {
       network: Network;
       wallet: WalletConnection;
       data: Uint8Array;
@@ -286,126 +312,16 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    throw new Error("Method not implemented.");
+    if (wallet.walletAccount?.algo !== Algos.secp256k1) {
+      throw new Error(`Unsupported algorithm: ${wallet.walletAccount?.algo}`);
+    }
+
+    return await ArbitrarySigningClient.verifyBytesSignature({
+      wallet,
+      data,
+      signature: signResult.signatures[0],
+    });
   }
 }
 
 export default Station;
-
-export class StationExtension {
-  identifier: string = "station";
-  extension?: Extension;
-
-  constructor(identifier?: string) {
-    if (identifier) {
-      this.identifier = identifier;
-    }
-  }
-
-  public async init(): Promise<void> {
-    this.extension = new Extension(this.identifier);
-    if (!this.extension.isAvailable) {
-      throw new Error(`StationExtension with identifier:${this.identifier} is not available`);
-    }
-  }
-
-  public async connect(): Promise<{
-    address: string;
-    addresses: { [key: string]: string };
-    pubkey: { [coinType: number]: string };
-    ledger: boolean;
-    name: string;
-    network: "testnet" | "mainnet";
-  }> {
-    return this.request("connect", {});
-  }
-
-  public async post({
-    messages,
-    fee,
-    memo,
-    chainId,
-  }: {
-    messages: any[];
-    fee?: string;
-    memo?: string;
-    chainId?: string;
-  }): Promise<{
-    id: string;
-    chainID: string;
-    msgs: string[];
-    purgeQueue: boolean;
-    result: { height: number; raw_log: string; txhash: string };
-    success: boolean;
-    error?: {
-      code: number;
-      message: string;
-    };
-  }> {
-    return this.request("post", {
-      msgs: messages,
-      purgeQueue: true,
-      waitForConfirmation: true,
-      memo,
-      fee,
-      chainID: chainId,
-    });
-  }
-
-  public async sign({
-    messages,
-    fee,
-    memo,
-    chainId,
-  }: {
-    messages: any[];
-    fee?: string;
-    memo?: string;
-    chainId?: string;
-  }): Promise<{
-    id: string;
-    msgs: string[];
-    purgeQueue: boolean;
-    result: {
-      auth_info: {
-        fee: { amount: { amount: string; denom: string }[]; gas_limit: string; granter: string; payer: string };
-        signer_infos: { mode_info: any; public_key: { ["@type"]: string; key: string }; sequence: string }[];
-      };
-      body: { memo: string; messages: any[]; timeout_height: string };
-      signatures: string[];
-    };
-    success: boolean;
-  }> {
-    return this.request("sign", { msgs: messages, purgeQueue: true, memo, fee, chainID: chainId });
-  }
-
-  private request(sendType: ExtensionSendDataType, payload: any = {}, options?: { timeout: number }): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let timeout = false;
-      let resolved = false;
-
-      const mapSendTypeToListener: { [key: string]: string } = {
-        "interchain-info": "onInterchainInfo",
-        info: "onInfo",
-        connect: "onConnect",
-        post: "onPost",
-        sign: "onSign",
-      };
-
-      this.extension?.once(mapSendTypeToListener[sendType], (response: any) => {
-        if (timeout || resolved) return;
-        resolved = true;
-        resolve(response);
-      });
-
-      this.extension?.send(sendType, payload);
-
-      setTimeout(() => {
-        if (timeout || resolved) return;
-        timeout = true;
-        reject(`${sendType} time out`);
-        throw new Error(`${sendType} time out`);
-      }, (options?.timeout ?? 15) * 1000);
-    });
-  }
-}

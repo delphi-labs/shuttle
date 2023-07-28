@@ -1,6 +1,12 @@
 import type { Network } from "../../internals/network";
-import Station, { StationExtension } from "../../internals/adapters/extensions/Station";
+import Station, { type StationWindow } from "../../internals/adapters/extensions/Station";
 import WalletExtensionProvider from "./WalletExtensionProvider";
+
+declare global {
+  interface Window {
+    station?: StationWindow;
+  }
+}
 
 export const StationExtensionProvider = class StationExtensionProvider extends WalletExtensionProvider {
   constructor({ networks }: { networks: Network[] }) {
@@ -10,14 +16,10 @@ export const StationExtensionProvider = class StationExtensionProvider extends W
       networks,
       extensionProviderAdapter: new Station({
         extensionResolver() {
-          return new StationExtension("station");
+          return window.station;
         },
         setupOnUpdateEventListener(callback) {
           window.addEventListener("station_wallet_change", () => {
-            callback?.();
-          });
-
-          window.addEventListener("station_network_change", () => {
             callback?.();
           });
         },

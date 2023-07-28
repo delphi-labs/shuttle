@@ -44,7 +44,6 @@
     "@injectivelabs/sdk-ts": "^1.11.0",
     "@injectivelabs/utils": "^1.11.0",
     "@metamask/eth-sig-util": "^6.0.0",
-    "@terra-money/feather.js": "^1.0.8",
     "@terra-money/terra.proto": "^3.0.5",
     "@walletconnect/sign-client": "^2.9.0",
     "ethereumjs-util": "^7.1.5",
