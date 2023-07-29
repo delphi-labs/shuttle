@@ -64,70 +64,74 @@ function Header() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const wallet = getWallets({ chainId: currentNetworkId })[0];
 
-  return (<>
+  return (
+    <>
       {wallet && (
         <>
           <p>Address: {wallet.account.address}</p>
         </>
       )}
 
-    {!wallet && (<>
-      {providers.map((provider) => {
-        return (
-          <button
-            key={provider.id}
-            onClick={() =>
-              connect({
-                providerId: provider.id,
-                chainId: currentNetworkId,
-              })
-            }
-            disabled={!provider.initialized}
-          >
-            {provider.name}
-          </button>
-        );
-      })}
-
-      {mobileProviders.map((mobileProvider) => {
-        return (
-          <button
-            key={mobileProvider.id}
-            onClick={async () => {
-              const urls = await mobileConnect({
-                mobileProviderId: mobileProvider.id,
-                chainId: currentNetworkId,
-                callback: () => {
-                  setQrCodeUrl("");
-                },
-              });
-
-              if (isMobile()) {
-                if (isAndroid()) {
-                  window.location.href = urls.androidUrl;
-                } else if (isIOS()) {
-                  window.location.href = urls.iosUrl;
-                } else {
-                  window.location.href = urls.androidUrl;
-                }
-              } else {
-                setQrCodeUrl(urls.qrCodeUrl);
-              }
-            }}
-            disabled={!mobileProvider.initialized}
-          >
-            {mobileProvider.name}
-          </button>
-        );
-      })}
-
-      {qrCodeUrl && (
+      {!wallet && (
         <>
-          <QRCode value={qrCodeUrl} />
+          {providers.map((provider) => {
+            return (
+              <button
+                key={provider.id}
+                onClick={() =>
+                  connect({
+                    providerId: provider.id,
+                    chainId: currentNetworkId,
+                  })
+                }
+                disabled={!provider.initialized}
+              >
+                {provider.name}
+              </button>
+            );
+          })}
+
+          {mobileProviders.map((mobileProvider) => {
+            return (
+              <button
+                key={mobileProvider.id}
+                onClick={async () => {
+                  const urls = await mobileConnect({
+                    mobileProviderId: mobileProvider.id,
+                    chainId: currentNetworkId,
+                    callback: () => {
+                      setQrCodeUrl("");
+                    },
+                  });
+
+                  if (isMobile()) {
+                    if (isAndroid()) {
+                      window.location.href = urls.androidUrl;
+                    } else if (isIOS()) {
+                      window.location.href = urls.iosUrl;
+                    } else {
+                      window.location.href = urls.androidUrl;
+                    }
+                  } else {
+                    setQrCodeUrl(urls.qrCodeUrl);
+                  }
+                }}
+                disabled={!mobileProvider.initialized}
+              >
+                {mobileProvider.name}
+              </button>
+            );
+          })}
+
+          {qrCodeUrl && (
+            <>
+              <QRCode value={qrCodeUrl} />
+            </>
+          )}
         </>
       )}
-    </>)}
-  </>);
+    </>
+  );
 }
 ```
 

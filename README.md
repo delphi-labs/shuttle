@@ -15,12 +15,11 @@ You can check out the [documentation](https://shuttle.delphilabs.io/) for more i
 
 ## Packages
 
-| Package                                                   | Version                                                                                                                                       | Size                                                                                                                                                             |
-|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`@delphi-labs/shuttle`](packages/core)                   | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle/v/latest)                  | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle)                               |
-| [`@delphi-labs/shuttle-react`](packages/react)            | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle-react.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle-react/v/latest)      | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle-react.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle-react)                   |
-| [`@delphi-labs/shuttle-vue`](packages/vue)                | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle-vue.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle-vue/v/latest)          | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle-vue.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle-vue)                       |
-
+| Package                                        | Version                                                                                                                                  | Size                                                                                                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@delphi-labs/shuttle`](packages/core)        | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle/v/latest)             | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle)             |
+| [`@delphi-labs/shuttle-react`](packages/react) | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle-react.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle-react/v/latest) | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle-react.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle-react) |
+| [`@delphi-labs/shuttle-vue`](packages/vue)     | [![npm](https://img.shields.io/npm/v/@delphi-labs/shuttle-vue.svg)](https://www.npmjs.com/package/@delphi-labs/shuttle-vue/v/latest)     | [![min](https://img.shields.io/bundlephobia/min/@delphi-labs/shuttle-vue.svg)](https://bundlephobia.com/result?p=@delphi-labs/shuttle-vue)     |
 
 ## How to get started
 
@@ -36,7 +35,6 @@ This is the core package of Shuttle, contains all the raw logic for connecting t
 
 - @delphi-labs/shuttle-react
 - @delphi-labs/shuttle-vue
-
 
 ## How to develop
 

@@ -22,19 +22,19 @@ npm install @delphi-labs/shuttle-vue
 ### Setup
 
 ```ts
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import { createShuttle } from "@delphi-labs/shuttle-vue";
 
-import App from './App.vue'
+import App from "./App.vue";
 
-export const pinia = createPinia()
-pinia.use(piniaPluginPersistedstate)
+export const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 const shuttle = createShuttle({
   pinia,
-  walletConnectProjectId: '...',
+  walletConnectProjectId: "...",
   extensionProviders: [
     // ...
   ],
@@ -43,32 +43,32 @@ const shuttle = createShuttle({
   ],
 });
 
-const app = createApp(App)
+const app = createApp(App);
 
-app.use(pinia)
-app.use(shuttle)
+app.use(pinia);
+app.use(shuttle);
 
-app.mount('#app')
+app.mount("#app");
 ```
 
 ### Use
 
 ```vue
 <script lang="ts" setup>
-import { ref } from 'vue';
-import { WalletConnection, isAndroid, isIOS, isMobile, useShuttle } from '@delphi-labs/shuttle-vue';
-import QrcodeVue from 'qrcode.vue'
+import { ref } from "vue";
+import { WalletConnection, isAndroid, isIOS, isMobile, useShuttle } from "@delphi-labs/shuttle-vue";
+import QrcodeVue from "qrcode.vue";
 
-import { useShuttlePortStore, } from '@/stores/shuttle-port';
-import { networks } from '@/config/networks'
-import useWallet from '@/composables/useWallet';
+import { useShuttlePortStore } from "@/stores/shuttle-port";
+import { networks } from "@/config/networks";
+import useWallet from "@/composables/useWallet";
 
-const shuttle = useShuttle()
+const shuttle = useShuttle();
 const networkStore = useShuttlePortStore();
 const wallet = useWallet();
 
 async function connect(extensionProviderId: string) {
-  await shuttle.connect({ extensionProviderId: extensionProviderId, chainId: networkStore.currentNetworkId })
+  await shuttle.connect({ extensionProviderId: extensionProviderId, chainId: networkStore.currentNetworkId });
 }
 
 const qrcodeUrl = ref<string | null>(null);
@@ -80,7 +80,7 @@ async function mobileConnect(mobileProviderId: string) {
     callback: () => {
       qrcodeUrl.value = null;
     },
-  })
+  });
 
   if (isMobile()) {
     if (isAndroid()) {
@@ -108,7 +108,11 @@ function disconnectWallet(wallet: WalletConnection) {
 
     <div>
       <label htmlFor="currentNetwork">Current network:</label>
-      <select id="currentNetwork" :value="networkStore.currentNetworkId" @change="networkStore.switchNetwork(($event.target as HTMLInputElement).value)">
+      <select
+        id="currentNetwork"
+        :value="networkStore.currentNetworkId"
+        @change="networkStore.switchNetwork(($event.target as HTMLInputElement).value)"
+      >
         <option v-for="network in networks" :key="network.chainId" :value="network.chainId">{{ network.name }}</option>
       </select>
     </div>
@@ -117,18 +121,22 @@ function disconnectWallet(wallet: WalletConnection) {
 
     <div v-if="!wallet">
       <button
-        v-for="extensionProvider in shuttle.extensionProviders.filter((provider) => provider.networks.has(networkStore.currentNetworkId))"
+        v-for="extensionProvider in shuttle.extensionProviders.filter((provider) =>
+          provider.networks.has(networkStore.currentNetworkId),
+        )"
         :key="extensionProvider.id"
         @click="() => connect(extensionProvider.id)"
-        :disabled="!shuttle.availableExtensionProviders.find(p => p.id === extensionProvider.id)"
+        :disabled="!shuttle.availableExtensionProviders.find((p) => p.id === extensionProvider.id)"
       >
         {{ extensionProvider.name }}
       </button>
       <button
-        v-for="mobileProvider in shuttle.mobileProviders.filter((provider) => provider.networks.has(networkStore.currentNetworkId))"
+        v-for="mobileProvider in shuttle.mobileProviders.filter((provider) =>
+          provider.networks.has(networkStore.currentNetworkId),
+        )"
         :key="mobileProvider.id"
         @click="() => mobileConnect(mobileProvider.id)"
-        :disabled="!shuttle.availableMobileProviders.find(p => p.id === mobileProvider.id)"
+        :disabled="!shuttle.availableMobileProviders.find((p) => p.id === mobileProvider.id)"
       >
         {{ mobileProvider.name }}
       </button>
@@ -144,11 +152,10 @@ function disconnectWallet(wallet: WalletConnection) {
 
   <div v-if="qrcodeUrl" className="fixed inset-0 flex flex-col items-center justify-center">
     <div className="absolute inset-0 z-0 bg-black opacity-20" @click="qrcodeUrl = null"></div>
-    <div className="relative flex min-h-[408px] min-w-[384px] flex-col items-center rounded-lg bg-white py-10 px-14 shadow-md">
-      <button
-        className="absolute top-3 right-3 rounded bg-black p-1.5 text-white"
-        @click="qrcodeUrl = null"
-      >
+    <div
+      className="relative flex min-h-[408px] min-w-[384px] flex-col items-center rounded-lg bg-white py-10 px-14 shadow-md"
+    >
+      <button className="absolute top-3 right-3 rounded bg-black p-1.5 text-white" @click="qrcodeUrl = null">
         Close
       </button>
 

@@ -16,6 +16,6 @@ export const useShuttlePortStore = create<ShuttlePortState>()(
     }),
     {
       name: "shuttle-port",
-    }
-  )
+    },
+  ),
 );

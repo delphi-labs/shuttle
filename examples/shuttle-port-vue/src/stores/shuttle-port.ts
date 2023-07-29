@@ -1,19 +1,19 @@
-import { ref } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from "vue";
+import { defineStore } from "pinia";
 
-import { DEFAULT_MAINNET } from '@/config/networks'
+import { DEFAULT_MAINNET } from "@/config/networks";
 
 export const useShuttlePortStore = defineStore(
-  'shuttle-port',
+  "shuttle-port",
   () => {
-    const currentNetworkId = ref(DEFAULT_MAINNET.chainId)
+    const currentNetworkId = ref(DEFAULT_MAINNET.chainId);
     function switchNetwork(network: string) {
-      currentNetworkId.value = network
+      currentNetworkId.value = network;
     }
 
-    return { currentNetworkId, switchNetwork }
+    return { currentNetworkId, switchNetwork };
   },
   {
-    persist: true
-  }
-)
+    persist: true,
+  },
+);

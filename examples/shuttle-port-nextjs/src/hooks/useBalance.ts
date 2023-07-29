@@ -16,15 +16,8 @@ export default function useBalance(tokenAddress: string) {
 
       const client = await CosmWasmClient.connect(wallet?.network.rpc || "");
 
-      if (
-        tokenAddress.startsWith("u") ||
-        tokenAddress === "inj" ||
-        tokenAddress.startsWith("ibc/")
-      ) {
-        const response = await client.getBalance(
-          wallet?.account.address || "",
-          tokenAddress
-        );
+      if (tokenAddress.startsWith("u") || tokenAddress === "inj" || tokenAddress.startsWith("ibc/")) {
+        const response = await client.getBalance(wallet?.account.address || "", tokenAddress);
         return Number(response.amount) / getTokenDecimals(tokenAddress);
       }
 
@@ -40,6 +33,6 @@ export default function useBalance(tokenAddress: string) {
       enabled: !!wallet && !!tokenAddress,
       initialData: 0,
       placeholderData: 0,
-    }
+    },
   );
 }

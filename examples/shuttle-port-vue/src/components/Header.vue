@@ -1,49 +1,49 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { WalletConnection, isAndroid, isIOS, isMobile, useShuttle } from '@delphi-labs/shuttle-vue'
-import QrcodeVue from 'qrcode.vue'
+import { ref } from "vue";
+import { WalletConnection, isAndroid, isIOS, isMobile, useShuttle } from "@delphi-labs/shuttle-vue";
+import QrcodeVue from "qrcode.vue";
 
-import { useShuttlePortStore } from '@/stores/shuttle-port'
-import { networks } from '@/config/networks'
-import useWallet from '@/composables/useWallet'
+import { useShuttlePortStore } from "@/stores/shuttle-port";
+import { networks } from "@/config/networks";
+import useWallet from "@/composables/useWallet";
 
-const shuttle = useShuttle()
-const networkStore = useShuttlePortStore()
-const wallet = useWallet()
+const shuttle = useShuttle();
+const networkStore = useShuttlePortStore();
+const wallet = useWallet();
 
 async function connect(extensionProviderId: string) {
   await shuttle.connect({
     extensionProviderId: extensionProviderId,
-    chainId: networkStore.currentNetworkId
-  })
+    chainId: networkStore.currentNetworkId,
+  });
 }
 
-const qrcodeUrl = ref<string | null>(null)
+const qrcodeUrl = ref<string | null>(null);
 
 async function mobileConnect(mobileProviderId: string) {
   const urls = await shuttle.mobileConnect({
     mobileProviderId: mobileProviderId,
     chainId: networkStore.currentNetworkId,
     callback: () => {
-      qrcodeUrl.value = null
-    }
-  })
+      qrcodeUrl.value = null;
+    },
+  });
 
   if (isMobile()) {
     if (isAndroid()) {
-      window.location.href = urls.androidUrl
+      window.location.href = urls.androidUrl;
     } else if (isIOS()) {
-      window.location.href = urls.iosUrl
+      window.location.href = urls.iosUrl;
     } else {
-      window.location.href = urls.androidUrl
+      window.location.href = urls.androidUrl;
     }
   } else {
-    qrcodeUrl.value = urls.qrCodeUrl
+    qrcodeUrl.value = urls.qrCodeUrl;
   }
 }
 
 function disconnectWallet(wallet: WalletConnection) {
-  shuttle.disconnectWallet(wallet)
+  shuttle.disconnectWallet(wallet);
 }
 </script>
 
@@ -71,7 +71,7 @@ function disconnectWallet(wallet: WalletConnection) {
     <div v-if="!wallet">
       <button
         v-for="extensionProvider in shuttle.extensionProviders.filter((provider) =>
-          provider.networks.has(networkStore.currentNetworkId)
+          provider.networks.has(networkStore.currentNetworkId),
         )"
         :key="extensionProvider.id"
         @click="() => connect(extensionProvider.id)"
@@ -81,7 +81,7 @@ function disconnectWallet(wallet: WalletConnection) {
       </button>
       <button
         v-for="mobileProvider in shuttle.mobileProviders.filter((provider) =>
-          provider.networks.has(networkStore.currentNetworkId)
+          provider.networks.has(networkStore.currentNetworkId),
         )"
         :key="mobileProvider.id"
         @click="() => mobileConnect(mobileProvider.id)"
@@ -104,19 +104,14 @@ function disconnectWallet(wallet: WalletConnection) {
     <div
       className="relative flex min-h-[408px] min-w-[384px] flex-col items-center rounded-lg bg-white py-10 px-14 shadow-md"
     >
-      <button
-        className="absolute top-3 right-3 rounded bg-black p-1.5 text-white"
-        @click="qrcodeUrl = null"
-      >
+      <button className="absolute top-3 right-3 rounded bg-black p-1.5 text-white" @click="qrcodeUrl = null">
         Close
       </button>
 
       <h2 className="mb-2 text-xl">Wallet Connect</h2>
 
       <div className="flex flex-col items-center">
-        <p className="mb-4 text-center text-sm text-gray-600">
-          Scan this QR code with your mobile wallet
-        </p>
+        <p className="mb-4 text-center text-sm text-gray-600">Scan this QR code with your mobile wallet</p>
         <QrcodeVue :value="qrcodeUrl" :size="250" />
       </div>
     </div>

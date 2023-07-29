@@ -26,7 +26,6 @@ This is the core package of Shuttle, contains all the raw logic for connecting t
 - @delphi-labs/shuttle-react
 - @delphi-labs/shuttle-vue
 
-
 ## How to develop
 
 ### Install
