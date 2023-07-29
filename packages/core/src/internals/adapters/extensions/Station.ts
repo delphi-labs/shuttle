@@ -27,7 +27,8 @@ export type StationAccount = {
 };
 
 export type StationWindow = {
-  connect(): Promise<StationAccount>;
+  connect(chainId?: string): Promise<Omit<StationAccount, "pubkey">>;
+  getPublicKey(chainId?: string): Promise<StationAccount>;
   sign(
     tx: { chainID: string; msgs: string[]; fee?: string; memo?: string },
     purgeQueue?: boolean,
@@ -96,19 +97,21 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    const connect = await this.extension.connect();
+    await this.extension.connect();
 
-    const isLedger = connect.ledger;
+    const account = await this.extension.getPublicKey();
 
-    const bech32Address = connect.addresses[network.chainId];
+    const isLedger = account.ledger;
+
+    const bech32Address = account.addresses[network.chainId];
     if (!bech32Address) {
       throw new Error(`Wallet not connected to the network "${network.name}" with chainId "${network.chainId}"`);
     }
 
-    const terraAddress = connect.address;
-    const terraPubkey = connect.pubkey[330];
+    const terraAddress = account.address;
+    const terraPubkey = account.pubkey[330];
 
-    let pubkey = connect.pubkey[118];
+    let pubkey = account.pubkey[118];
     if (network.chainId === "phoenix-1" || network.chainId === "pisco-1") {
       pubkey = terraPubkey;
     }
