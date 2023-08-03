@@ -118,6 +118,34 @@ export const OSMOSIS_MAINNET: Network = {
   gasPrice: "0.015uosmo",
 };
 
+export const NEUTRON_MAINNET: Network = {
+  name: "Neutron",
+  chainId: "neutron-1",
+  chainPrefix: "neutron",
+  rpc: "https://multichain-nodes.astroport.fi/neutron-1/rpc/",
+  rest: "https://multichain-nodes.astroport.fi/neutron-1/lcd/",
+  defaultCurrency: {
+    coinDenom: "NTRN",
+    coinMinimalDenom: "untrn",
+    coinDecimals: 6,
+  },
+  gasPrice: "0.025untrn",
+};
+
+export const NEUTRON_TESTNET: Network = {
+  name: "Neutron Testnet",
+  chainId: "pion-1",
+  chainPrefix: "neutron",
+  rpc: "https://rpc-palvus.pion-1.ntrn.tech/",
+  rest: "https://rest-palvus.pion-1.ntrn.tech/",
+  defaultCurrency: {
+    coinDenom: "NTRN",
+    coinMinimalDenom: "untrn",
+    coinDecimals: 6,
+  },
+  gasPrice: "0.025untrn",
+};
+
 export const DEFAULT_MAINNET = TERRA_MAINNET;
 
 export const networks = [
@@ -127,6 +155,8 @@ export const networks = [
   INJECTIVE_TESTNET,
   OSMOSIS_MAINNET,
   MARS_MAINNET,
+  NEUTRON_MAINNET,
+  NEUTRON_TESTNET,
 ];
 
 export function getNetworkByChainId(chainId: string): Network {
@@ -151,6 +181,10 @@ export function fromNetworkToNativeDenom(chainId: string): string {
       return "uosmo";
     case "mars-1":
       return "umars";
+    case "neutron-1":
+      return "untrn";
+    case "pion-1":
+      return "untrn";
     default:
       throw new Error(`Network with chainId ${chainId} not found`);
   }
@@ -168,6 +202,8 @@ export function fromNetworkToNativeSymbol(chainId: string): string {
       return "OSMO";
     case "umars":
       return "MARS";
+    case "untrn":
+      return "NTRN";
     default:
       throw new Error(`Network with chainId ${chainId} not found`);
   }

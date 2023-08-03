@@ -1,4 +1,11 @@
-import { INJECTIVE_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_TESTNET } from "./networks";
+import {
+  INJECTIVE_MAINNET,
+  TERRA_MAINNET,
+  TERRA_TESTNET,
+  INJECTIVE_TESTNET,
+  NEUTRON_MAINNET,
+  NEUTRON_TESTNET,
+} from "./networks";
 
 export const POOLS = {
   [TERRA_MAINNET.chainId]: {
@@ -12,5 +19,11 @@ export const POOLS = {
   },
   [INJECTIVE_TESTNET.chainId]: {
     astroNative: "inj1ln5epw58qxhqyjzwulgzn0qu87e6e0rfhyv0f6",
+  },
+  [NEUTRON_MAINNET.chainId]: {
+    astroNative: "neutron1s2lr8u69xammmg3s8hemegcz57y07ae0wa7c7d2adupp6du3neyqd8ygp7",
+  },
+  [NEUTRON_TESTNET.chainId]: {
+    astroNative: "neutron1vwrktvvxnevy7s5t7v44z72pdxncnq9gdsjwq9607cdd6vl2lfcs33fpah",
   },
 };

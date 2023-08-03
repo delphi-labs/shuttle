@@ -22,6 +22,8 @@ import {
   TERRA_TESTNET,
   INJECTIVE_MAINNET,
   INJECTIVE_TESTNET,
+  NEUTRON_MAINNET,
+  NEUTRON_TESTNET,
 } from "@/config/networks";
 import Header from "@/components/Header";
 
@@ -34,7 +36,15 @@ const extensionProviders = [
     networks: [TERRA_MAINNET, TERRA_TESTNET, OSMOSIS_MAINNET, MARS_MAINNET],
   }),
   new CosmostationExtensionProvider({
-    networks: [OSMOSIS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+    networks: [
+      OSMOSIS_MAINNET,
+      TERRA_MAINNET,
+      TERRA_TESTNET,
+      INJECTIVE_MAINNET,
+      INJECTIVE_TESTNET,
+      NEUTRON_MAINNET,
+      NEUTRON_TESTNET,
+    ],
   }),
   new LeapCosmosExtensionProvider({
     networks: [OSMOSIS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
@@ -43,7 +53,16 @@ const extensionProviders = [
     networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, TERRA_TESTNET],
   }),
   new KeplrExtensionProvider({
-    networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+    networks: [
+      OSMOSIS_MAINNET,
+      MARS_MAINNET,
+      TERRA_MAINNET,
+      TERRA_TESTNET,
+      INJECTIVE_MAINNET,
+      INJECTIVE_TESTNET,
+      NEUTRON_MAINNET,
+      NEUTRON_TESTNET,
+    ],
   }),
   new MetamaskExtensionProvider({
     networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
@@ -52,13 +71,22 @@ const extensionProviders = [
 
 const mobileProviders = [
   new KeplrMobileProvider({
-    networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+    networks: [
+      OSMOSIS_MAINNET,
+      MARS_MAINNET,
+      TERRA_MAINNET,
+      TERRA_TESTNET,
+      INJECTIVE_MAINNET,
+      INJECTIVE_TESTNET,
+      NEUTRON_MAINNET,
+      NEUTRON_TESTNET,
+    ],
   }),
   new LeapCosmosMobileProvider({
     networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
   }),
   new CosmostationMobileProvider({
-    networks: [TERRA_MAINNET, OSMOSIS_MAINNET, MARS_MAINNET],
+    networks: [TERRA_MAINNET, OSMOSIS_MAINNET, MARS_MAINNET, NEUTRON_MAINNET, NEUTRON_TESTNET],
   }),
   new MetamaskMobileProvider({
     networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
