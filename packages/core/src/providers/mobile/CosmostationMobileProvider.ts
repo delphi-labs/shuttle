@@ -1,5 +1,5 @@
 import type { Network } from "../../internals/network";
-import CosmostationWalletConnect from "../../internals/adapters/mobile/CosmostationWalletConnect";
+import CosmosWalletConnect from "../../internals/adapters/mobile/CosmosWalletConnect";
 import WalletMobileProvider from "./WalletMobileProvider";
 
 export const CosmostationMobileProvider = class CosmostationMobileProvider extends WalletMobileProvider {
@@ -8,7 +8,7 @@ export const CosmostationMobileProvider = class CosmostationMobileProvider exten
       id: "mobile-cosmostation",
       name: "Cosmostation - WalletConnect",
       networks,
-      mobileProviderAdapter: new CosmostationWalletConnect({
+      mobileProviderAdapter: new CosmosWalletConnect({
         walletConnectPeerName: "Cosmostation",
         walletConnectProjectId,
       }),
