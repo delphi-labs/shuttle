@@ -152,7 +152,7 @@ export class Keplr implements ExtensionProviderAdapter {
                 if (currency.gasPriceStep) return currency;
                 return Object.assign(currency, {
                   gasPriceStep: {
-                    low: baseGasPrice.amount.toFloatApproximation(),
+                    low: baseGasPrice.amount.toFloatApproximation() * 1.1,
                     average: baseGasPrice.amount.toFloatApproximation() * 1.25,
                     high: baseGasPrice.amount.toFloatApproximation() * 1.5,
                   },
@@ -161,7 +161,7 @@ export class Keplr implements ExtensionProviderAdapter {
             : []),
           Object.assign(defaultCurrency, {
             gasPriceStep: {
-              low: baseGasPrice.amount.toFloatApproximation(),
+              low: baseGasPrice.amount.toFloatApproximation() * 1.1,
               average: baseGasPrice.amount.toFloatApproximation() * 1.25,
               high: baseGasPrice.amount.toFloatApproximation() * 1.5,
             },

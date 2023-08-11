@@ -135,18 +135,18 @@ export class Vectis implements ExtensionProviderAdapter {
                   if (currency.gasPriceStep) return currency;
                   return Object.assign(currency, {
                     gasPriceStep: {
-                      low: baseGasPrice.amount.toFloatApproximation(),
-                      average: baseGasPrice.amount.toFloatApproximation() * 1.3,
-                      high: baseGasPrice.amount.toFloatApproximation() * 2,
+                      low: baseGasPrice.amount.toFloatApproximation() * 1.1,
+                      average: baseGasPrice.amount.toFloatApproximation() * 1.25,
+                      high: baseGasPrice.amount.toFloatApproximation() * 1.5,
                     },
                   });
                 })
               : []),
             Object.assign(defaultCurrency, {
               gasPriceStep: {
-                low: baseGasPrice.amount.toFloatApproximation(),
-                average: baseGasPrice.amount.toFloatApproximation() * 1.3,
-                high: baseGasPrice.amount.toFloatApproximation() * 2,
+                low: baseGasPrice.amount.toFloatApproximation() * 1.1,
+                average: baseGasPrice.amount.toFloatApproximation() * 1.25,
+                high: baseGasPrice.amount.toFloatApproximation() * 1.5,
               },
             }),
           ].filter(nonNullable),
