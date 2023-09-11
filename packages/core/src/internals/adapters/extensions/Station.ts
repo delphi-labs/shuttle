@@ -286,10 +286,6 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    console.log(data);
-    console.log(Buffer.from(data).toString("base64"));
-    console.log(Buffer.from(data).toString("utf-8"));
-
     const signature = await this.extension.signBytes(Buffer.from(data).toString("base64"), true);
 
     return {

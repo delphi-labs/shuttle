@@ -10,6 +10,7 @@ import {
   CosmostationMobileProvider,
   KeplrMobileProvider,
   LeapCosmosMobileProvider,
+  LeapMetamaskCosmosSnapExtensionProvider,
   MetamaskMobileProvider,
   ShuttleProvider,
 } from "@delphi-labs/shuttle-react";
@@ -48,6 +49,18 @@ const extensionProviders = [
   }),
   new LeapCosmosExtensionProvider({
     networks: [OSMOSIS_MAINNET, TERRA_MAINNET, TERRA_TESTNET, INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+  }),
+  new LeapMetamaskCosmosSnapExtensionProvider({
+    networks: [
+      OSMOSIS_MAINNET,
+      MARS_MAINNET,
+      TERRA_MAINNET,
+      TERRA_TESTNET,
+      INJECTIVE_MAINNET,
+      INJECTIVE_TESTNET,
+      NEUTRON_MAINNET,
+      NEUTRON_TESTNET,
+    ],
   }),
   new StationExtensionProvider({
     networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, TERRA_TESTNET],

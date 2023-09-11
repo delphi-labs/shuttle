@@ -14,6 +14,7 @@ import { ExtensionProviderAdapter } from "./";
 export type EthereumWindow = {
   isMetaMask?: boolean;
   request: (request: { method: string; params?: unknown[] | object }) => Promise<unknown>;
+  on: (event: string, callback: (data: any) => void) => void;
 };
 
 export class Metamask implements ExtensionProviderAdapter {

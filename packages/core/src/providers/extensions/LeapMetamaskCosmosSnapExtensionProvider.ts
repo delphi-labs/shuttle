@@ -1,20 +1,15 @@
 import type { Network } from "../../internals/network";
-import Metamask, { type EthereumWindow } from "../../internals/adapters/extensions/Metamask";
+import MetamaskCosmosSnap from "../../internals/adapters/extensions/MetamaskCosmosSnap";
 import WalletExtensionProvider from "./WalletExtensionProvider";
 
-declare global {
-  interface Window {
-    ethereum?: EthereumWindow;
-  }
-}
-
-export const MetamaskExtensionProvider = class MetamaskExtensionProvider extends WalletExtensionProvider {
+export const LeapMetamaskCosmosSnapExtensionProvider = class LeapMetamaskCosmosSnapExtensionProvider extends WalletExtensionProvider {
   constructor({ networks }: { networks: Network[] }) {
     super({
-      id: "metamask",
-      name: "Metamask",
+      id: "leap-metamask-cosmos-snap",
+      name: "Leap Metamask Cosmos Snap",
       networks,
-      extensionProviderAdapter: new Metamask({
+      extensionProviderAdapter: new MetamaskCosmosSnap({
+        snapId: "npm:@leapwallet/metamask-cosmos-snap",
         extensionResolver() {
           if (!window.ethereum || !window.ethereum.isMetaMask) {
             throw new Error("Metamask is not available");
@@ -31,4 +26,4 @@ export const MetamaskExtensionProvider = class MetamaskExtensionProvider extends
   }
 };
 
-export default MetamaskExtensionProvider;
+export default LeapMetamaskCosmosSnapExtensionProvider;

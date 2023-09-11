@@ -1,5 +1,6 @@
 export * from "./KeplrExtensionProvider";
 export * from "./LeapCosmosExtensionProvider";
+export * from "./LeapMetamaskCosmosSnapExtensionProvider";
 export * from "./StationExtensionProvider";
 export * from "./XDEFICosmosExtensionProvider";
 export * from "./CosmostationExtensionProvider";
