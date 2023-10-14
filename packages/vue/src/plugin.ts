@@ -298,24 +298,27 @@ export function createShuttle({
         });
       };
 
-      extensionProviders.forEach((extensionProvider) => {
-        extensionProvider
-          .init()
-          .then(() => {
-            updateExtensionWallets(extensionProvider);
-
-            extensionProvider.setOnUpdateCallback(() => {
+      // Force delay to let extensions inject into window
+      setTimeout(() => {
+        extensionProviders.forEach((extensionProvider) => {
+          extensionProvider
+            .init()
+            .then(() => {
               updateExtensionWallets(extensionProvider);
-            });
 
-            availableExtensionProviders.value.push(extensionProvider);
-          })
-          .catch((e) => {
-            if (withLogging) {
-              console.warn("Shuttle: ", e);
-            }
-          });
-      });
+              extensionProvider.setOnUpdateCallback(() => {
+                updateExtensionWallets(extensionProvider);
+              });
+
+              availableExtensionProviders.value.push(extensionProvider);
+            })
+            .catch((e) => {
+              if (withLogging) {
+                console.warn("Shuttle: ", e);
+              }
+            });
+        });
+      }, 500);
 
       const updateMobileWallets = (mobileProvider: WalletMobileProvider) => {
         store.getWallets({ providerId: mobileProvider.id }).forEach((mobileProviderWallet) => {
