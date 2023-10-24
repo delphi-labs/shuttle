@@ -5,6 +5,7 @@ import {
   MsgInstantiateContract as InjMsgInstantiateContract,
   MsgMigrateContract as InjMsgMigrateContract,
   MsgCreateSpotLimitOrder as InjMsgCreateSpotLimitOrder,
+  MsgCancelSpotOrder as InjMsgCancelSpotOrder,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -16,6 +17,7 @@ import {
   MsgTransfer,
   TransactionMsg,
   MsgCreateSpotLimitOrder,
+  MsgCancelSpotOrder,
 } from "./transactions";
 
 export function isInjectiveNetwork(chainId: string): boolean {
@@ -47,7 +49,8 @@ export type InjTransactionMsg =
   | InjMsgInstantiateContract
   | InjMsgMigrateContract
   | InjMsgTransfer
-  | InjMsgCreateSpotLimitOrder;
+  | InjMsgCreateSpotLimitOrder
+  | InjMsgCancelSpotOrder;
 
 export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTransactionMsg[] {
   return messages
@@ -123,6 +126,17 @@ export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTran
           price: createSpotLimitOrderMsg.value.order.price,
           quantity: createSpotLimitOrderMsg.value.order.quantity,
           orderType: createSpotLimitOrderMsg.value.order.orderType,
+        });
+      }
+
+      if (msg.typeUrl === MsgCancelSpotOrder.TYPE) {
+        const cancelSpotOrderMsg = msg as MsgCancelSpotOrder;
+
+        return InjMsgCancelSpotOrder.fromJSON({
+          injectiveAddress: cancelSpotOrderMsg.value.sender,
+          marketId: cancelSpotOrderMsg.value.market_id,
+          subaccountId: cancelSpotOrderMsg.value.subaccount_id,
+          orderHash: cancelSpotOrderMsg.value.order_hash,
         });
       }
 
