@@ -1,6 +1,6 @@
 import { AminoMsg, CosmosMsg, MsgCancelSpotOrder } from "../../../../src";
 
-describe("MsgCreateSpotLimitOrder", () => {
+describe("MsgCancelSpotOrder", () => {
   test("it returns the correct typeUrl", () => {
     const msg = new MsgCancelSpotOrder({
       sender: "address1",
