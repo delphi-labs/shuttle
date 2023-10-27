@@ -4,6 +4,8 @@ import {
   MsgTransfer as InjMsgTransfer,
   MsgInstantiateContract as InjMsgInstantiateContract,
   MsgMigrateContract as InjMsgMigrateContract,
+  MsgCreateSpotLimitOrder as InjMsgCreateSpotLimitOrder,
+  MsgCancelSpotOrder as InjMsgCancelSpotOrder,
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
@@ -14,6 +16,8 @@ import {
   MsgMigrateContract,
   MsgTransfer,
   TransactionMsg,
+  MsgCreateSpotLimitOrder,
+  MsgCancelSpotOrder,
 } from "./transactions";
 
 export function isInjectiveNetwork(chainId: string): boolean {
@@ -44,7 +48,9 @@ export type InjTransactionMsg =
   | InjMsgExecuteContractCompat
   | InjMsgInstantiateContract
   | InjMsgMigrateContract
-  | InjMsgTransfer;
+  | InjMsgTransfer
+  | InjMsgCreateSpotLimitOrder
+  | InjMsgCancelSpotOrder;
 
 export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTransactionMsg[] {
   return messages
@@ -106,6 +112,31 @@ export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTran
             revisionHeight: new BigNumberInBase(execMsg.value.timeoutHeight.revisionHeight).toNumber(),
             revisionNumber: new BigNumberInBase(execMsg.value.timeoutHeight.revisionNumber).toNumber(),
           },
+        });
+      }
+
+      if (msg.typeUrl === MsgCreateSpotLimitOrder.TYPE) {
+        const createSpotLimitOrderMsg = msg as MsgCreateSpotLimitOrder;
+
+        return InjMsgCreateSpotLimitOrder.fromJSON({
+          subaccountId: createSpotLimitOrderMsg.value.order.subaccountId,
+          injectiveAddress: createSpotLimitOrderMsg.value.sender,
+          marketId: createSpotLimitOrderMsg.value.order.marketId,
+          feeRecipient: createSpotLimitOrderMsg.value.order.feeRecipient,
+          price: createSpotLimitOrderMsg.value.order.price,
+          quantity: createSpotLimitOrderMsg.value.order.quantity,
+          orderType: createSpotLimitOrderMsg.value.order.orderType,
+        });
+      }
+
+      if (msg.typeUrl === MsgCancelSpotOrder.TYPE) {
+        const cancelSpotOrderMsg = msg as MsgCancelSpotOrder;
+
+        return InjMsgCancelSpotOrder.fromJSON({
+          injectiveAddress: cancelSpotOrderMsg.value.sender,
+          marketId: cancelSpotOrderMsg.value.market_id,
+          subaccountId: cancelSpotOrderMsg.value.subaccount_id,
+          orderHash: cancelSpotOrderMsg.value.order_hash,
         });
       }
 
