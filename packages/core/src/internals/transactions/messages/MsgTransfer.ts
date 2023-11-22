@@ -14,6 +14,7 @@ export type MsgTransferValue = {
     revisionHeight: string;
   };
   timeoutTimestamp: string;
+  memo?: string;
 };
 
 export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
@@ -28,6 +29,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
     token,
     timeoutHeight,
     timeoutTimestamp,
+    memo,
   }: MsgTransferValue) {
     super(MsgTransfer.TYPE, MsgTransfer.AMINO_TYPE, {
       sender,
@@ -37,6 +39,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
       token,
       timeoutHeight,
       timeoutTimestamp,
+      memo,
     });
   }
 
@@ -55,6 +58,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
           }
         : undefined,
       timeout_timestamp: this.value.timeoutTimestamp,
+      memo: this.value.memo,
     });
   }
 
@@ -74,6 +78,7 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
             }
           : undefined,
         timeout_timestamp: this.value.timeoutTimestamp,
+        memo: this.value.memo,
       },
     };
   }
