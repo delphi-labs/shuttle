@@ -456,6 +456,10 @@ export function ShuttleProvider({
             }
           });
       });
+
+    return () => {
+      document.removeEventListener("readystatechange", initExtensionProviders);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
