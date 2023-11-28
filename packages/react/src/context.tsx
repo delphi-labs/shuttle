@@ -400,32 +400,38 @@ export function ShuttleProvider({
 
   // Initialize providers
   useEffect(() => {
-    // Force delay to let extensions inject into window
-    setTimeout(() => {
-      extensionProviders
-        .filter((extensionProvider) => !extensionProvider.initializing && !extensionProvider.initialized)
-        .forEach((extensionProvider) => {
-          extensionProvider
-            .init()
-            .then(() => {
-              updateExtensionWallets(extensionProvider);
-
-              extensionProvider.setOnUpdateCallback(() => {
+    const initExtensionProviders = () => {
+      if (document.readyState === "complete") {
+        extensionProviders
+          .filter((extensionProvider) => !extensionProvider.initializing && !extensionProvider.initialized)
+          .forEach((extensionProvider) => {
+            extensionProvider
+              .init()
+              .then(() => {
                 updateExtensionWallets(extensionProvider);
-              });
 
-              setAvailableExtensionProviders((prev) => {
-                const rest = prev.filter((p) => p.id !== extensionProvider.id);
-                return [...rest, extensionProvider];
+                extensionProvider.setOnUpdateCallback(() => {
+                  updateExtensionWallets(extensionProvider);
+                });
+
+                setAvailableExtensionProviders((prev) => {
+                  const rest = prev.filter((p) => p.id !== extensionProvider.id);
+                  return [...rest, extensionProvider];
+                });
+              })
+              .catch((e) => {
+                if (withLogging) {
+                  console.warn("Shuttle: ", e);
+                }
               });
-            })
-            .catch((e) => {
-              if (withLogging) {
-                console.warn("Shuttle: ", e);
-              }
-            });
-        });
-    }, 500);
+          });
+
+        document.removeEventListener("readystatechange", initExtensionProviders);
+      }
+    };
+
+    document.addEventListener("readystatechange", initExtensionProviders);
+    initExtensionProviders();
 
     mobileProviders
       .filter((mobileProvider) => !mobileProvider.initializing && !mobileProvider.initialized)
