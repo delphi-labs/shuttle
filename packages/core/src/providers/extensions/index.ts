@@ -9,3 +9,4 @@ export * from "./FinExtensionProvider";
 export * from "./CompassExtensionProvider";
 export * from "./WalletExtensionProvider";
 export * from "./VectisExtensionProvider";
+export * from "./OkxWalletExtensionProvider";

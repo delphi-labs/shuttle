@@ -13,6 +13,7 @@ import {
   LeapMetamaskCosmosSnapExtensionProvider,
   MetamaskMobileProvider,
   ShuttleProvider,
+  OkxWalletExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -76,6 +77,9 @@ const extensionProviders = [
       NEUTRON_MAINNET,
       NEUTRON_TESTNET,
     ],
+  }),
+  new OkxWalletExtensionProvider({
+    networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
   }),
   new MetamaskExtensionProvider({
     networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
