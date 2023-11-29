@@ -47,7 +47,7 @@ export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
     return {
       type: this.aminoTypeUrl,
       value: {
-        rom: this.value.from,
+        from: this.value.from,
         amount: this.value.amount,
         destination_domain: this.value.destinationDomain,
         mint_recipient: this.value.mintRecipient,
