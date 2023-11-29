@@ -10,3 +10,4 @@ export * from "./MsgInstantiateContract";
 export * from "./MsgMigrateContract";
 export * from "./MsgCreateSpoTLimitOrder";
 export * from "./MsgCancelSpotOrder";
+export * from "./MsgDepositForBurn";

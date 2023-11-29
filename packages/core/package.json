@@ -49,6 +49,7 @@
     "ethereumjs-util": "^7.1.5",
     "long": "^5.2.3",
     "mobile-detect": "^1.4.5",
+    "protobufjs": "^7.2.5",
     "tslib": "^2.6.0",
     "tsup": "^7.1.0"
   },
