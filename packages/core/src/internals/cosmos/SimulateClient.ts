@@ -3,10 +3,11 @@ import { BaseAccount, ChainRestAuthApi, createTransactionAndCosmosSignDoc, TxRes
 
 import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../../internals/network";
 import { WalletConnection } from "../../internals/wallet";
-import { createDefaultRegistry, SimulateResult, TransactionMsg } from "../../internals/transactions";
+import { SimulateResult, TransactionMsg } from "../../internals/transactions";
 import { isInjectiveNetwork, prepareMessagesForInjective } from "../../internals/injective";
 import { Fee } from "../../internals/cosmos";
 import FakeOfflineSigner from "./FakeOfflineSigner";
+import { extendedRegistryTypes } from "../registry";
 
 export class SimulateClient {
   static async run({
@@ -48,8 +49,10 @@ export class SimulateClient {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningStargateClient.connectWithSigner(overrides?.rpc ?? network.rpc, signer, {
       gasPrice,
-      registry: createDefaultRegistry(),
     });
+    for (const [typeUrl, type] of extendedRegistryTypes) {
+      client.registry.register(typeUrl, type);
+    }
 
     const processedMessages = messages.map((message) => message.toCosmosMsg());
 

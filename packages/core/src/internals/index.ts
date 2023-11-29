@@ -5,4 +5,5 @@ export * from "./transactions";
 export * from "./injective";
 export * from "./network";
 export * from "./providers";
+export * from "./registry";
 export * from "./wallet";

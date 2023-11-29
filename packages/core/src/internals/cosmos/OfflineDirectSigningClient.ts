@@ -8,13 +8,14 @@ import {
   createTxRawFromSigResponse,
 } from "@injectivelabs/sdk-ts";
 
-import { createDefaultRegistry, type SigningResult } from "../../internals/transactions";
+import { type SigningResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
 import type { WalletConnection } from "../../internals/wallet";
 import type { Fee } from "../../internals/cosmos";
 import type { Network } from "../../internals/network";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE } from "../../internals/network";
 import { isInjectiveNetwork, prepareMessagesForInjective } from "../../internals/injective";
+import { extendedRegistryTypes } from "../registry";
 
 export class OfflineDirectSigningClient {
   static async sign(
@@ -149,8 +150,10 @@ export class OfflineDirectSigningClient {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
     const client = await SigningStargateClient.connectWithSigner(overrides?.rpc ?? network.rpc, offlineSigner, {
       gasPrice,
-      registry: createDefaultRegistry(),
     });
+    for (const [typeUrl, type] of extendedRegistryTypes) {
+      client.registry.register(typeUrl, type);
+    }
 
     const processedMessages = messages.map((message) => message.toCosmosMsg());
 
