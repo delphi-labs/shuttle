@@ -1,4 +1,4 @@
-import { calculateFee, GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { BaseAccount, ChainRestAuthApi, createTransactionAndCosmosSignDoc, TxRestApi } from "@injectivelabs/sdk-ts";
 
 import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../../internals/network";
@@ -8,6 +8,7 @@ import { isInjectiveNetwork, prepareMessagesForInjective } from "../../internals
 import { Fee } from "../../internals/cosmos";
 import FakeOfflineSigner from "./FakeOfflineSigner";
 import { extendedRegistryTypes } from "../registry";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export class SimulateClient {
   static async run({
@@ -47,7 +48,7 @@ export class SimulateClient {
   }): Promise<SimulateResult> {
     const signer = new FakeOfflineSigner(wallet);
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningStargateClient.connectWithSigner(overrides?.rpc ?? network.rpc, signer, {
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc ?? network.rpc, signer, {
       gasPrice,
     });
     for (const [typeUrl, type] of extendedRegistryTypes) {

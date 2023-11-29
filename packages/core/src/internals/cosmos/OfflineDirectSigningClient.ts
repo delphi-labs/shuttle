@@ -1,4 +1,4 @@
-import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
+import { GasPrice } from "@cosmjs/stargate";
 import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import {
@@ -16,6 +16,7 @@ import type { Network } from "../../internals/network";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE } from "../../internals/network";
 import { isInjectiveNetwork, prepareMessagesForInjective } from "../../internals/injective";
 import { extendedRegistryTypes } from "../registry";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export class OfflineDirectSigningClient {
   static async sign(
@@ -148,7 +149,7 @@ export class OfflineDirectSigningClient {
     },
   ): Promise<SigningResult> {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningStargateClient.connectWithSigner(overrides?.rpc ?? network.rpc, offlineSigner, {
+    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc ?? network.rpc, offlineSigner, {
       gasPrice,
     });
     for (const [typeUrl, type] of extendedRegistryTypes) {
