@@ -1,8 +1,7 @@
 import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { GasPrice } from "@cosmjs/stargate";
+import { GasPrice, SigningStargateClient } from "@cosmjs/stargate";
 
-import type { BroadcastResult } from "../../internals/transactions";
+import { createDefaultRegistry, type BroadcastResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, type Network } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
@@ -33,8 +32,9 @@ export class SignAndBroadcastClient {
     },
   ): Promise<BroadcastResult> {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
+    const client = await SigningStargateClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
       gasPrice,
+      registry: createDefaultRegistry(),
     });
 
     const processedMessages = messages.map((message) => message.toCosmosMsg());
