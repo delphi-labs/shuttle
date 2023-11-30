@@ -122,7 +122,7 @@ export class SimulateClient {
     } catch (error: any) {
       return {
         success: false,
-        error: error?.errorMessage || error?.message,
+        error: error?.originalMessage || error?.message,
       };
     }
   }
