@@ -24,9 +24,13 @@ export default function useFeeEstimate(messages: Ref<TransactionMsg[]>) {
         wallet: wallet.value,
       });
 
+      if (response.success === false) {
+        throw new Error(response.error);
+      }
+
       return {
-        fee: response.fee?.amount[0],
-        gasLimit: response.fee?.gas,
+        fee: response.fee.amount[0],
+        gasLimit: response.fee.gas,
       };
     },
     enabled: isEnabled,

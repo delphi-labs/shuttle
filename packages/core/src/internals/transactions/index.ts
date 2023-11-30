@@ -2,11 +2,17 @@ import { Fee } from "../../internals/cosmos";
 
 export * from "./messages";
 
-export type SimulateResult = {
-  success: boolean;
-  error?: string | null;
-  fee?: Fee | null;
+type SimulateResultSuccess = {
+  success: true;
+  fee: Fee;
 };
+
+type SimulateResultError = {
+  success: false;
+  error: string;
+};
+
+export type SimulateResult = SimulateResultSuccess | SimulateResultError;
 
 export type BroadcastResult = {
   hash: string;
