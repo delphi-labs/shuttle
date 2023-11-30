@@ -23,9 +23,13 @@ export default function useFeeEstimate({ messages }: Props) {
         wallet,
       });
 
+      if (response.success === false) {
+        throw new Error(response.error);
+      }
+
       return {
-        fee: response.fee?.amount[0],
-        gasLimit: response.fee?.gas,
+        fee: response.fee.amount[0],
+        gasLimit: response.fee.gas,
       };
     },
     {
