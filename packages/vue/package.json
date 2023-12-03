@@ -12,7 +12,7 @@
     "vue"
   ],
   "author": "Delphi Labs (delphi-labs)",
-  "license": "GPL-3",
+  "license": "MIT",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "repository": {

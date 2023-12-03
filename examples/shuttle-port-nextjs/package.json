@@ -2,7 +2,7 @@
   "name": "shuttle-port-nextjs",
   "version": "1.0.0",
   "author": "Delphi Labs (delphi-labs)",
-  "license": "GPL-3",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
