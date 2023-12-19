@@ -1,5 +1,6 @@
 import { EthereumChainId } from "@injectivelabs/ts-types";
 import {
+  MsgSend as InjMsgSend,
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
   MsgTransfer as InjMsgTransfer,
   MsgInstantiateContract as InjMsgInstantiateContract,
@@ -11,6 +12,7 @@ import { BigNumberInBase } from "@injectivelabs/utils";
 
 import { nonNullable } from "../utils";
 import {
+  MsgSend,
   MsgExecuteContract,
   MsgInstantiateContract,
   MsgMigrateContract,
@@ -45,6 +47,7 @@ export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): st
 }
 
 export type InjTransactionMsg =
+  | InjMsgSend
   | InjMsgExecuteContractCompat
   | InjMsgInstantiateContract
   | InjMsgMigrateContract
@@ -55,6 +58,16 @@ export type InjTransactionMsg =
 export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTransactionMsg[] {
   return messages
     .map((msg) => {
+      if (msg.typeUrl === MsgSend.TYPE) {
+        const sendMsg = msg as MsgSend;
+
+        return InjMsgSend.fromJSON({
+          srcInjectiveAddress: sendMsg.value.fromAddress,
+          dstInjectiveAddress: sendMsg.value.toAddress,
+          amount: sendMsg.value.amount,
+        });
+      }
+
       if (msg.typeUrl === MsgExecuteContract.TYPE) {
         const execMsg = msg as MsgExecuteContract;
 
