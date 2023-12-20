@@ -14,6 +14,7 @@ import {
   MetamaskMobileProvider,
   ShuttleProvider,
   OkxWalletExtensionProvider,
+  NinjiExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -83,6 +84,9 @@ const extensionProviders = [
   }),
   new MetamaskExtensionProvider({
     networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+  }),
+  new NinjiExtensionProvider({
+    networks: [INJECTIVE_MAINNET],
   }),
 ];
 
