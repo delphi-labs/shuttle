@@ -18,10 +18,12 @@ export const FinExtensionProvider = class FinExtensionProvider extends WalletExt
         name: "Fin",
         useExperimentalSuggestChain: false,
         extensionResolver() {
-          return window.compass;
+          return window.fin;
         },
-        setupOnUpdateEventListener(_callback) {
-          // @TODO - add support for wallet change
+        setupOnUpdateEventListener(callback) {
+          window.addEventListener("accountsChanged", () => {
+            callback?.();
+          });
         },
       }),
     });
