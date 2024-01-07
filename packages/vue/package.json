@@ -1,6 +1,6 @@
 {
   "name": "@delphi-labs/shuttle-vue",
-  "version": "3.17.1",
+  "version": "3.17.2",
   "description": "Shuttle is open-source npm package designed to turn wallet connections into a plug-and-play Lego brick for Cosmos Dapps.",
   "keywords": [
     "dapp",
