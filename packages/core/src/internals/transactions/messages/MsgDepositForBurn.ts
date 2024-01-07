@@ -16,13 +16,6 @@ export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
   static override AMINO_TYPE = "cosmos-sdk/MsgDepositForBurn";
 
   constructor({ from, amount, destinationDomain, mintRecipient, burnToken }: MsgDepositForBurnValue) {
-    console.log(MsgDepositForBurn.TYPE, MsgDepositForBurn.AMINO_TYPE, {
-      from,
-      amount,
-      destinationDomain,
-      mintRecipient,
-      burnToken,
-    });
     super(MsgDepositForBurn.TYPE, MsgDepositForBurn.AMINO_TYPE, {
       from,
       amount,
@@ -58,7 +51,6 @@ export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
 
   override toProtoMsg(): ProtoMsg {
     const cosmosMsg = this.toCosmosMsg();
-    console.log("cosmosMsg", cosmosMsg);
     return {
       typeUrl: this.typeUrl,
       value: NobleMsgDepositForBurn.encode(NobleMsgDepositForBurn.fromPartial(cosmosMsg.value)).finish(),

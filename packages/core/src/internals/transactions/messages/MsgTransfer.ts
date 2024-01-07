@@ -13,7 +13,7 @@ export type MsgTransferValue = {
     revisionNumber: string;
     revisionHeight: string;
   };
-  timeoutTimestamp: string;
+  timeoutTimestamp?: string;
   memo?: string;
 };
 
@@ -53,10 +53,10 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
       token: this.value.token,
       timeout_height: this.value.timeoutHeight
         ? {
-            revision_height: this.value.timeoutHeight.revisionHeight,
             revision_number: this.value.timeoutHeight.revisionNumber,
+            revision_height: this.value.timeoutHeight.revisionHeight,
           }
-        : undefined,
+        : {},
       timeout_timestamp: this.value.timeoutTimestamp,
       memo: this.value.memo,
     });
@@ -73,10 +73,10 @@ export class MsgTransfer extends TransactionMsg<MsgTransferValue> {
         token: this.value.token,
         timeout_height: this.value.timeoutHeight
           ? {
-              revision_height: this.value.timeoutHeight.revisionHeight,
               revision_number: this.value.timeoutHeight.revisionNumber,
+              revision_height: this.value.timeoutHeight.revisionHeight,
             }
-          : undefined,
+          : {},
         timeout_timestamp: this.value.timeoutTimestamp,
         memo: this.value.memo,
       },

@@ -120,11 +120,13 @@ export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTran
           port: execMsg.value.sourcePort,
           channelId: execMsg.value.sourceChannel,
           amount: execMsg.value.token ?? { denom: "", amount: "" },
-          timeout: new BigNumberInBase(execMsg.value.timeoutTimestamp).toNumber(),
-          height: {
-            revisionHeight: new BigNumberInBase(execMsg.value.timeoutHeight.revisionHeight).toNumber(),
-            revisionNumber: new BigNumberInBase(execMsg.value.timeoutHeight.revisionNumber).toNumber(),
-          },
+          timeout: execMsg.value.timeoutTimestamp ? new BigNumberInBase(execMsg.value.timeoutTimestamp).toNumber() : 0,
+          height: execMsg.value.timeoutHeight
+            ? {
+                revisionHeight: new BigNumberInBase(execMsg.value.timeoutHeight.revisionHeight).toNumber(),
+                revisionNumber: new BigNumberInBase(execMsg.value.timeoutHeight.revisionNumber).toNumber(),
+              }
+            : undefined,
         });
       }
 
