@@ -77,7 +77,7 @@ describe("MsgTransfer", () => {
         source_port: "channel-1",
         source_channel: "channel-2",
         token: { amount: "1000000", denom: "uastrod" },
-        timeout_height: { revision_height: "100", revision_number: "1" },
+        timeout_height: { revision_number: "1", revision_height: "100" },
         timeout_timestamp: "1000000000",
       }),
     );
@@ -141,7 +141,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         source_port: "channel-1",
         source_channel: "channel-2",
-        timeout_height: undefined,
+        timeout_height: {},
         timeout_timestamp: "1000000000",
         token: undefined,
       },
@@ -156,6 +156,7 @@ describe("MsgTransfer", () => {
         receiver: "address2",
         source_port: "channel-1",
         source_channel: "channel-2",
+        timeout_height: {},
         timeout_timestamp: "1000000000",
       }),
     );
