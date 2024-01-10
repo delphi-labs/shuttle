@@ -18,6 +18,14 @@ export const KeplrExtensionProvider = class KeplrExtensionProvider extends Walle
         extensionResolver() {
           return window.keplr;
         },
+        onInitialized(keplr) {
+          keplr.defaultOptions = {
+            sign: {
+              preferNoSetFee: true,
+              preferNoSetMemo: true,
+            },
+          };
+        },
         setupOnUpdateEventListener(callback) {
           window.addEventListener("keplr_keystorechange", () => {
             callback?.();

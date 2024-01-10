@@ -79,6 +79,12 @@ export type KeplrWindow = {
     data: string | Uint8Array,
     signature: StdSignature,
   ): Promise<boolean>;
+  defaultOptions?: {
+    sign?: {
+      preferNoSetFee?: boolean;
+      preferNoSetMemo?: boolean;
+    };
+  };
 };
 
 export class Keplr implements ExtensionProviderAdapter {
@@ -87,6 +93,7 @@ export class Keplr implements ExtensionProviderAdapter {
   isAvailable: boolean = false;
   keplr?: KeplrWindow;
   extensionResolver: () => KeplrWindow | undefined;
+  onInitialized: ((keplr: KeplrWindow) => void) | undefined;
   setupOnUpdateEventListener: (callback?: () => void) => void;
 
   constructor({
@@ -94,16 +101,19 @@ export class Keplr implements ExtensionProviderAdapter {
     useExperimentalSuggestChain,
     extensionResolver,
     setupOnUpdateEventListener,
+    onInitialized,
   }: {
     name?: string;
     useExperimentalSuggestChain?: boolean;
     extensionResolver: () => KeplrWindow | undefined;
     setupOnUpdateEventListener: (callback?: () => void) => void;
+    onInitialized?: (keplr: KeplrWindow) => void;
   }) {
     this.name = name || "Keplr";
     this.useExperimentalSuggestChain = useExperimentalSuggestChain ?? true;
     this.extensionResolver = extensionResolver;
     this.setupOnUpdateEventListener = setupOnUpdateEventListener;
+    this.onInitialized = onInitialized;
   }
 
   async init(provider: WalletExtensionProvider): Promise<void> {
@@ -118,6 +128,8 @@ export class Keplr implements ExtensionProviderAdapter {
     });
 
     this.isAvailable = true;
+
+    this.onInitialized?.(this.keplr);
   }
 
   isReady(): boolean {
