@@ -11,3 +11,4 @@ export * from "./WalletExtensionProvider";
 export * from "./VectisExtensionProvider";
 export * from "./OkxWalletExtensionProvider";
 export * from "./NinjiExtensionProvider";
+export * from "./BitgetExtensionProvider";
