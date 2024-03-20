@@ -50,7 +50,7 @@ export const createShuttleStore: StateCreator<ShuttleStore> = (set, state) => ({
 
       if (filters.providerId && filters.chainId) {
         wallets = wallets.filter(
-          (wallet) => wallet.providerId !== filters.providerId && wallet.network.chainId !== filters.chainId,
+          (wallet) => wallet.providerId !== filters.providerId || wallet.network.chainId !== filters.chainId,
         );
       } else if (filters.providerId && !filters.chainId) {
         wallets = wallets.filter((wallet) => wallet.providerId !== filters.providerId);

@@ -67,7 +67,7 @@ export const useShuttleStore = defineStore<
       let wallets = this.wallets;
       if (filters.providerId && filters.chainId) {
         wallets = wallets.filter(
-          (wallet) => wallet.providerId !== filters.providerId && wallet.network.chainId !== filters.chainId,
+          (wallet) => wallet.providerId !== filters.providerId || wallet.network.chainId !== filters.chainId,
         );
       } else if (filters.providerId && !filters.chainId) {
         wallets = wallets.filter((wallet) => wallet.providerId !== filters.providerId);
