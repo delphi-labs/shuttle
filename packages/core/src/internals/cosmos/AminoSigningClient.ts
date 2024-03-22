@@ -35,6 +35,7 @@ export class AminoSigningClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<StdSignDoc> {
     const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);

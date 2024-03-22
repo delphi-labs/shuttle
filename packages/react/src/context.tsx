@@ -30,7 +30,15 @@ export type ShuttleContextType = {
   recentWallet: WalletConnection | null;
   disconnect: (filters?: { providerId?: string; chainId?: string }) => void;
   disconnectWallet: (wallet: WalletConnection) => void;
-  simulate: (options: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => Promise<SimulateResult>;
+  simulate: (options: {
+    messages: TransactionMsg[];
+    wallet?: WalletConnection | null;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+      gasAdjustment?: number;
+    };
+  }) => Promise<SimulateResult>;
   broadcast: (options: {
     messages: TransactionMsg[];
     wallet?: WalletConnection | null;
@@ -40,6 +48,7 @@ export type ShuttleContextType = {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }) => Promise<BroadcastResult>;
   sign: (options: {
@@ -48,6 +57,11 @@ export type ShuttleContextType = {
     gasLimit?: string | null;
     memo?: string | null;
     wallet?: WalletConnection | null;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+      gasAdjustment?: number;
+    };
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
   verifyArbitrary: (options: {
@@ -200,7 +214,19 @@ export function ShuttleProvider({
       removeWallet(wallet);
     };
 
-    const simulate = async ({ messages, wallet }: { messages: TransactionMsg[]; wallet?: WalletConnection | null }) => {
+    const simulate = async ({
+      messages,
+      wallet,
+      overrides,
+    }: {
+      messages: TransactionMsg[];
+      wallet?: WalletConnection | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+      };
+    }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
         throw new Error("No wallet to simulate with");
@@ -214,7 +240,7 @@ export function ShuttleProvider({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.simulate({ messages, wallet: walletToUse });
+      return provider.simulate({ messages, wallet: walletToUse, overrides });
     };
 
     const broadcast = async ({
@@ -233,6 +259,7 @@ export function ShuttleProvider({
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     }) => {
       const walletToUse = wallet || recentWallet;
@@ -257,12 +284,18 @@ export function ShuttleProvider({
       gasLimit,
       memo,
       wallet,
+      overrides,
     }: {
       messages: TransactionMsg[];
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
       wallet?: WalletConnection | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+      };
     }) => {
       const walletToUse = wallet || recentWallet;
       if (!walletToUse) {
@@ -277,7 +310,7 @@ export function ShuttleProvider({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo });
+      return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, overrides });
     };
 
     const signArbitrary = async ({ wallet, data }: { wallet?: WalletConnection | null; data: Uint8Array }) => {

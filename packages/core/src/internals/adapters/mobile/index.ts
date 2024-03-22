@@ -29,6 +29,7 @@ export interface MobileProviderAdapter {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
       intents: { androidUrl: string; iosUrl: string };
     },

@@ -194,7 +194,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       feeAmount?: string | null | undefined;
       gasLimit?: string | null | undefined;
       memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {

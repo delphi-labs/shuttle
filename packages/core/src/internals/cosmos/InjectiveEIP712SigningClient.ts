@@ -44,6 +44,7 @@ export class InjectiveEIP712SigningClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<{
     messages: InjTransactionMsg[];

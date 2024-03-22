@@ -83,9 +83,15 @@ export abstract class WalletExtensionProvider {
   async simulate({
     messages,
     wallet,
+    overrides,
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
+    overrides?: {
+      rpc?: string;
+      rest?: string;
+      gasAdjustment?: number;
+    };
   }): Promise<SimulateResult> {
     if (!this.extensionProviderAdapter.isReady()) {
       throw new Error(`${this.name} is not available`);
@@ -107,6 +113,7 @@ export abstract class WalletExtensionProvider {
       network,
       wallet,
       messages,
+      overrides,
     });
   }
 
@@ -126,6 +133,7 @@ export abstract class WalletExtensionProvider {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<SigningResult> {
     if (!this.extensionProviderAdapter.isReady()) {
@@ -171,6 +179,7 @@ export abstract class WalletExtensionProvider {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<BroadcastResult> {
     if (!this.extensionProviderAdapter.isReady()) {

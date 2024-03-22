@@ -17,6 +17,7 @@ export class BroadcastClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<BroadcastResult> {
     if (isInjectiveNetwork(network.chainId)) {
@@ -36,6 +37,7 @@ export class BroadcastClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<BroadcastResult> {
     const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
@@ -59,6 +61,7 @@ export class BroadcastClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<BroadcastResult> {
     const txRestApi = new TxRestApi(overrides?.rest || network.rest);

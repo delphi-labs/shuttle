@@ -39,6 +39,7 @@ export class OfflineDirectSigningClient {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<SigningResult> {
@@ -85,6 +86,7 @@ export class OfflineDirectSigningClient {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<SigningResult> {
@@ -145,6 +147,7 @@ export class OfflineDirectSigningClient {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<SigningResult> {

@@ -30,6 +30,7 @@ export class SignAndBroadcastClient {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<BroadcastResult> {

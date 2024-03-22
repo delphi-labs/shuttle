@@ -175,6 +175,7 @@ export abstract class WalletMobileProvider {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<SigningResult> {
     if (!this.mobileProviderAdapter.isReady()) {
@@ -228,6 +229,7 @@ export abstract class WalletMobileProvider {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<BroadcastResult> {
     if (!this.mobileProviderAdapter.isReady()) {

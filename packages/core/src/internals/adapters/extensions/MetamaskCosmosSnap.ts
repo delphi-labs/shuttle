@@ -133,7 +133,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       feeAmount?: string | null | undefined;
       gasLimit?: string | null | undefined;
       memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
     },
   ): Promise<SigningResult> {
     if (!this.ethereum) {
@@ -195,7 +195,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       feeAmount?: string | null | undefined;
       gasLimit?: string | null | undefined;
       memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
     },
   ): Promise<BroadcastResult> {
     if (!this.ethereum) {

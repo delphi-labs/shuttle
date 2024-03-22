@@ -24,6 +24,7 @@ export interface ExtensionProviderAdapter {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<SigningResult>;
@@ -39,6 +40,7 @@ export interface ExtensionProviderAdapter {
       overrides?: {
         rpc?: string;
         rest?: string;
+        gasAdjustment?: number;
       };
     },
   ): Promise<BroadcastResult>;

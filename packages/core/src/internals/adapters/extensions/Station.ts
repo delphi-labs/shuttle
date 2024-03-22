@@ -148,6 +148,7 @@ export class Station implements ExtensionProviderAdapter {
       feeAmount,
       gasLimit,
       memo,
+      overrides,
     }: {
       network: Network;
       messages: TransactionMsg<any>[];
@@ -155,7 +156,7 @@ export class Station implements ExtensionProviderAdapter {
       feeAmount?: string | null | undefined;
       gasLimit?: string | null | undefined;
       memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
     },
   ): Promise<SigningResult> {
     if (!this.extension) {
@@ -168,6 +169,7 @@ export class Station implements ExtensionProviderAdapter {
           network,
           wallet,
           messages,
+          overrides,
         });
         if (simulate.success) {
           feeAmount = simulate.fee?.amount[0].amount;
@@ -208,6 +210,7 @@ export class Station implements ExtensionProviderAdapter {
       feeAmount,
       gasLimit,
       memo,
+      overrides,
     }: {
       network: Network;
       messages: TransactionMsg<any>[];
@@ -215,7 +218,7 @@ export class Station implements ExtensionProviderAdapter {
       feeAmount?: string | null | undefined;
       gasLimit?: string | null | undefined;
       memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined } | undefined;
+      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
     },
   ): Promise<BroadcastResult> {
     if (!this.extension) {
@@ -228,6 +231,7 @@ export class Station implements ExtensionProviderAdapter {
           network,
           wallet,
           messages,
+          overrides,
         });
         if (simulate.success) {
           feeAmount = simulate.fee?.amount[0].amount;

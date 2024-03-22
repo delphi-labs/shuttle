@@ -23,6 +23,7 @@ export class SimulateClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<SimulateResult> {
     if (isInjectiveNetwork(network.chainId)) {
@@ -44,6 +45,7 @@ export class SimulateClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<SimulateResult> {
     const signer = new FakeOfflineSigner(wallet);
@@ -61,7 +63,7 @@ export class SimulateClient {
       const gasEstimation = await client.simulate(wallet.account.address, processedMessages, "");
 
       const fee = calculateFee(
-        Math.round(gasEstimation * DEFAULT_GAS_MULTIPLIER),
+        Math.round(gasEstimation * (overrides?.gasAdjustment ?? DEFAULT_GAS_MULTIPLIER)),
         network.gasPrice || DEFAULT_GAS_PRICE,
       ) as Fee;
 
@@ -89,6 +91,7 @@ export class SimulateClient {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
     };
   }): Promise<SimulateResult> {
     const chainRestAuthApi = new ChainRestAuthApi(overrides?.rest ?? network.rest);
@@ -111,7 +114,9 @@ export class SimulateClient {
       const txClientSimulateResponse = await txRestApi.simulate(txRaw);
 
       const fee = calculateFee(
-        Math.round((txClientSimulateResponse.gasInfo?.gasUsed || 0) * DEFAULT_GAS_MULTIPLIER),
+        Math.round(
+          (txClientSimulateResponse.gasInfo?.gasUsed || 0) * (overrides?.gasAdjustment ?? DEFAULT_GAS_MULTIPLIER),
+        ),
         network.gasPrice || "0.0005inj",
       ) as Fee;
 
