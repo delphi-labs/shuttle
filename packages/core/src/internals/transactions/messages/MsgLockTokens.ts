@@ -1,11 +1,12 @@
 import { Coin } from "@cosmjs/amino";
 
-import { MsgLockTokens as OsmosisMsgLockTokens } from "../../../externals/osmosis";
-import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import { MsgLockTokens as OsmosisMsgLockTokens } from "../../../externals/osmosis/lockup";
+import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Duration } from "../../../externals/osmosis/duration";
 
 export type MsgLockTokensValue = {
   owner: string;
-  duration: string;
+  duration: Duration;
   coins: Coin[];
 };
 
@@ -16,16 +17,26 @@ export class MsgLockTokens extends TransactionMsg<MsgLockTokensValue> {
   constructor({ owner, duration, coins }: MsgLockTokensValue) {
     super(MsgLockTokens.TYPE, MsgLockTokens.AMINO_TYPE, {
       owner,
-      duration: (Number(duration) * 1_000_000_000).toString(),
+      duration,
       coins,
     });
+  }
+
+  override toAminoMsg(): AminoMsg {
+    return {
+      type: this.aminoTypeUrl,
+      value: {
+        ...this.value,
+        duration: Number(this.value.duration.seconds.toString()) * 1_000_000_000,
+      },
+    };
   }
 
   override toProtoMsg(): ProtoMsg {
     const cosmosMsg = this.toCosmosMsg();
     return {
       typeUrl: this.typeUrl,
-      value: new OsmosisMsgLockTokens(OsmosisMsgLockTokens.fromJson(cosmosMsg.value)).toBinary(),
+      value: OsmosisMsgLockTokens.encode(OsmosisMsgLockTokens.fromPartial(cosmosMsg.value)).finish(),
     };
   }
 }

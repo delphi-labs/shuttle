@@ -12,3 +12,4 @@ export * from "./MsgCreateSpoTLimitOrder";
 export * from "./MsgCancelSpotOrder";
 export * from "./MsgDepositForBurn";
 export * from "./MsgLockTokens";
+export * from "./MsgBeginUnlocking";
