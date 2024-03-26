@@ -6,7 +6,7 @@ importers:
     devDependencies:
       '@turbo/gen':
         specifier: ^1.9.7
-        version: 1.9.7(@types/node@18.17.15)(typescript@5.2.2)
+        version: 1.9.7(@types/node@17.0.12)(typescript@5.2.2)
       eslint:
         specifier: ^7.32.0
         version: 7.32.0
@@ -162,6 +162,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@bufbuild/protobuf':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@cosmjs/amino':
         specifier: ^0.31.0
         version: 0.31.0
@@ -807,6 +810,10 @@ packages:
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
+
+  /@bufbuild/protobuf@1.8.0:
+    resolution: {integrity: sha512-qR9FwI8QKIveDnUYutvfzbC21UZJJryYrLuZGjeZ/VGz+vXelUkK+xgkOHsvPEdYEdxtgUUq4313N8QtOehJ1Q==}
+    dev: false
 
   /@confio/ics23@0.6.8:
     resolution: {integrity: sha512-wB6uo+3A50m0sW/EWcU64xpV/8wShZ6bMTa7pF8eYsTrSkQA7oLUIJcs/wb8g4y2Oyq701BaGiO6n/ak5WXO1w==}
@@ -3044,7 +3051,7 @@ packages:
     resolution: {integrity: sha512-UqdfvuJK0SArA2CxhKWwwAWfnVSXiYe63bVpMutc27vpngCntGUZQETO24pEJ46zU6XM+7SpqYoMgcO3bM11Ew==}
     dev: true
 
-  /@turbo/gen@1.9.7(@types/node@18.17.15)(typescript@5.2.2):
+  /@turbo/gen@1.9.7(@types/node@17.0.12)(typescript@5.2.2):
     resolution: {integrity: sha512-mjenROdRNvYxZixNfamJY/XxwKMT+01PuQby8+qdRUUa5ZLBPOv4rw11n+II1O8ZnpFpBJIGGFJcnRNY+lCddw==}
     hasBin: true
     dependencies:
@@ -3055,7 +3062,7 @@ packages:
       minimatch: 9.0.3
       node-plop: 0.26.3
       semver: 7.5.4
-      ts-node: 10.9.1(@types/node@18.17.15)(typescript@5.2.2)
+      ts-node: 10.9.1(@types/node@17.0.12)(typescript@5.2.2)
       update-check: 1.5.4
       validate-npm-package-name: 5.0.0
     transitivePeerDependencies:
@@ -9940,7 +9947,7 @@ packages:
       yargs-parser: 21.1.1
     dev: true
 
-  /ts-node@10.9.1(@types/node@18.17.15)(typescript@5.2.2):
+  /ts-node@10.9.1(@types/node@17.0.12)(typescript@5.2.2):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -9959,7 +9966,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 18.17.15
+      '@types/node': 17.0.12
       acorn: 8.10.0
       acorn-walk: 8.2.0
       arg: 4.1.3
