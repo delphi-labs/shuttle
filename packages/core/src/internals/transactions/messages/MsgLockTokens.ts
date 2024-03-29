@@ -1,8 +1,7 @@
-import { Coin } from "@cosmjs/amino";
-
 import { MsgLockTokens as OsmosisMsgLockTokens } from "../../../externals/osmosis/lockup";
 import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 import { Duration } from "../../../externals/osmosis/duration";
+import { Coin } from "../../../externals/osmosis/coin";
 
 export type MsgLockTokensValue = {
   owner: string;
@@ -27,7 +26,8 @@ export class MsgLockTokens extends TransactionMsg<MsgLockTokensValue> {
       type: this.aminoTypeUrl,
       value: {
         ...this.value,
-        duration: Number(this.value.duration.seconds.toString()) * 1_000_000_000,
+        duration: Duration.toAmino(this.value.duration),
+        coins: this.value.coins.map((coin) => Coin.toAmino(coin)),
       },
     };
   }
