@@ -1,8 +1,8 @@
-import { Coin } from "@cosmjs/amino";
 import Long from "long";
 
 import { MsgBeginUnlocking as OsmosisMsgBeginUnlocking } from "../../../externals/osmosis/lockup";
-import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
+import { Coin } from "../../../externals/osmosis/coin";
 
 export type MsgBeginUnlockingValue = {
   owner: string;
@@ -20,6 +20,17 @@ export class MsgBeginUnlocking extends TransactionMsg<MsgBeginUnlockingValue> {
       ID,
       coins,
     });
+  }
+
+  override toAminoMsg(): AminoMsg {
+    return {
+      type: this.aminoTypeUrl,
+      value: {
+        ...this.value,
+        ID: this.value.ID.toString(),
+        coins: this.value.coins?.map((coin) => Coin.toAmino(coin)) ?? [],
+      },
+    };
   }
 
   override toProtoMsg(): ProtoMsg {
