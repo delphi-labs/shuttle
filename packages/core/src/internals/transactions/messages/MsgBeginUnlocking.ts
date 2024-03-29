@@ -1,8 +1,7 @@
-import { AminoMsg } from "@cosmjs/amino";
 import Long from "long";
 
 import { MsgBeginUnlocking as OsmosisMsgBeginUnlocking } from "../../../externals/osmosis/lockup";
-import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import TransactionMsg, { AminoMsg, ProtoMsg } from "./TransactionMsg";
 import { Coin } from "../../../externals/osmosis/coin";
 
 export type MsgBeginUnlockingValue = {
