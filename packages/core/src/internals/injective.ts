@@ -114,7 +114,7 @@ export function prepareMessagesForInjective(messages: TransactionMsg[]): InjTran
         }
 
         return InjMsgTransfer.fromJSON({
-          memo: "IBC Transfer",
+          memo: execMsg.value.memo ?? "IBC Transfer",
           sender: execMsg.value.sender,
           receiver: execMsg.value.receiver,
           port: execMsg.value.sourcePort,
