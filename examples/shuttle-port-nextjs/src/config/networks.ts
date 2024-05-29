@@ -146,6 +146,34 @@ export const NEUTRON_TESTNET: Network = {
   gasPrice: "0.025untrn",
 };
 
+export const ORAI_MAINNET: Network = {
+  name: "Oraichain Mainnet",
+  chainId: "Oraichain",
+  chainPrefix: "orai",
+  rpc: "https://rpc.orai.io",
+  rest: "https://lcd.orai.io",
+  defaultCurrency: {
+    coinDenom: "ORAI",
+    coinMinimalDenom: "orai",
+    coinDecimals: 6,
+  },
+  gasPrice: "0.025orai",
+};
+
+export const ORAI_TESTNET: Network = {
+  name: "Oraichain Testnet",
+  chainId: "Oraichain-testnet",
+  chainPrefix: "orai",
+  rpc: "https://testnet-rpc.orai.io",
+  rest: "https://testnet-lcd.orai.io",
+  defaultCurrency: {
+    coinDenom: "ORAI",
+    coinMinimalDenom: "orai",
+    coinDecimals: 6,
+  },
+  gasPrice: "0.025orai",
+};
+
 export const DEFAULT_MAINNET = TERRA_MAINNET;
 
 export const networks = [
@@ -157,6 +185,8 @@ export const networks = [
   MARS_MAINNET,
   NEUTRON_MAINNET,
   NEUTRON_TESTNET,
+  ORAI_MAINNET,
+  ORAI_TESTNET,
 ];
 
 export function getNetworkByChainId(chainId: string): Network {

@@ -15,6 +15,7 @@ import {
   ShuttleProvider,
   OkxWalletExtensionProvider,
   NinjiExtensionProvider,
+  OWalletCosmosExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -27,6 +28,8 @@ import {
   INJECTIVE_TESTNET,
   NEUTRON_MAINNET,
   NEUTRON_TESTNET,
+  ORAI_MAINNET,
+  ORAI_TESTNET,
 } from "@/config/networks";
 import Header from "@/components/Header";
 
@@ -88,6 +91,9 @@ const extensionProviders = [
   new NinjiExtensionProvider({
     networks: [INJECTIVE_MAINNET],
   }),
+  new OWalletCosmosExtensionProvider({
+    networks: [ORAI_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
+  })
 ];
 
 const mobileProviders = [
