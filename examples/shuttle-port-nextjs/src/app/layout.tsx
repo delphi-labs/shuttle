@@ -101,7 +101,7 @@ const extensionProviders = [
     allowedParentOrigins: ["UNSAFE_ALLOW_ANY_ORIGIN"],
   }),
   new CitadelOneExtensionProvider({
-    networks: [OSMOSIS_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
+    networks: [OSMOSIS_MAINNET],
   }),
 ];
 

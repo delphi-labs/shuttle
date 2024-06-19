@@ -15,6 +15,7 @@ import {
   MetamaskMobileProvider,
   StationExtensionProvider,
   XDEFICosmosExtensionProvider,
+  CitadelOneExtensionProvider,
   createShuttle,
 } from "@delphi-labs/shuttle-vue";
 
@@ -54,6 +55,9 @@ const shuttle = createShuttle({
     }),
     new MetamaskExtensionProvider({
       networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+    }),
+    new CitadelOneExtensionProvider({
+      networks: [OSMOSIS_MAINNET],
     }),
   ],
   mobileProviders: [
