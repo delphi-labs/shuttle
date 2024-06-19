@@ -17,6 +17,7 @@ import {
   NinjiExtensionProvider,
   OWalletCosmosExtensionProvider,
   CosmiframeExtensionProvider,
+  CitadelOneExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -98,6 +99,9 @@ const extensionProviders = [
   new CosmiframeExtensionProvider({
     networks: [NEUTRON_MAINNET],
     allowedParentOrigins: ["UNSAFE_ALLOW_ANY_ORIGIN"],
+  }),
+  new CitadelOneExtensionProvider({
+    networks: [OSMOSIS_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
   }),
 ];
 
