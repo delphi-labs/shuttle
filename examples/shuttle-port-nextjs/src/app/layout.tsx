@@ -96,7 +96,7 @@ const extensionProviders = [
     networks: [ORAI_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
   }),
   new CitadelOneExtensionProvider({
-    networks: [OSMOSIS_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
+    networks: [OSMOSIS_MAINNET],
   })
 ];
 
