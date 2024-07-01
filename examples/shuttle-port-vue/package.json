@@ -11,7 +11,7 @@
     "prettier": "prettier --write src/"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.31.0",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@delphi-labs/shuttle-vue": "workspace:*",
     "@tanstack/vue-query": "^4.29.20",
     "bech32": "^2.0.0",

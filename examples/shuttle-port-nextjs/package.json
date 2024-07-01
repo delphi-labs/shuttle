@@ -10,7 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cosmjs/cosmwasm-stargate": "^0.30.1",
+    "@cosmjs/cosmwasm-stargate": "^0.32.4",
     "@delphi-labs/shuttle-react": "workspace:*",
     "@tanstack/react-query": "^4.29.12",
     "bech32": "^2.0.0",
