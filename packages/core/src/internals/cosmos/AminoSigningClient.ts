@@ -1,4 +1,3 @@
-import Long from "long";
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { GasPrice } from "@cosmjs/stargate";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
@@ -126,12 +125,12 @@ export class AminoSigningClient {
               },
               multi: undefined,
             },
-            sequence: Long.fromString(signResponse.signed.sequence),
+            sequence: BigInt(signResponse.signed.sequence),
           },
         ],
         fee: CosmosFee.fromPartial({
           amount: signResponse.signed.fee.amount as Coin[],
-          gasLimit: signResponse.signed.fee.gas,
+          gasLimit: BigInt(signResponse.signed.fee.gas),
           payer: undefined,
         }),
       }).finish(),
