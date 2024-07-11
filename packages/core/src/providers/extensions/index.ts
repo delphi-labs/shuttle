@@ -13,3 +13,4 @@ export * from "./OkxWalletExtensionProvider";
 export * from "./NinjiExtensionProvider";
 export * from "./BitgetExtensionProvider";
 export * from "./OWalletCosmosExtensionProvider";
+export * from "./CosmiframeExtensionProvider";
