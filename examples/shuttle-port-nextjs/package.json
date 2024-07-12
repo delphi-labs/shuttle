@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@cosmjs/cosmwasm-stargate": "^0.32.4",
+    "@dao-dao/cosmiframe": "^0.1.0",
     "@delphi-labs/shuttle-react": "workspace:*",
     "@tanstack/react-query": "^4.29.12",
     "bech32": "^2.0.0",

@@ -16,6 +16,7 @@ import {
   OkxWalletExtensionProvider,
   NinjiExtensionProvider,
   OWalletCosmosExtensionProvider,
+  CosmiframeExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -93,7 +94,11 @@ const extensionProviders = [
   }),
   new OWalletCosmosExtensionProvider({
     networks: [ORAI_MAINNET, ORAI_TESTNET, INJECTIVE_MAINNET],
-  })
+  }),
+  new CosmiframeExtensionProvider({
+    networks: [NEUTRON_MAINNET],
+    allowedParentOrigins: ["UNSAFE_ALLOW_ANY_ORIGIN"],
+  }),
 ];
 
 const mobileProviders = [

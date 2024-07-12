@@ -52,7 +52,8 @@ interface KeplrKey {
   isKeystone: boolean;
   isNanoLedger: boolean;
   name: string;
-  pubKey: Uint8Array;
+  pubKey?: Uint8Array;
+  pubkey?: Uint8Array;
 }
 
 export type KeplrWindow = {
@@ -192,7 +193,7 @@ export class Keplr implements ExtensionProviderAdapter {
       providerId: provider.id,
       account: {
         address: account.bech32Address,
-        pubkey: toBase64(account.pubKey),
+        pubkey: toBase64(account.pubKey || account.pubkey || new Uint8Array(0)),
         algo: account.algo as Algo,
         isLedger: account.isNanoLedger,
       },
