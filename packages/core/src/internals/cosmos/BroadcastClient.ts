@@ -47,6 +47,7 @@ export class BroadcastClient {
     return {
       hash: broadcast.transactionHash,
       rawLogs: broadcast.rawLog || "",
+      events: broadcast.events,
       response: broadcast,
     };
   }
@@ -76,6 +77,7 @@ export class BroadcastClient {
     return {
       hash: response.txHash,
       rawLogs: response.rawLog,
+      events: response.events ?? [],
       response: response,
     };
   }

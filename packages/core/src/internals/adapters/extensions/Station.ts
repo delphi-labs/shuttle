@@ -272,6 +272,7 @@ export class Station implements ExtensionProviderAdapter {
     return {
       hash: tx.hash,
       rawLogs: tx.rawLog,
+      events: tx.events,
       response: tx,
     };
   }
