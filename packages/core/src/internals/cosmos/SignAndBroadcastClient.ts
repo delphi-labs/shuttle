@@ -59,6 +59,7 @@ export class SignAndBroadcastClient {
     return {
       hash: broadcast.transactionHash,
       rawLogs: broadcast.rawLog || "",
+      events: broadcast.events,
       response: broadcast,
     };
   }

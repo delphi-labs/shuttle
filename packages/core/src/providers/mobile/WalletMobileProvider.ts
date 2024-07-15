@@ -261,6 +261,7 @@ export abstract class WalletMobileProvider {
       return {
         hash: "",
         rawLogs: "",
+        events: [],
         response: null,
       };
     }
