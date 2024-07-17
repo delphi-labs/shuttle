@@ -15,3 +15,4 @@ export * from "./BitgetExtensionProvider";
 export * from "./OWalletCosmosExtensionProvider";
 export * from "./CosmiframeExtensionProvider";
 export * from "./CitadelOneExtensionProvider";
+export * from "./SafePalExtensionProvider";

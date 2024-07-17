@@ -18,6 +18,7 @@ import {
   OWalletCosmosExtensionProvider,
   CosmiframeExtensionProvider,
   CitadelOneExtensionProvider,
+  SafePalExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -102,6 +103,9 @@ const extensionProviders = [
   }),
   new CitadelOneExtensionProvider({
     networks: [OSMOSIS_MAINNET],
+  }),
+  new SafePalExtensionProvider({
+    networks: [TERRA_MAINNET, INJECTIVE_MAINNET],
   }),
 ];
 
