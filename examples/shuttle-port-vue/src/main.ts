@@ -16,6 +16,7 @@ import {
   StationExtensionProvider,
   XDEFICosmosExtensionProvider,
   CitadelOneExtensionProvider,
+  SafePalExtensionProvider,
   createShuttle,
 } from "@delphi-labs/shuttle-vue";
 
@@ -58,6 +59,9 @@ const shuttle = createShuttle({
     }),
     new CitadelOneExtensionProvider({
       networks: [OSMOSIS_MAINNET],
+    }),
+    new SafePalExtensionProvider({
+      networks: [TERRA_MAINNET, INJECTIVE_MAINNET],
     }),
   ],
   mobileProviders: [
