@@ -1,7 +1,7 @@
 import { calculateFee, GasPrice } from "@cosmjs/stargate";
 import { BaseAccount, ChainRestAuthApi, createTransactionAndCosmosSignDoc, TxRestApi } from "@injectivelabs/sdk-ts";
 
-import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network } from "../../internals/network";
+import { DEFAULT_GAS_MULTIPLIER, DEFAULT_GAS_PRICE, Network, NetworkCurrency } from "../../internals/network";
 import { WalletConnection } from "../../internals/wallet";
 import { SimulateResult, TransactionMsg } from "../../internals/transactions";
 import { isInjectiveNetwork, prepareMessagesForInjective } from "../../internals/injective";
@@ -24,6 +24,8 @@ export class SimulateClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SimulateResult> {
     if (isInjectiveNetwork(network.chainId)) {
@@ -46,10 +48,12 @@ export class SimulateClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SimulateResult> {
     const signer = new FakeOfflineSigner(wallet);
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc ?? network.rpc, signer, {
       gasPrice,
     });
@@ -64,7 +68,7 @@ export class SimulateClient {
 
       const fee = calculateFee(
         Math.round(gasEstimation * (overrides?.gasAdjustment ?? DEFAULT_GAS_MULTIPLIER)),
-        network.gasPrice || DEFAULT_GAS_PRICE,
+        overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE,
       ) as Fee;
 
       return {
@@ -92,6 +96,8 @@ export class SimulateClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SimulateResult> {
     const chainRestAuthApi = new ChainRestAuthApi(overrides?.rest ?? network.rest);
@@ -117,7 +123,7 @@ export class SimulateClient {
         Math.round(
           (txClientSimulateResponse.gasInfo?.gasUsed || 0) * (overrides?.gasAdjustment ?? DEFAULT_GAS_MULTIPLIER),
         ),
-        network.gasPrice || "0.0005inj",
+        overrides?.gasPrice ?? network.gasPrice ?? "0.0005inj",
       ) as Fee;
 
       return {

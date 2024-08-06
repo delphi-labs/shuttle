@@ -12,6 +12,7 @@ import {
   SimulateResult,
   BroadcastResult,
   SigningResult,
+  NetworkCurrency,
 } from "@delphi-labs/shuttle";
 
 import { ShuttleStore, useShuttleStore } from "./store";
@@ -37,6 +38,8 @@ export type ShuttleContextType = {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }) => Promise<SimulateResult>;
   broadcast: (options: {
@@ -49,6 +52,8 @@ export type ShuttleContextType = {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }) => Promise<BroadcastResult>;
   sign: (options: {
@@ -61,6 +66,8 @@ export type ShuttleContextType = {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
@@ -225,6 +232,8 @@ export function ShuttleProvider({
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     }) => {
       const walletToUse = wallet || recentWallet;
@@ -260,6 +269,8 @@ export function ShuttleProvider({
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     }) => {
       const walletToUse = wallet || recentWallet;
@@ -295,6 +306,8 @@ export function ShuttleProvider({
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     }) => {
       const walletToUse = wallet || recentWallet;

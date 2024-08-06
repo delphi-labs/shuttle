@@ -1,7 +1,7 @@
 import type { BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
 import type { ExtensionProviderAdapter } from "../../internals/adapters";
-import type { Network } from "../../internals/network";
+import type { Network, NetworkCurrency } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
 
@@ -91,6 +91,8 @@ export abstract class WalletExtensionProvider {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SimulateResult> {
     if (!this.extensionProviderAdapter.isReady()) {
@@ -134,6 +136,8 @@ export abstract class WalletExtensionProvider {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SigningResult> {
     if (!this.extensionProviderAdapter.isReady()) {
@@ -180,6 +184,8 @@ export abstract class WalletExtensionProvider {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<BroadcastResult> {
     if (!this.extensionProviderAdapter.isReady()) {

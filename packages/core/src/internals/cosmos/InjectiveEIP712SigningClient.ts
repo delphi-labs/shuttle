@@ -17,7 +17,7 @@ import {
   fromInjectiveCosmosChainToEthereumChain,
   prepareMessagesForInjective,
 } from "../../internals/injective";
-import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, type Network } from "../../internals/network";
+import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, NetworkCurrency, type Network } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import type { SigningResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
@@ -45,14 +45,17 @@ export class InjectiveEIP712SigningClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<{
     messages: InjTransactionMsg[];
     eip712TypedData: Eip712TypedData;
     signDoc: StdSignDoc & { timeout_height: string };
   }> {
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
+    const feeCurrency =
+      overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
 
     let fee: Fee = {

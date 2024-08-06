@@ -1,7 +1,7 @@
 import { GasPrice } from "@cosmjs/stargate";
 import { fromBase64 } from "@cosmjs/encoding";
 
-import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, type Network } from "../../../internals/network";
+import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, NetworkCurrency, type Network } from "../../../internals/network";
 import type { SigningResult, BroadcastResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import { Algos, type WalletConnection } from "../../../internals/wallet";
@@ -153,10 +153,16 @@ export class Station implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<SigningResult> {
     if (!this.extension) {
@@ -180,8 +186,9 @@ export class Station implements ExtensionProviderAdapter {
       }
     }
 
-    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const feeCurrency =
+      overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
@@ -215,10 +222,16 @@ export class Station implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<BroadcastResult> {
     if (!this.extension) {
@@ -241,8 +254,9 @@ export class Station implements ExtensionProviderAdapter {
         /* empty */
       }
     }
-    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const feeCurrency =
+      overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
     const fee = JSON.stringify({
       amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],

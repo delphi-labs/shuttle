@@ -2,7 +2,7 @@ import { AminoSignResponse } from "@cosmjs/amino";
 import SignClient from "@walletconnect/sign-client";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
-import type { Network } from "../../../internals/network";
+import type { Network, NetworkCurrency } from "../../../internals/network";
 import { type WalletConnection, type Algo, Algos, WalletMobileSession } from "../../../internals/wallet";
 import type { WalletMobileProvider } from "../../../providers/mobile";
 import type { SigningResult } from "../../../internals/transactions";
@@ -191,10 +191,16 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {

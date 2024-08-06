@@ -3,7 +3,7 @@ import { TxRaw } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { BroadcastMode, TxRestApi } from "@injectivelabs/sdk-ts";
 
 import { BroadcastResult, SigningResult } from "../../internals/transactions";
-import { Network } from "../../internals/network";
+import { Network, NetworkCurrency } from "../../internals/network";
 import { isInjectiveNetwork } from "../../internals/injective";
 
 export class BroadcastClient {
@@ -18,6 +18,8 @@ export class BroadcastClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<BroadcastResult> {
     if (isInjectiveNetwork(network.chainId)) {
@@ -38,6 +40,8 @@ export class BroadcastClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<BroadcastResult> {
     const client = await CosmWasmClient.connect(overrides?.rpc || network.rpc);
@@ -63,6 +67,8 @@ export class BroadcastClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<BroadcastResult> {
     const txRestApi = new TxRestApi(overrides?.rest || network.rest);

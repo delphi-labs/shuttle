@@ -11,7 +11,7 @@ import type { SigningResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
 import type { WalletConnection } from "../../internals/wallet";
 import type { Coin, Fee } from "../../internals/cosmos";
-import type { Network } from "../../internals/network";
+import type { Network, NetworkCurrency } from "../../internals/network";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE } from "../../internals/network";
 import { isInjectiveNetwork } from "../../internals/injective";
 
@@ -35,10 +35,13 @@ export class AminoSigningClient {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<StdSignDoc> {
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
-    const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
+    const feeCurrency =
+      overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
 
     let accountNumber = "";

@@ -2,7 +2,7 @@ import SignClient from "@walletconnect/sign-client";
 import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
-import type { Network } from "../../../internals/network";
+import type { Network, NetworkCurrency } from "../../../internals/network";
 import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
 import { fromInjectiveCosmosChainToEthereumChain, isInjectiveNetwork } from "../../../internals/injective";
 import type { SigningResult } from "../../../internals/transactions";
@@ -213,10 +213,16 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
       intents: { androidUrl: string; iosUrl: string };
     },
   ): Promise<SigningResult> {
