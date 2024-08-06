@@ -191,10 +191,16 @@ export class Vectis implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<SigningResult> {
     if (!this.vectis) {
@@ -226,10 +232,16 @@ export class Vectis implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<BroadcastResult> {
     if (!this.vectis) {

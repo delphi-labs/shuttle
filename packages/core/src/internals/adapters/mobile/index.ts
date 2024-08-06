@@ -1,4 +1,4 @@
-import type { Network } from "../../../internals/network";
+import type { Network, NetworkCurrency } from "../../../internals/network";
 import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
@@ -30,6 +30,8 @@ export interface MobileProviderAdapter {
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
       intents: { androidUrl: string; iosUrl: string };
     },

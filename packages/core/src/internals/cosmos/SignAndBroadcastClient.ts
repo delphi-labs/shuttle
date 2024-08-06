@@ -3,7 +3,7 @@ import { GasPrice } from "@cosmjs/stargate";
 
 import { type BroadcastResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
-import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, type Network } from "../../internals/network";
+import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, NetworkCurrency, type Network } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import type { Fee } from "../../internals/cosmos";
 import { extendedRegistryTypes } from "../registry";
@@ -31,10 +31,12 @@ export class SignAndBroadcastClient {
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     },
   ): Promise<BroadcastResult> {
-    const gasPrice = GasPrice.fromString(network.gasPrice || DEFAULT_GAS_PRICE);
+    const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const client = await SigningCosmWasmClient.connectWithSigner(overrides?.rpc || network.rpc, offlineSigner, {
       gasPrice,
     });
@@ -46,7 +48,8 @@ export class SignAndBroadcastClient {
 
     let fee: "auto" | Fee = "auto";
     if (feeAmount && feeAmount != "auto") {
-      const feeCurrency = network.feeCurrencies?.[0] || network.defaultCurrency || DEFAULT_CURRENCY;
+      const feeCurrency =
+        overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
       fee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],

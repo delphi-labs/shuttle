@@ -1,6 +1,6 @@
 import type { MobileProviderAdapter } from "../../internals/adapters/mobile";
 import type { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
-import type { Network } from "../../internals/network";
+import type { Network, NetworkCurrency } from "../../internals/network";
 import type { MobileConnectResponse } from "../../internals/providers";
 import type { WalletConnection, WalletMobileSession } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
@@ -176,6 +176,8 @@ export abstract class WalletMobileProvider {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<SigningResult> {
     if (!this.mobileProviderAdapter.isReady()) {
@@ -230,6 +232,8 @@ export abstract class WalletMobileProvider {
       rpc?: string;
       rest?: string;
       gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }): Promise<BroadcastResult> {
     if (!this.mobileProviderAdapter.isReady()) {

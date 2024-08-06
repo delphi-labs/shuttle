@@ -1,6 +1,6 @@
 import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
-import type { Network } from "../../../internals/network";
+import type { Network, NetworkCurrency } from "../../../internals/network";
 import type { SigningResult, BroadcastResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import type { WalletConnection } from "../../../internals/wallet";
@@ -98,10 +98,16 @@ export class Metamask implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<SigningResult> {
     if (!this.ethereum) {
@@ -158,10 +164,16 @@ export class Metamask implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<BroadcastResult> {
     if (!this.ethereum) {
