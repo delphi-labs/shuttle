@@ -123,7 +123,7 @@ export class SimulateClient {
         Math.round(
           (txClientSimulateResponse.gasInfo?.gasUsed || 0) * (overrides?.gasAdjustment ?? DEFAULT_GAS_MULTIPLIER),
         ),
-        network.gasPrice || "0.0005inj",
+        overrides?.gasPrice ?? network.gasPrice ?? "0.0005inj",
       ) as Fee;
 
       return {
