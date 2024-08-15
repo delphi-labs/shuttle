@@ -1,4 +1,4 @@
-import type { Network } from "../../../internals/network";
+import type { Network, NetworkCurrency } from "../../../internals/network";
 import type { BroadcastResult, SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import type { WalletConnection } from "../../../internals/wallet";
@@ -25,6 +25,8 @@ export interface ExtensionProviderAdapter {
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     },
   ): Promise<SigningResult>;
@@ -41,6 +43,8 @@ export interface ExtensionProviderAdapter {
         rpc?: string;
         rest?: string;
         gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
       };
     },
   ): Promise<BroadcastResult>;

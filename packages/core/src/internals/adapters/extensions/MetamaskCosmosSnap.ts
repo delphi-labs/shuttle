@@ -1,7 +1,7 @@
 import { Algo, AminoSignResponse } from "@cosmjs/amino";
 import { toBase64 } from "@cosmjs/encoding";
 
-import type { Network } from "../../network";
+import type { Network, NetworkCurrency } from "../../network";
 import type { SigningResult, BroadcastResult } from "../../transactions";
 import type { TransactionMsg } from "../../transactions/messages";
 import type { WalletConnection } from "../../wallet";
@@ -130,10 +130,16 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<SigningResult> {
     if (!this.ethereum) {
@@ -192,10 +198,16 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
-      feeAmount?: string | null | undefined;
-      gasLimit?: string | null | undefined;
-      memo?: string | null | undefined;
-      overrides?: { rpc?: string | undefined; rest?: string | undefined; gasAdjustment?: number } | undefined;
+      feeAmount?: string | null;
+      gasLimit?: string | null;
+      memo?: string | null;
+      overrides?: {
+        rpc?: string;
+        rest?: string;
+        gasAdjustment?: number;
+        gasPrice?: string;
+        feeCurrency?: NetworkCurrency;
+      };
     },
   ): Promise<BroadcastResult> {
     if (!this.ethereum) {
