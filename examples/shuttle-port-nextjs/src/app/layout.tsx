@@ -18,7 +18,8 @@ import {
   OWalletCosmosExtensionProvider,
   CosmiframeExtensionProvider,
   CitadelOneExtensionProvider,
-  imTokenExtensionProvider
+  SafePalExtensionProvider,
+  imTokenExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -106,6 +107,9 @@ const extensionProviders = [
   }),
   new imTokenExtensionProvider({
     networks: [INJECTIVE_MAINNET],
+  }),
+  new SafePalExtensionProvider({
+    networks: [TERRA_MAINNET, INJECTIVE_MAINNET],
   }),
 ];
 
