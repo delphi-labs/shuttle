@@ -1,10 +1,7 @@
 import "./assets/main.css";
 
-import { createApp } from "vue";
-import { VueQueryPlugin } from "@tanstack/vue-query";
-import { createPinia } from "pinia";
-import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import {
+  CitadelOneExtensionProvider,
   CosmostationExtensionProvider,
   CosmostationMobileProvider,
   KeplrExtensionProvider,
@@ -13,16 +10,19 @@ import {
   LeapCosmosMobileProvider,
   MetamaskExtensionProvider,
   MetamaskMobileProvider,
+  OnseiMobileProvider,
   StationExtensionProvider,
   XDEFICosmosExtensionProvider,
-  CitadelOneExtensionProvider,
   SafePalExtensionProvider,
   imTokenExtensionProvider,
   createShuttle,
 } from "@delphi-labs/shuttle-vue";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+import { createApp } from "vue";
 
 import App from "./App.vue";
-import router from "./router";
 import {
   INJECTIVE_MAINNET,
   INJECTIVE_TESTNET,
@@ -31,6 +31,7 @@ import {
   TERRA_MAINNET,
   TERRA_TESTNET,
 } from "./config/networks";
+import router from "./router";
 
 export const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
@@ -80,6 +81,9 @@ const shuttle = createShuttle({
     }),
     new MetamaskMobileProvider({
       networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+    }),
+    new OnseiMobileProvider({
+      networks: [OSMOSIS_MAINNET],
     }),
   ],
 });

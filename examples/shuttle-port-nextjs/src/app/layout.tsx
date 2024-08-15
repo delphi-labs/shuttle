@@ -1,41 +1,42 @@
 "use client";
 
 import {
+  CitadelOneExtensionProvider,
+  CosmiframeExtensionProvider,
   CosmostationExtensionProvider,
-  KeplrExtensionProvider,
-  LeapCosmosExtensionProvider,
-  MetamaskExtensionProvider,
-  StationExtensionProvider,
-  XDEFICosmosExtensionProvider,
   CosmostationMobileProvider,
+  KeplrExtensionProvider,
   KeplrMobileProvider,
+  LeapCosmosExtensionProvider,
   LeapCosmosMobileProvider,
   LeapMetamaskCosmosSnapExtensionProvider,
+  MetamaskExtensionProvider,
   MetamaskMobileProvider,
-  ShuttleProvider,
-  OkxWalletExtensionProvider,
   NinjiExtensionProvider,
   OWalletCosmosExtensionProvider,
-  CosmiframeExtensionProvider,
-  CitadelOneExtensionProvider,
+  OkxWalletExtensionProvider,
+  OnseiMobileProvider,
+  ShuttleProvider,
+  StationExtensionProvider,
+  XDEFICosmosExtensionProvider,
   SafePalExtensionProvider,
   imTokenExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import Header from "@/components/Header";
 import {
-  OSMOSIS_MAINNET,
-  MARS_MAINNET,
-  TERRA_MAINNET,
-  TERRA_TESTNET,
   INJECTIVE_MAINNET,
   INJECTIVE_TESTNET,
+  MARS_MAINNET,
   NEUTRON_MAINNET,
   NEUTRON_TESTNET,
   ORAI_MAINNET,
   ORAI_TESTNET,
+  OSMOSIS_MAINNET,
+  TERRA_MAINNET,
+  TERRA_TESTNET,
 } from "@/config/networks";
-import Header from "@/components/Header";
 
 import "./globals.css";
 
@@ -134,6 +135,9 @@ const mobileProviders = [
   }),
   new MetamaskMobileProvider({
     networks: [INJECTIVE_MAINNET, INJECTIVE_TESTNET],
+  }),
+  new OnseiMobileProvider({
+    networks: [OSMOSIS_MAINNET],
   }),
 ];
 
