@@ -3,6 +3,7 @@ import { Pinia } from "pinia";
 import {
   BroadcastResult,
   MobileConnectResponse,
+  NetworkCurrency,
   SigningResult,
   SimulateResult,
   TransactionMsg,
@@ -47,6 +48,9 @@ export type Shuttle = {
     overrides?: {
       rpc?: string;
       rest?: string;
+      gasAdjustment?: number;
+      gasPrice?: string;
+      feeCurrency?: NetworkCurrency;
     };
   }) => Promise<BroadcastResult>;
   sign: (options: {
@@ -169,6 +173,8 @@ export function createShuttle({
             rpc?: string;
             rest?: string;
             gasAdjustment?: number;
+            gasPrice?: string;
+            feeCurrency?: NetworkCurrency;
           };
         }) => {
           const walletToUse = wallet || store.recentWallet;
@@ -204,6 +210,8 @@ export function createShuttle({
             rpc?: string;
             rest?: string;
             gasAdjustment?: number;
+            gasPrice?: string;
+            feeCurrency?: NetworkCurrency;
           };
         }) => {
           const walletToUse = wallet || store.recentWallet;
@@ -239,6 +247,8 @@ export function createShuttle({
             rpc?: string;
             rest?: string;
             gasAdjustment?: number;
+            gasPrice?: string;
+            feeCurrency?: NetworkCurrency;
           };
         }) => {
           const walletToUse = wallet || store.recentWallet;
