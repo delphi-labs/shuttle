@@ -15,7 +15,7 @@ export const imTokenExtensionProvider = class imTokenExtensionProvider extends W
       name: "imToken",
       networks,
       extensionProviderAdapter: new Keplr({
-        name: "imToekn",
+        name: "imToken",
         extensionResolver() {
           return window.keplr;
         },
