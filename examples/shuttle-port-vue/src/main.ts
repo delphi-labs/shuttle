@@ -15,6 +15,7 @@ import {
   XDEFICosmosExtensionProvider,
   SafePalExtensionProvider,
   imTokenExtensionProvider,
+  MathExtensionProvider,
   createShuttle,
 } from "@delphi-labs/shuttle-vue";
 import { VueQueryPlugin } from "@tanstack/vue-query";
@@ -67,6 +68,9 @@ const shuttle = createShuttle({
     }),
     new imTokenExtensionProvider({
       networks: [INJECTIVE_MAINNET],
+    }),
+    new MathExtensionProvider({
+      networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
     }),
   ],
   mobileProviders: [

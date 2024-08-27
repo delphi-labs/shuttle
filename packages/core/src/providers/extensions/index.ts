@@ -17,3 +17,4 @@ export * from "./CosmiframeExtensionProvider";
 export * from "./CitadelOneExtensionProvider";
 export * from "./SafePalExtensionProvider";
 export * from "./imTokenExtensionProvider";
+export * from "./MathExtensionProvider";
