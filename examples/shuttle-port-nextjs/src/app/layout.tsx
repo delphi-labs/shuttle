@@ -21,6 +21,7 @@ import {
   XDEFICosmosExtensionProvider,
   SafePalExtensionProvider,
   imTokenExtensionProvider,
+  MathExtensionProvider,
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -111,6 +112,9 @@ const extensionProviders = [
   }),
   new SafePalExtensionProvider({
     networks: [TERRA_MAINNET, INJECTIVE_MAINNET],
+  }),
+  new MathExtensionProvider({
+    networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
   }),
 ];
 
