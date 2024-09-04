@@ -22,6 +22,7 @@ import {
   SafePalExtensionProvider,
   imTokenExtensionProvider,
   MathExtensionProvider,
+  CypherWalletExtensionProvider
 } from "@delphi-labs/shuttle-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -115,6 +116,9 @@ const extensionProviders = [
   }),
   new MathExtensionProvider({
     networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
+  }),
+  new CypherWalletExtensionProvider({
+    networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, INJECTIVE_MAINNET, NEUTRON_MAINNET, TERRA_TESTNET, INJECTIVE_TESTNET, NEUTRON_TESTNET],
   }),
 ];
 

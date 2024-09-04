@@ -16,6 +16,7 @@ import {
   SafePalExtensionProvider,
   imTokenExtensionProvider,
   MathExtensionProvider,
+  CypherWalletExtensionProvider,
   createShuttle,
 } from "@delphi-labs/shuttle-vue";
 import { VueQueryPlugin } from "@tanstack/vue-query";
@@ -71,6 +72,9 @@ const shuttle = createShuttle({
     }),
     new MathExtensionProvider({
       networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
+    }),
+    new CypherWalletExtensionProvider({
+      networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, INJECTIVE_MAINNET, TERRA_TESTNET, INJECTIVE_TESTNET],
     }),
   ],
   mobileProviders: [
