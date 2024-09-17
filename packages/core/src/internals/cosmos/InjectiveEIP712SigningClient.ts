@@ -6,11 +6,11 @@ import {
   createWeb3Extension,
   createTxRawEIP712,
   createTransaction,
-  SIGN_AMINO,
-  getEip712TypedData,
+  getEip712TypedDataV2,
   ChainRestTendermintApi,
+  SIGN_EIP712_V2,
 } from "@injectivelabs/sdk-ts";
-import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
+import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT, getStdFee } from "@injectivelabs/utils";
 
 import {
   type InjTransactionMsg,
@@ -23,7 +23,7 @@ import type { SigningResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
 import type { Fee } from "./";
 
-export type Eip712TypedData = ReturnType<typeof getEip712TypedData>;
+export type Eip712TypedData = ReturnType<typeof getEip712TypedDataV2>;
 
 export class InjectiveEIP712SigningClient {
   static async prepare({
@@ -78,8 +78,12 @@ export class InjectiveEIP712SigningClient {
     const latestHeight = latestBlock.header.height;
     const timeoutHeight = new BigNumberInBase(latestHeight).plus(DEFAULT_BLOCK_TIMEOUT_HEIGHT);
 
+    const stdFee = getStdFee({
+      gasPrice: fee.gas,
+    });
+
     const preparedMessages = prepareMessagesForInjective(messages);
-    const eip712TypedData = getEip712TypedData({
+    const eip712TypedData = getEip712TypedDataV2({
       msgs: preparedMessages,
       tx: {
         memo: memo || "",
@@ -88,7 +92,10 @@ export class InjectiveEIP712SigningClient {
         chainId: network.chainId,
         timeoutHeight: timeoutHeight.toFixed(),
       },
-      fee,
+      fee: {
+        amount: fee.amount,
+        gas: stdFee.gas,
+      },
       ethereumChainId: fromInjectiveCosmosChainToEthereumChain(network.chainId),
     });
 
@@ -100,7 +107,10 @@ export class InjectiveEIP712SigningClient {
         timeout_height: timeoutHeight.toFixed(),
         account_number: baseAccount.accountNumber.toString(),
         sequence: baseAccount.sequence.toString(),
-        fee,
+        fee: {
+          amount: fee.amount,
+          gas: stdFee.gas,
+        },
         msgs: preparedMessages.map((m) => m.toEip712()),
         memo: memo || "",
       },
@@ -123,7 +133,7 @@ export class InjectiveEIP712SigningClient {
     const preparedTx = createTransaction({
       message: messages,
       memo: signDoc.memo,
-      signMode: SIGN_AMINO,
+      signMode: SIGN_EIP712_V2,
       fee: signDoc.fee,
       pubKey,
       sequence: parseInt(signDoc.sequence, 10),

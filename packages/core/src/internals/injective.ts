@@ -30,7 +30,7 @@ export function fromInjectiveCosmosChainToEthereumChain(chainId: string): number
   if (chainId === "injective-1") {
     return EthereumChainId.Mainnet;
   } else if (chainId === "injective-888") {
-    return EthereumChainId.Goerli;
+    return EthereumChainId.Sepolia;
   } else {
     throw new Error(`Invalid Injective chainId: ${chainId}`);
   }
@@ -39,7 +39,7 @@ export function fromInjectiveCosmosChainToEthereumChain(chainId: string): number
 export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): string {
   if (chainNumber === EthereumChainId.Mainnet) {
     return "injective-1";
-  } else if (chainNumber === EthereumChainId.Goerli) {
+  } else if (chainNumber === EthereumChainId.Sepolia) {
     return "injective-888";
   } else {
     throw new Error(`Invalid Injective EVM chainId: ${chainNumber}`);

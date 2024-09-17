@@ -42,8 +42,8 @@ export const INJECTIVE_TESTNET: Network = {
   name: "Injective Testnet",
   chainId: "injective-888",
   chainPrefix: "inj",
-  rpc: "https://multichain-nodes.astroport.fi/injective-888/rpc/",
-  rest: "https://multichain-nodes.astroport.fi/injective-888/lcd/",
+  rpc: "https://testnet.sentry.tm.injective.network/",
+  rest: "https://testnet.sentry.lcd.injective.network/",
   defaultCurrency: {
     coinDenom: "INJ",
     coinMinimalDenom: "inj",
