@@ -19,3 +19,4 @@ export * from "./SafePalExtensionProvider";
 export * from "./imTokenExtensionProvider";
 export * from "./MathExtensionProvider";
 export * from "./CypherWalletExtensionProvider";
+export * from "./TrustWalletExtensionProvider";
