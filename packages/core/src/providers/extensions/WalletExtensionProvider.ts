@@ -1,6 +1,6 @@
 import type { BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
-import type { ExtensionProviderAdapter } from "../../internals/adapters";
+import type { EthSignType, ExtensionProviderAdapter } from "../../internals/adapters";
 import type { Network, NetworkCurrency } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
@@ -12,6 +12,11 @@ export abstract class WalletExtensionProvider {
   initializing: boolean = false;
   initialized: boolean = false;
   onUpdate?: () => void;
+  signEthereum?: (options: {
+    wallet: WalletConnection;
+    data: string | Uint8Array;
+    type: EthSignType;
+  }) => Promise<SigningResult>;
 
   extensionProviderAdapter: ExtensionProviderAdapter;
 

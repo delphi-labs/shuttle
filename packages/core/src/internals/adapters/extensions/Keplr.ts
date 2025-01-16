@@ -56,6 +56,12 @@ interface KeplrKey {
   pubkey?: Uint8Array;
 }
 
+export enum EthSignType {
+  MESSAGE = "message",
+  TRANSACTION = "transaction",
+  EIP712 = "eip-712",
+}
+
 export type KeplrWindow = {
   experimentalSuggestChain(chainInfo: KeplrChainInfo): Promise<void>;
   enable(chainId: string): Promise<void>;
@@ -86,6 +92,7 @@ export type KeplrWindow = {
       preferNoSetMemo?: boolean;
     };
   };
+  signEthereum(chainId: string, signer: string, data: string | Uint8Array, type: EthSignType): Promise<Uint8Array>;
 };
 
 export class Keplr implements ExtensionProviderAdapter {
@@ -436,6 +443,16 @@ export class Keplr implements ExtensionProviderAdapter {
       data,
       signature: signResult.signatures[0],
     });
+  }
+
+  async signEthereum(
+    _provider: WalletExtensionProvider,
+    { chainId, signer, data, type }: { chainId: string; signer: string; data: string | Uint8Array; type: EthSignType },
+  ): Promise<Uint8Array> {
+    if (!this.keplr) {
+      throw new Error(`${this.name} is not available`);
+    }
+    return await this.keplr.signEthereum(chainId, signer, data, type);
   }
 }
 
