@@ -2,6 +2,7 @@ import { App, Ref, inject, ref } from "vue";
 import { Pinia } from "pinia";
 import {
   BroadcastResult,
+  EthSignType,
   MobileConnectResponse,
   NetworkCurrency,
   SigningResult,
@@ -59,6 +60,11 @@ export type Shuttle = {
     gasLimit?: string | null;
     memo?: string | null;
     wallet?: WalletConnection | null;
+  }) => Promise<SigningResult>;
+  signEthereum: (options: {
+    wallet?: WalletConnection | null;
+    data: string | Uint8Array;
+    type: EthSignType;
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
   verifyArbitrary: (options: {
@@ -283,6 +289,35 @@ export function createShuttle({
           }
 
           return provider.signArbitrary({ wallet: walletToUse, data });
+        },
+        signEthereum: async ({
+          wallet,
+          data,
+          type,
+        }: {
+          wallet?: WalletConnection | null;
+          data: string | Uint8Array;
+          type: EthSignType;
+        }) => {
+          const walletToUse = wallet || store.recentWallet;
+          if (!walletToUse) {
+            throw new Error("No wallet to sign with");
+          }
+
+          const provider =
+            availableExtensionProviders.value.find(
+              (extensionProvider) => extensionProvider.id === walletToUse.providerId,
+            ) || availableMobileProviders.value.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+
+          if (!provider) {
+            throw new Error(`Provider ${walletToUse.providerId} not found`);
+          }
+
+          if (!("signEthereum" in provider) || !provider.signEthereum) {
+            throw new Error(`Provider ${walletToUse.providerId} does not support Ethereum signing`);
+          }
+
+          return provider.signEthereum({ wallet: walletToUse, data, type });
         },
         verifyArbitrary: async ({
           wallet,

@@ -13,6 +13,7 @@ import {
   BroadcastResult,
   SigningResult,
   NetworkCurrency,
+  EthSignType,
 } from "@delphi-labs/shuttle";
 
 import { ShuttleStore, useShuttleStore } from "./store";
@@ -71,6 +72,11 @@ export type ShuttleContextType = {
     };
   }) => Promise<SigningResult>;
   signArbitrary: (options: { wallet?: WalletConnection | null; data: Uint8Array }) => Promise<SigningResult>;
+  signEthereum: (options: {
+    wallet?: WalletConnection | null;
+    data: string | Uint8Array;
+    type: EthSignType;
+  }) => Promise<SigningResult>;
   verifyArbitrary: (options: {
     wallet?: WalletConnection | null;
     data: Uint8Array;
@@ -343,6 +349,35 @@ export function ShuttleProvider({
       return provider.signArbitrary({ wallet: walletToUse, data });
     };
 
+    const signEthereum = async ({
+      wallet,
+      data,
+      type,
+    }: {
+      wallet?: WalletConnection | null;
+      data: string | Uint8Array;
+      type: EthSignType;
+    }) => {
+      const walletToUse = wallet || recentWallet;
+      if (!walletToUse) {
+        throw new Error("No wallet to sign with");
+      }
+
+      const provider =
+        availableExtensionProviders.find((extensionProvider) => extensionProvider.id === walletToUse.providerId) ||
+        availableMobileProviders.find((mobileProvider) => mobileProvider.id === walletToUse.providerId);
+
+      if (!provider) {
+        throw new Error(`Provider ${walletToUse.providerId} not found`);
+      }
+
+      if (!("signEthereum" in provider) || !provider.signEthereum) {
+        throw new Error(`Provider ${walletToUse.providerId} does not support Ethereum signing`);
+      }
+
+      return provider.signEthereum({ wallet: walletToUse, data, type });
+    };
+
     const verifyArbitrary = async ({
       wallet,
       data,
@@ -382,6 +417,7 @@ export function ShuttleProvider({
       broadcast,
       sign,
       signArbitrary,
+      signEthereum,
       verifyArbitrary,
     };
   }, [

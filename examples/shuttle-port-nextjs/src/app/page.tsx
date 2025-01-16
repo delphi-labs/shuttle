@@ -1,5 +1,6 @@
 import { Swap } from "@/components/Swap";
 import { ArbitrarySign } from "@/components/ArbitrarySign";
+import { EthereumSign } from "@/components/EthereumSign";
 
 export const metadata = {
   title: "Shuttle Port (Next.js)",
@@ -11,6 +12,7 @@ export default async function Home() {
     <main>
       <Swap />
       <ArbitrarySign />
+      <EthereumSign />
     </main>
   );
 }
