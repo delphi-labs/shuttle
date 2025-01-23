@@ -16,15 +16,14 @@ import {
   OWalletCosmosExtensionProvider,
   OkxWalletExtensionProvider,
   OnseiMobileProvider,
-  ShuttleProvider,
   StationExtensionProvider,
   XDEFICosmosExtensionProvider,
   SafePalExtensionProvider,
   imTokenExtensionProvider,
   MathExtensionProvider,
   CypherWalletExtensionProvider,
-  TrustWalletExtensionProvider
-} from "@delphi-labs/shuttle-react";
+  TrustWalletExtensionProvider,
+} from "@delphi-labs/shuttle";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import Header from "@/components/Header";
@@ -42,6 +41,7 @@ import {
 } from "@/config/networks";
 
 import "./globals.css";
+import { ShuttleProvider } from "@delphi-labs/shuttle-react";
 
 const WC_PROJECT_ID = process.env.NEXT_PUBLIC_WC_PROJECT_ID;
 
@@ -119,7 +119,16 @@ const extensionProviders = [
     networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],
   }),
   new CypherWalletExtensionProvider({
-    networks: [OSMOSIS_MAINNET, MARS_MAINNET, TERRA_MAINNET, INJECTIVE_MAINNET, NEUTRON_MAINNET, TERRA_TESTNET, INJECTIVE_TESTNET, NEUTRON_TESTNET],
+    networks: [
+      OSMOSIS_MAINNET,
+      MARS_MAINNET,
+      TERRA_MAINNET,
+      INJECTIVE_MAINNET,
+      NEUTRON_MAINNET,
+      TERRA_TESTNET,
+      INJECTIVE_TESTNET,
+      NEUTRON_TESTNET,
+    ],
   }),
   new TrustWalletExtensionProvider({
     networks: [OSMOSIS_MAINNET, INJECTIVE_MAINNET],

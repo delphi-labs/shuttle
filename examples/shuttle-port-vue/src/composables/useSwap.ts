@@ -1,6 +1,6 @@
 import { ComputedRef, Ref, computed } from "vue";
 import { useQuery } from "@tanstack/vue-query";
-import { MsgExecuteContract, WalletConnection } from "@delphi-labs/shuttle-vue";
+import { MsgExecuteContract, WalletConnection } from "@delphi-labs/shuttle";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import BigNumber from "bignumber.js";
 

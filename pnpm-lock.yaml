@@ -38,6 +38,9 @@ importers:
       '@dao-dao/cosmiframe':
         specifier: ^0.1.0
         version: 0.1.0(@cosmjs/amino@0.32.4)(@cosmjs/proto-signing@0.32.4)
+      '@delphi-labs/shuttle':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@delphi-labs/shuttle-react':
         specifier: workspace:*
         version: link:../../packages/react
@@ -93,6 +96,9 @@ importers:
       '@cosmjs/cosmwasm-stargate':
         specifier: ^0.32.4
         version: 0.32.4
+      '@delphi-labs/shuttle':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@delphi-labs/shuttle-vue':
         specifier: workspace:*
         version: link:../../packages/vue

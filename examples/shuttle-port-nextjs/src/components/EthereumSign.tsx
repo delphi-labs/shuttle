@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { EthSignType, useShuttle } from "@delphi-labs/shuttle-react";
+import { EthSignType } from "@delphi-labs/shuttle";
+import { useShuttle } from "@delphi-labs/shuttle-react";
 
 import useWallet from "@/hooks/useWallet";
 

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { MsgExecuteContract, WalletConnection } from "@delphi-labs/shuttle-react";
+import { MsgExecuteContract, WalletConnection } from "@delphi-labs/shuttle";
 import { useQuery } from "@tanstack/react-query";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import BigNumber from "bignumber.js";

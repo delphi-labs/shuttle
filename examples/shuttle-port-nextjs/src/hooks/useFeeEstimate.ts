@@ -1,4 +1,5 @@
-import { SimulateResult, TransactionMsg, useShuttle } from "@delphi-labs/shuttle-react";
+import { SimulateResult, TransactionMsg } from "@delphi-labs/shuttle";
+import { useShuttle } from "@delphi-labs/shuttle-react";
 import { useQuery } from "@tanstack/react-query";
 
 import useWallet from "./useWallet";

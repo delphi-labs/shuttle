@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
-import { EthSignType, useShuttle } from "@delphi-labs/shuttle-vue";
+import { EthSignType } from "@delphi-labs/shuttle";
+import { useShuttle } from "@delphi-labs/shuttle-vue";
 
 import useWallet from "@/composables/useWallet";
 

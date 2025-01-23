@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useShuttle, isMobile } from "@delphi-labs/shuttle-react";
+import { useShuttle } from "@delphi-labs/shuttle-react";
 import BigNumber from "bignumber.js";
 
 import { fromNetworkToNativeSymbol } from "@/config/networks";
