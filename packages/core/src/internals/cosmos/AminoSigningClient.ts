@@ -1,7 +1,6 @@
 import { AminoSignResponse, StdSignDoc } from "@cosmjs/amino";
 import { GasPrice } from "@cosmjs/stargate";
 import { CosmWasmClient } from "@cosmjs/cosmwasm-stargate";
-import { SignMode } from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
 import { TxRaw, TxBody, AuthInfo, Fee as CosmosFee } from "cosmjs-types/cosmos/tx/v1beta1/tx";
 import { PubKey } from "cosmjs-types/cosmos/crypto/secp256k1/keys";
 import { BaseAccount, ChainRestAuthApi } from "@injectivelabs/sdk-ts";
@@ -14,6 +13,7 @@ import type { Coin, Fee } from "../../internals/cosmos";
 import type { Network, NetworkCurrency } from "../../internals/network";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE } from "../../internals/network";
 import { isInjectiveNetwork } from "../../internals/injective";
+import { SignMode } from "cosmjs-types/cosmos/tx/signing/v1beta1/signing";
 
 export class AminoSigningClient {
   static async prepare({
