@@ -208,6 +208,9 @@ importers:
       '@injectivelabs/sdk-ts':
         specifier: ^1.14.11
         version: 1.14.13(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@injectivelabs/ts-types':
+        specifier: ^1.14.11
+        version: 1.14.13
       '@injectivelabs/utils':
         specifier: ^1.14.11
         version: 1.14.13(google-protobuf@3.21.2)
@@ -220,6 +223,9 @@ importers:
       '@walletconnect/sign-client':
         specifier: ^2.9.0
         version: 2.9.0
+      cosmjs-types:
+        specifier: ^0.9.0
+        version: 0.9.0
       ethereumjs-util:
         specifier: ^7.1.5
         version: 7.1.5
@@ -236,9 +242,6 @@ importers:
         specifier: ^2.6.0
         version: 2.6.0
     devDependencies:
-      '@injectivelabs/ts-types':
-        specifier: ^1.14.11
-        version: 1.14.13
       '@swc/core':
         specifier: ^1.3.68
         version: 1.3.68(@swc/helpers@0.5.1)
@@ -257,9 +260,6 @@ importers:
       '@walletconnect/types':
         specifier: ^2.8.2
         version: 2.8.2
-      cosmjs-types:
-        specifier: ^0.9.0
-        version: 0.9.0
       eslint:
         specifier: ^8.25.0
         version: 8.42.0
@@ -8453,7 +8453,7 @@ snapshots:
       eslint: 8.42.0
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0)
-      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0)
+      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0)
       eslint-plugin-jsx-a11y: 6.7.1(eslint@8.42.0)
       eslint-plugin-react: 7.33.2(eslint@8.42.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.42.0)
@@ -8484,8 +8484,8 @@ snapshots:
       debug: 4.3.4
       enhanced-resolve: 5.15.0
       eslint: 8.42.0
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0)
-      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0)
+      eslint-plugin-import: 2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0)
       fast-glob: 3.3.1
       get-tsconfig: 4.7.0
       is-core-module: 2.13.0
@@ -8496,7 +8496,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -8507,7 +8507,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0):
+  eslint-plugin-import@2.28.1(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0):
     dependencies:
       array-includes: 3.1.7
       array.prototype.findlastindex: 1.2.3
@@ -8517,7 +8517,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.42.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0)(eslint@8.42.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.0(@typescript-eslint/parser@5.62.0(eslint@8.42.0)(typescript@4.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.28.1(eslint@8.42.0))(eslint@8.42.0))(eslint@8.42.0)
       has: 1.0.3
       is-core-module: 2.13.0
       is-glob: 4.0.3
