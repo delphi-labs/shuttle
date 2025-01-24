@@ -1,4 +1,5 @@
 import { OfflineDirectSigner, OfflineSigner } from "@cosmjs/proto-signing";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 import { GasPrice } from "@cosmjs/stargate";
 
 import { type BroadcastResult } from "../../internals/transactions";
@@ -7,7 +8,6 @@ import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, NetworkCurrency, type Network } fr
 import type { WalletConnection } from "../../internals/wallet";
 import type { Fee } from "../../internals/cosmos";
 import { extendedRegistryTypes } from "../registry";
-import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export class SignAndBroadcastClient {
   static async execute(

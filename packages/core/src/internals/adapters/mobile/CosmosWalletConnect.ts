@@ -9,7 +9,8 @@ import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import ArbitrarySigningClient from "../../cosmos/ArbitrarySigningClient";
-import { MobileProviderAdapter, setupWalletConnect } from "./";
+import MobileProviderAdapter from "./MobileProviderAdapter";
+import { setupWalletConnect } from "./wallet-connect";
 
 type CosmosWCAccount = {
   address: string;

@@ -1,8 +1,8 @@
 import type { Network } from "../../internals/network";
-import Keplr, { EthSignType, type KeplrWindow } from "../../internals/adapters/extensions/Keplr";
+import Keplr, { type KeplrWindow } from "../../internals/adapters/extensions/Keplr";
 import type { WalletConnection } from "../../internals/wallet";
 import WalletExtensionProvider from "./WalletExtensionProvider";
-import { SigningResult } from "../../internals";
+import { EthSignType, SigningResult } from "../../internals";
 
 declare global {
   interface Window {

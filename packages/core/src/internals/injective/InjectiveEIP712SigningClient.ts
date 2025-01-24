@@ -12,16 +12,18 @@ import {
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase, DEFAULT_BLOCK_TIMEOUT_HEIGHT } from "@injectivelabs/utils";
 
+import { type InjTransactionMsg, prepareMessagesForInjective } from ".";
 import {
-  type InjTransactionMsg,
+  DEFAULT_CURRENCY,
+  DEFAULT_GAS_PRICE,
   fromInjectiveCosmosChainToEthereumChain,
-  prepareMessagesForInjective,
-} from "../../internals/injective";
-import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, NetworkCurrency, type Network } from "../../internals/network";
-import type { WalletConnection } from "../../internals/wallet";
-import type { SigningResult } from "../../internals/transactions";
-import type { TransactionMsg } from "../../internals/transactions/messages";
-import type { Fee } from "./";
+  NetworkCurrency,
+  type Network,
+} from "../network";
+import type { WalletConnection } from "../wallet";
+import type { SigningResult } from "../transactions";
+import type { TransactionMsg } from "../transactions/messages";
+import type { Fee } from "../cosmos";
 
 export type Eip712TypedData = ReturnType<typeof getEip712TypedData>;
 

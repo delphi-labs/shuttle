@@ -2,10 +2,9 @@ import { DirectSignResponse, OfflineDirectSigner, OfflineSigner } from "@cosmjs/
 import { Algo, AminoSignResponse, OfflineAminoSigner, StdSignDoc } from "@cosmjs/amino";
 import { GasPrice } from "@cosmjs/stargate";
 import { SignDoc } from "cosmjs-types/cosmos/tx/v1beta1/tx";
-import { toBase64 } from "@injectivelabs/sdk-ts";
 
 import { WalletExtensionProvider } from "../../../providers";
-import { nonNullable } from "../../../utils";
+import { nonNullable, objectToBase64 } from "../../../utils";
 import {
   BIP44,
   DEFAULT_BIP44_COIN_TYPE,
@@ -14,13 +13,13 @@ import {
   DEFAULT_GAS_PRICE,
   Network,
   NetworkCurrency,
+  isInjectiveNetwork,
 } from "../../../internals/network";
 import { WalletConnection } from "../../../internals/wallet";
 import { BroadcastResult, SigningResult, TransactionMsg } from "../../../internals/transactions";
 import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
 import { BroadcastClient } from "../../../internals/cosmos";
 import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
-import { isInjectiveNetwork } from "../../../internals/injective";
 import { ExtensionProviderAdapter } from "./";
 
 interface VectisChainInfo extends Network {
@@ -164,7 +163,7 @@ export class Vectis implements ExtensionProviderAdapter {
       providerId: provider.id,
       account: {
         address: account.address,
-        pubkey: toBase64(account.pubKey),
+        pubkey: objectToBase64(account.pubKey),
         algo: account.algo,
         isLedger: account.isNanoLedger,
       },

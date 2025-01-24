@@ -1,10 +1,10 @@
-import type { MobileProviderAdapter } from "../../internals/adapters/mobile";
 import type { TransactionMsg, BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
 import type { Network, NetworkCurrency } from "../../internals/network";
 import type { MobileConnectResponse } from "../../internals/providers";
 import type { WalletConnection, WalletMobileSession } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
 import BroadcastClient from "../../internals/cosmos/BroadcastClient";
+import MobileProviderAdapter from "../../internals/adapters/mobile/MobileProviderAdapter";
 
 export abstract class WalletMobileProvider {
   id: string;

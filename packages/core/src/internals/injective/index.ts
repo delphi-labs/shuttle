@@ -1,4 +1,3 @@
-import { EthereumChainId } from "@injectivelabs/ts-types";
 import {
   MsgSend as InjMsgSend,
   MsgExecuteContractCompat as InjMsgExecuteContractCompat,
@@ -10,7 +9,7 @@ import {
 } from "@injectivelabs/sdk-ts";
 import { BigNumberInBase } from "@injectivelabs/utils";
 
-import { nonNullable } from "../utils";
+import { nonNullable } from "../../utils";
 import {
   MsgSend,
   MsgExecuteContract,
@@ -20,31 +19,7 @@ import {
   TransactionMsg,
   MsgCreateSpotLimitOrder,
   MsgCancelSpotOrder,
-} from "./transactions";
-
-export function isInjectiveNetwork(chainId: string): boolean {
-  return chainId === "injective-1" || chainId === "injective-888";
-}
-
-export function fromInjectiveCosmosChainToEthereumChain(chainId: string): number {
-  if (chainId === "injective-1") {
-    return EthereumChainId.Mainnet;
-  } else if (chainId === "injective-888") {
-    return EthereumChainId.Goerli;
-  } else {
-    throw new Error(`Invalid Injective chainId: ${chainId}`);
-  }
-}
-
-export function fromInjectiveEthereumChainToCosmosChain(chainNumber: number): string {
-  if (chainNumber === EthereumChainId.Mainnet) {
-    return "injective-1";
-  } else if (chainNumber === EthereumChainId.Goerli) {
-    return "injective-888";
-  } else {
-    throw new Error(`Invalid Injective EVM chainId: ${chainNumber}`);
-  }
-}
+} from "../transactions";
 
 export type InjTransactionMsg =
   | InjMsgSend

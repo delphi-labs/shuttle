@@ -1,10 +1,10 @@
-import type { Network, NetworkCurrency } from "../../../internals/network";
-import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
-import type { SigningResult } from "../../../internals/transactions";
-import type { TransactionMsg } from "../../../internals/transactions/messages";
+import type { Network, NetworkCurrency } from "../../network";
+import type { WalletConnection, WalletMobileSession } from "../../wallet";
+import type { SigningResult } from "../../transactions";
+import type { TransactionMsg } from "../../transactions/messages";
 import type WalletMobileProvider from "../../../providers/mobile/WalletMobileProvider";
 
-export interface MobileProviderAdapter {
+export default interface MobileProviderAdapter {
   init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void>;
   isReady(): boolean;
   isSessionExpired(mobileSession: WalletMobileSession): boolean;
@@ -55,7 +55,3 @@ export interface MobileProviderAdapter {
     },
   ): Promise<boolean>;
 }
-
-export * from "./wallet-connect";
-export * from "./CosmosWalletConnect";
-export * from "./EvmWalletConnect";

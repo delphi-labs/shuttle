@@ -1,12 +1,12 @@
 import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
 import type { Network, NetworkCurrency } from "../../../internals/network";
+import { isInjectiveNetwork } from "../../../internals/network";
 import type { SigningResult, BroadcastResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import type { WalletConnection } from "../../../internals/wallet";
 import type { WalletExtensionProvider } from "../../../providers";
-import { isInjectiveNetwork } from "../../../internals/injective";
-import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
+import InjectiveEIP712SigningClient from "../../injective/InjectiveEIP712SigningClient";
 import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
 import { BroadcastClient } from "../../../internals/cosmos";
 import { ExtensionProviderAdapter } from "./";

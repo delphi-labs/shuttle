@@ -32,6 +32,12 @@ export type BroadcastResult = {
   response: any;
 };
 
+export enum EthSignType {
+  MESSAGE = "message",
+  TRANSACTION = "transaction",
+  EIP712 = "eip-712",
+}
+
 export type SigningResult = {
   signatures: Uint8Array[];
   response: any;

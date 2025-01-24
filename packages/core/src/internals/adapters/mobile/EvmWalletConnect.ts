@@ -2,15 +2,20 @@ import SignClient from "@walletconnect/sign-client";
 import { getEthereumAddress, hexToBase64, hexToBuff, recoverTypedSignaturePubKey } from "@injectivelabs/sdk-ts";
 
 import { isAndroid, isIOS, isMobile } from "../../../utils/device";
-import type { Network, NetworkCurrency } from "../../../internals/network";
+import {
+  type Network,
+  type NetworkCurrency,
+  fromInjectiveCosmosChainToEthereumChain,
+  isInjectiveNetwork,
+} from "../../../internals/network";
 import type { WalletConnection, WalletMobileSession } from "../../../internals/wallet";
-import { fromInjectiveCosmosChainToEthereumChain, isInjectiveNetwork } from "../../../internals/injective";
 import type { SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
-import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
+import InjectiveEIP712SigningClient from "../../injective/InjectiveEIP712SigningClient";
 import type { WalletMobileProvider } from "../../../providers/mobile";
 import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
-import { MobileProviderAdapter, setupWalletConnect } from "./";
+import MobileProviderAdapter from "./MobileProviderAdapter";
+import { setupWalletConnect } from "./wallet-connect";
 
 export class EvmWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;

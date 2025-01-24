@@ -27,7 +27,6 @@ export * from "./AminoSigningClient";
 export * from "./ArbitrarySigningClient";
 export * from "./BroadcastClient";
 export * from "./FakeOfflineSigner";
-export * from "./InjectiveEIP712SigningClient";
 export * from "./OfflineDirectSigningClient";
 export * from "./SignAndBroadcastClient";
 export * from "./SimulateClient";

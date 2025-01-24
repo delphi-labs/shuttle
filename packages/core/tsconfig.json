@@ -1,12 +1,9 @@
 {
   "include": ["src", "tests"],
-  "exclude": [
-    "dist",
-    "node_modules"
-  ],
+  "exclude": ["dist", "node_modules"],
   "compilerOptions": {
-    "target": "es5",
-    "module": "CommonJS",
+    "target": "esnext",
+    "module": "esnext",
     "lib": ["dom", "esnext"],
     "importHelpers": true,
     "declaration": true,

@@ -13,14 +13,14 @@ import {
   type Network,
   BIP44,
   Bech32Config,
+  isInjectiveNetwork,
 } from "../../../internals/network";
-import type { BroadcastResult, SigningResult } from "../../../internals/transactions";
+import type { BroadcastResult, EthSignType, SigningResult } from "../../../internals/transactions";
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import { Algos, type Algo, type WalletConnection } from "../../../internals/wallet";
 import type WalletExtensionProvider from "../../../providers/extensions/WalletExtensionProvider";
-import { isInjectiveNetwork } from "../../../internals/injective";
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
-import InjectiveEIP712SigningClient from "../../../internals/cosmos/InjectiveEIP712SigningClient";
+import InjectiveEIP712SigningClient from "../../injective/InjectiveEIP712SigningClient";
 import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
 import { ArbitrarySigningClient, BroadcastClient } from "../../../internals/cosmos";
 import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
@@ -54,12 +54,6 @@ interface KeplrKey {
   name: string;
   pubKey?: Uint8Array;
   pubkey?: Uint8Array;
-}
-
-export enum EthSignType {
-  MESSAGE = "message",
-  TRANSACTION = "transaction",
-  EIP712 = "eip-712",
 }
 
 export type KeplrWindow = {

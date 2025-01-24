@@ -1,7 +1,8 @@
-import { Keplr } from "../../internals";
+import { Cosmiframe } from "@dao-dao/cosmiframe";
+
+import { Keplr } from "../../internals/adapters/extensions";
 import type { Network } from "../../internals/network";
 import WalletExtensionProvider from "./WalletExtensionProvider";
-import { Cosmiframe } from "@dao-dao/cosmiframe";
 
 export const CosmiframeExtensionProvider = class CosmiframeExtensionProvider extends WalletExtensionProvider {
   constructor({ networks, allowedParentOrigins }: { networks: Network[]; allowedParentOrigins: string[] }) {

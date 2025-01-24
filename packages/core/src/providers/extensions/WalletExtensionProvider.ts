@@ -1,9 +1,9 @@
-import type { BroadcastResult, SigningResult, SimulateResult } from "../../internals/transactions";
+import type { BroadcastResult, EthSignType, SigningResult, SimulateResult } from "../../internals/transactions";
 import type { TransactionMsg } from "../../internals/transactions/messages";
-import type { EthSignType, ExtensionProviderAdapter } from "../../internals/adapters";
 import type { Network, NetworkCurrency } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
+import { ExtensionProviderAdapter } from "../../internals/adapters/extensions";
 
 export abstract class WalletExtensionProvider {
   id: string;
