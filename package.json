@@ -29,7 +29,7 @@
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
     "tsup": "^7.1.0",
-    "turbo": "^1.10.16"
+    "turbo": "^2.3.4"
   },
   "packageManager": "pnpm@9.4.0"
 }
