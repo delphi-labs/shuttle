@@ -8,7 +8,7 @@ import type { WalletConnection } from "../../../internals/wallet";
 import type { WalletExtensionProvider } from "../../../providers";
 import InjectiveEIP712SigningClient from "../../injective/InjectiveEIP712SigningClient";
 import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
-import { BroadcastClient } from "../../../internals/cosmos";
+import { BroadcastClient, Fee } from "../../../internals/cosmos";
 import { ExtensionProviderAdapter } from "./";
 
 export type EthereumWindow = {
@@ -90,6 +90,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -98,6 +99,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -130,6 +132,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -156,6 +159,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -164,6 +168,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -192,6 +197,7 @@ export class Metamask implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,

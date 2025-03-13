@@ -16,6 +16,7 @@ export class SignAndBroadcastClient {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -24,6 +25,7 @@ export class SignAndBroadcastClient {
       network: Network;
       wallet: WalletConnection;
       messages: TransactionMsg[];
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -46,18 +48,18 @@ export class SignAndBroadcastClient {
 
     const processedMessages = messages.map((message) => message.toCosmosMsg());
 
-    let fee: "auto" | Fee = "auto";
-    if (feeAmount && feeAmount != "auto") {
+    let computedFee: "auto" | Fee = fee ?? "auto";
+    if (!fee && feeAmount && feeAmount != "auto") {
       const feeCurrency =
         overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-      fee = {
+      computedFee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
     }
 
-    const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, fee, memo || "");
+    const broadcast = await client.signAndBroadcast(wallet.account.address, processedMessages, computedFee, memo ?? "");
 
     return {
       hash: broadcast.transactionHash,

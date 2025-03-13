@@ -18,7 +18,7 @@ import {
 import { WalletConnection } from "../../../internals/wallet";
 import { BroadcastResult, SigningResult, TransactionMsg } from "../../../internals/transactions";
 import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
-import { BroadcastClient } from "../../../internals/cosmos";
+import { BroadcastClient, Fee } from "../../../internals/cosmos";
 import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
 import { ExtensionProviderAdapter } from "./";
 
@@ -182,6 +182,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -190,6 +191,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -210,6 +212,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -223,6 +226,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -231,6 +235,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -252,6 +257,7 @@ export class Vectis implements ExtensionProviderAdapter {
         network,
         wallet,
         messages,
+        fee,
         feeAmount,
         gasLimit,
         memo,
@@ -265,6 +271,7 @@ export class Vectis implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,

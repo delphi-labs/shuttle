@@ -14,6 +14,7 @@ import {
   SigningResult,
   NetworkCurrency,
   EthSignType,
+  Fee,
 } from "@delphi-labs/shuttle";
 
 import { ShuttleStore, useShuttleStore } from "./store";
@@ -46,6 +47,7 @@ export type ShuttleContextType = {
   broadcast: (options: {
     messages: TransactionMsg[];
     wallet?: WalletConnection | null;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -59,6 +61,7 @@ export type ShuttleContextType = {
   }) => Promise<BroadcastResult>;
   sign: (options: {
     messages: TransactionMsg[];
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -261,6 +264,7 @@ export function ShuttleProvider({
     const broadcast = async ({
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -268,6 +272,7 @@ export function ShuttleProvider({
     }: {
       messages: TransactionMsg[];
       wallet?: WalletConnection | null;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -292,11 +297,12 @@ export function ShuttleProvider({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, overrides });
+      return provider.broadcast({ messages, wallet: walletToUse, fee, feeAmount, gasLimit, memo, overrides });
     };
 
     const sign = async ({
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -304,6 +310,7 @@ export function ShuttleProvider({
       overrides,
     }: {
       messages: TransactionMsg[];
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -329,7 +336,7 @@ export function ShuttleProvider({
         throw new Error(`Provider ${walletToUse.providerId} not found`);
       }
 
-      return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, overrides });
+      return provider.sign({ messages, wallet: walletToUse, fee, feeAmount, gasLimit, memo, overrides });
     };
 
     const signArbitrary = async ({ wallet, data }: { wallet?: WalletConnection | null; data: Uint8Array }) => {

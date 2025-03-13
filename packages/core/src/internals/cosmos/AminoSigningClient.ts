@@ -18,6 +18,7 @@ export class AminoSigningClient {
     network,
     wallet,
     messages,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -26,6 +27,7 @@ export class AminoSigningClient {
     network: Network;
     wallet: WalletConnection;
     messages: TransactionMsg[];
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -42,6 +44,7 @@ export class AminoSigningClient {
         network,
         wallet,
         messages,
+        fee,
         feeAmount,
         gasLimit,
         memo,
@@ -56,7 +59,7 @@ export class AminoSigningClient {
 
     let accountNumber = "";
     let sequence = "";
-    let fee: Fee = {
+    let computedFee: Fee = fee ?? {
       amount: [{ amount: gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
@@ -65,8 +68,8 @@ export class AminoSigningClient {
     accountNumber = accountInfo?.accountNumber.toString() || "";
     sequence = accountInfo?.sequence.toString() || "";
 
-    if (feeAmount && feeAmount != "auto") {
-      fee = {
+    if (!fee && feeAmount && feeAmount != "auto") {
+      computedFee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
@@ -76,7 +79,7 @@ export class AminoSigningClient {
       chain_id: network.chainId,
       account_number: accountNumber,
       sequence,
-      fee,
+      fee: computedFee,
       msgs: messages.map((message) => message.toAminoMsg()),
       memo: memo || "",
     };

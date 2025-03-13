@@ -6,7 +6,7 @@ import type { SigningResult, BroadcastResult } from "../../transactions";
 import type { TransactionMsg } from "../../transactions/messages";
 import type { WalletConnection } from "../../wallet";
 import type { WalletExtensionProvider } from "../../../providers";
-import { AminoSigningClient, ArbitrarySigningClient, BroadcastClient } from "../../cosmos";
+import { AminoSigningClient, ArbitrarySigningClient, BroadcastClient, Fee } from "../../cosmos";
 import { ExtensionProviderAdapter } from ".";
 import { EthereumWindow } from "./Metamask";
 
@@ -122,6 +122,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -130,6 +131,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -156,6 +158,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -190,6 +193,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -198,6 +202,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -224,6 +229,7 @@ export class MetamaskCosmosSnap implements ExtensionProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,

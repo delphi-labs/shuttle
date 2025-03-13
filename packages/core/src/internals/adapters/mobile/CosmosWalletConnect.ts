@@ -11,6 +11,7 @@ import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import ArbitrarySigningClient from "../../cosmos/ArbitrarySigningClient";
 import MobileProviderAdapter from "./MobileProviderAdapter";
 import { setupWalletConnect } from "./wallet-connect";
+import { Fee } from "../../cosmos";
 
 type CosmosWCAccount = {
   address: string;
@@ -183,6 +184,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -192,6 +194,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -217,6 +220,7 @@ export class CosmosWalletConnect implements MobileProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,

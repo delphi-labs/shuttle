@@ -5,6 +5,7 @@ import type { WalletConnection, WalletMobileSession } from "../../internals/wall
 import SimulateClient from "../../internals/cosmos/SimulateClient";
 import BroadcastClient from "../../internals/cosmos/BroadcastClient";
 import MobileProviderAdapter from "../../internals/adapters/mobile/MobileProviderAdapter";
+import { Fee } from "../../internals";
 
 export abstract class WalletMobileProvider {
   id: string;
@@ -162,6 +163,7 @@ export abstract class WalletMobileProvider {
   async sign({
     messages,
     wallet,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -169,6 +171,7 @@ export abstract class WalletMobileProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -207,6 +210,7 @@ export abstract class WalletMobileProvider {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -218,6 +222,7 @@ export abstract class WalletMobileProvider {
   async broadcast({
     messages,
     wallet,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -225,6 +230,7 @@ export abstract class WalletMobileProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -259,7 +265,7 @@ export abstract class WalletMobileProvider {
       throw new Error("Wallet not connected");
     }
 
-    const signResult = await this.sign({ messages, wallet, feeAmount, gasLimit, memo, overrides });
+    const signResult = await this.sign({ messages, wallet, fee, feeAmount, gasLimit, memo, overrides });
 
     if (!signResult.response) {
       return {

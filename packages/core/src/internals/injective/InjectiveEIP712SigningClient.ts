@@ -32,6 +32,7 @@ export class InjectiveEIP712SigningClient {
     network,
     wallet,
     messages,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -40,6 +41,7 @@ export class InjectiveEIP712SigningClient {
     network: Network;
     wallet: WalletConnection;
     messages: TransactionMsg[];
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -60,12 +62,12 @@ export class InjectiveEIP712SigningClient {
       overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
 
-    let fee: Fee = {
+    let computedFee: Fee = fee ?? {
       amount: [{ amount: gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
-    if (feeAmount && feeAmount != "auto") {
-      fee = {
+    if (!fee && feeAmount && feeAmount != "auto") {
+      computedFee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
@@ -90,7 +92,7 @@ export class InjectiveEIP712SigningClient {
         chainId: network.chainId,
         timeoutHeight: timeoutHeight.toFixed(),
       },
-      fee,
+      fee: computedFee,
       ethereumChainId: fromInjectiveCosmosChainToEthereumChain(network.chainId),
     });
 
@@ -102,7 +104,7 @@ export class InjectiveEIP712SigningClient {
         timeout_height: timeoutHeight.toFixed(),
         account_number: baseAccount.accountNumber.toString(),
         sequence: baseAccount.sequence.toString(),
-        fee,
+        fee: computedFee,
         msgs: preparedMessages.map((m) => m.toEip712()),
         memo: memo || "",
       },

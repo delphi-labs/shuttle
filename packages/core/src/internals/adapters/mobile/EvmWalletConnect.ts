@@ -16,6 +16,7 @@ import type { WalletMobileProvider } from "../../../providers/mobile";
 import EthArbitrarySigningClient from "../../evm/EthArbitrarySigningClient";
 import MobileProviderAdapter from "./MobileProviderAdapter";
 import { setupWalletConnect } from "./wallet-connect";
+import { Fee } from "../../cosmos";
 
 export class EvmWalletConnect implements MobileProviderAdapter {
   walletConnectPeerName: string;
@@ -209,6 +210,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       network,
       messages,
       wallet,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -218,6 +220,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -255,6 +258,7 @@ export class EvmWalletConnect implements MobileProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,

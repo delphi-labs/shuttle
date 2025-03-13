@@ -23,6 +23,7 @@ export class InjectiveOfflineDirectSigningClient {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -31,6 +32,7 @@ export class InjectiveOfflineDirectSigningClient {
       network: Network;
       wallet: WalletConnection;
       messages: TransactionMsg[];
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -48,12 +50,12 @@ export class InjectiveOfflineDirectSigningClient {
     const baseAccount = BaseAccount.fromRestApi(accountDetailsResponse);
 
     const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
-    let fee: Fee | undefined = undefined;
-    if (feeAmount && feeAmount != "auto") {
+    let computedFee = fee ?? undefined;
+    if (!fee && feeAmount && feeAmount != "auto") {
       const feeCurrency =
         overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
       const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-      fee = {
+      computedFee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
@@ -62,11 +64,11 @@ export class InjectiveOfflineDirectSigningClient {
     const preparedTx = createTransactionAndCosmosSignDoc({
       pubKey: wallet.account.pubkey || "",
       chainId: network.chainId,
-      fee,
+      fee: computedFee,
       message: prepareMessagesForInjective(messages),
       sequence: baseAccount.sequence,
       accountNumber: baseAccount.accountNumber,
-      memo: memo || "",
+      memo: memo ?? "",
     });
 
     const directSignResponse = await offlineSigner.signDirect(

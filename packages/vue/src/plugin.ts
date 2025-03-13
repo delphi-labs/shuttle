@@ -11,6 +11,7 @@ import {
   WalletConnection,
   WalletExtensionProvider,
   WalletMobileProvider,
+  Fee,
 } from "@delphi-labs/shuttle";
 
 import { ShuttleStore, useShuttleStore } from "./store";
@@ -43,6 +44,7 @@ export type Shuttle = {
   broadcast: (options: {
     messages: TransactionMsg[];
     wallet?: WalletConnection | null;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -56,6 +58,7 @@ export type Shuttle = {
   }) => Promise<BroadcastResult>;
   sign: (options: {
     messages: TransactionMsg[];
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -202,6 +205,7 @@ export function createShuttle({
         broadcast: async ({
           messages,
           wallet,
+          fee,
           feeAmount,
           gasLimit,
           memo,
@@ -209,6 +213,7 @@ export function createShuttle({
         }: {
           messages: TransactionMsg[];
           wallet?: WalletConnection | null;
+          fee?: Fee | null;
           feeAmount?: string | null;
           gasLimit?: string | null;
           memo?: string | null;
@@ -234,10 +239,11 @@ export function createShuttle({
             throw new Error(`Provider ${walletToUse.providerId} not found`);
           }
 
-          return provider.broadcast({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, overrides });
+          return provider.broadcast({ messages, wallet: walletToUse, fee, feeAmount, gasLimit, memo, overrides });
         },
         sign: async ({
           messages,
+          fee,
           feeAmount,
           gasLimit,
           memo,
@@ -245,6 +251,7 @@ export function createShuttle({
           overrides,
         }: {
           messages: TransactionMsg[];
+          fee?: Fee | null;
           feeAmount?: string | null;
           gasLimit?: string | null;
           memo?: string | null;
@@ -271,7 +278,7 @@ export function createShuttle({
             throw new Error(`Provider ${walletToUse.providerId} not found`);
           }
 
-          return provider.sign({ messages, wallet: walletToUse, feeAmount, gasLimit, memo, overrides });
+          return provider.sign({ messages, wallet: walletToUse, fee, feeAmount, gasLimit, memo, overrides });
         },
         signArbitrary: async ({ wallet, data }: { wallet?: WalletConnection | null; data: Uint8Array }) => {
           const walletToUse = wallet || store.recentWallet;

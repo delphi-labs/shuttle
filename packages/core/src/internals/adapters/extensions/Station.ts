@@ -9,7 +9,7 @@ import SimulateClient from "../../../internals/cosmos/SimulateClient";
 import TxWatcher from "../../../internals/transactions/TxWatcher";
 import type { WalletExtensionProvider } from "../../../providers/extensions";
 import { ExtensionProviderAdapter } from "./";
-import { ArbitrarySigningClient } from "../../cosmos";
+import { ArbitrarySigningClient, Fee } from "../../cosmos";
 
 export type StationAccount = {
   address: string;
@@ -145,6 +145,7 @@ export class Station implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -153,6 +154,7 @@ export class Station implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -169,7 +171,7 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    if (feeAmount === "auto") {
+    if (!fee && feeAmount === "auto") {
       try {
         const simulate = await SimulateClient.run({
           network,
@@ -190,14 +192,16 @@ export class Station implements ExtensionProviderAdapter {
       overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-    const fee = JSON.stringify({
-      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
-      gas_limit: gasLimit || gas,
-    });
+    const computedFee = fee
+      ? JSON.stringify(fee)
+      : JSON.stringify({
+          amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
+          gas_limit: gasLimit || gas,
+        });
 
     const signing = await this.extension.sign({
       msgs: messages.map((message) => message.toTerraExtensionMsg()),
-      fee,
+      fee: computedFee,
       memo: memo || "",
       chainID: network.chainId,
     });
@@ -214,6 +218,7 @@ export class Station implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -222,6 +227,7 @@ export class Station implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -238,7 +244,7 @@ export class Station implements ExtensionProviderAdapter {
       throw new Error(`${this.name} is not available`);
     }
 
-    if (feeAmount === "auto") {
+    if (!fee && feeAmount === "auto") {
       try {
         const simulate = await SimulateClient.run({
           network,
@@ -254,19 +260,22 @@ export class Station implements ExtensionProviderAdapter {
         /* empty */
       }
     }
+
     const feeCurrency =
       overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gasPrice = GasPrice.fromString(overrides?.gasPrice ?? network.gasPrice ?? DEFAULT_GAS_PRICE);
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-    const fee = JSON.stringify({
-      amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
-      gas_limit: gasLimit || gas,
-    });
+    const computedFee = fee
+      ? JSON.stringify(fee)
+      : JSON.stringify({
+          amount: [{ amount: feeAmount && feeAmount != "auto" ? feeAmount : gas, denom: feeCurrency.coinMinimalDenom }],
+          gas_limit: gasLimit || gas,
+        });
 
     const post = await this.extension.post(
       {
         msgs: messages.map((message) => message.toTerraExtensionMsg()),
-        fee,
+        fee: computedFee,
         memo: memo || "",
         chainID: network.chainId,
       },

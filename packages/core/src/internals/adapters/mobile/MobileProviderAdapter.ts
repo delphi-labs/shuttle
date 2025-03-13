@@ -3,6 +3,7 @@ import type { WalletConnection, WalletMobileSession } from "../../wallet";
 import type { SigningResult } from "../../transactions";
 import type { TransactionMsg } from "../../transactions/messages";
 import type WalletMobileProvider from "../../../providers/mobile/WalletMobileProvider";
+import { Fee } from "../../cosmos";
 
 export default interface MobileProviderAdapter {
   init(provider: WalletMobileProvider, params: { walletConnectProjectId?: string }): Promise<void>;
@@ -23,6 +24,7 @@ export default interface MobileProviderAdapter {
       network: Network;
       messages: TransactionMsg[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;

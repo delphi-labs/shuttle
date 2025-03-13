@@ -14,6 +14,7 @@ export class InjectiveAminoSigningClient {
     network,
     wallet,
     messages,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -22,6 +23,7 @@ export class InjectiveAminoSigningClient {
     network: Network;
     wallet: WalletConnection;
     messages: TransactionMsg[];
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -40,7 +42,7 @@ export class InjectiveAminoSigningClient {
 
     let accountNumber = "";
     let sequence = "";
-    let fee: Fee = {
+    let computedFee: Fee = fee ?? {
       amount: [{ amount: gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
@@ -51,9 +53,9 @@ export class InjectiveAminoSigningClient {
     accountNumber = baseAccount.accountNumber.toString() || "";
     sequence = baseAccount.sequence.toString() || "";
 
-    if (feeAmount && feeAmount != "auto") {
+    if (!fee && feeAmount && feeAmount != "auto") {
       feeAmount = String(new BigNumberInBase(feeAmount).times(10 ** (feeCurrency.coinDecimals - 6)).toFixed(0));
-      fee = {
+      computedFee = {
         amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
         gas: gasLimit || gas,
       };
@@ -63,9 +65,9 @@ export class InjectiveAminoSigningClient {
       chain_id: network.chainId,
       account_number: accountNumber,
       sequence,
-      fee,
+      fee: computedFee,
       msgs: messages.map((message) => message.toAminoMsg()),
-      memo: memo || "",
+      memo: memo ?? "",
     };
   }
 }

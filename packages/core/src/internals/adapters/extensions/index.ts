@@ -3,6 +3,7 @@ import type { BroadcastResult, SigningResult } from "../../../internals/transact
 import type { TransactionMsg } from "../../../internals/transactions/messages";
 import type { WalletConnection } from "../../../internals/wallet";
 import type WalletExtensionProvider from "../../../providers/extensions/WalletExtensionProvider";
+import { Fee } from "../../cosmos";
 
 export interface ExtensionProviderAdapter {
   init(provider: WalletExtensionProvider): Promise<void>;
@@ -18,6 +19,7 @@ export interface ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -36,6 +38,7 @@ export interface ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;

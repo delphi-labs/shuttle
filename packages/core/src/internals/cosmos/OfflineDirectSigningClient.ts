@@ -9,6 +9,7 @@ import type { Network, NetworkCurrency } from "../../internals/network";
 import { DEFAULT_CURRENCY, DEFAULT_GAS_PRICE, isInjectiveNetwork } from "../../internals/network";
 import { extendedRegistryTypes } from "../registry";
 import InjectiveOfflineDirectSigningClient from "../injective/InjectiveOfflineDirectSigningClient";
+import { Fee } from ".";
 
 export class OfflineDirectSigningClient {
   static async sign(
@@ -17,6 +18,7 @@ export class OfflineDirectSigningClient {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -25,6 +27,7 @@ export class OfflineDirectSigningClient {
       network: Network;
       wallet: WalletConnection;
       messages: TransactionMsg[];
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -42,6 +45,7 @@ export class OfflineDirectSigningClient {
         network,
         wallet,
         messages,
+        fee,
         feeAmount,
         gasLimit,
         memo,
@@ -62,12 +66,12 @@ export class OfflineDirectSigningClient {
     const feeCurrency =
       overrides?.feeCurrency ?? network.feeCurrencies?.[0] ?? network.defaultCurrency ?? DEFAULT_CURRENCY;
     const gas = String(gasPrice.amount.toFloatApproximation() * 10 ** feeCurrency.coinDecimals);
-    const fee = {
+    const computedFee = fee ?? {
       amount: [{ amount: feeAmount || gas, denom: feeCurrency.coinMinimalDenom }],
       gas: gasLimit || gas,
     };
 
-    const txRaw = await client.sign(wallet.account.address, processedMessages, fee, memo || "");
+    const txRaw = await client.sign(wallet.account.address, processedMessages, computedFee, memo ?? "");
 
     return {
       signatures: txRaw.signatures,

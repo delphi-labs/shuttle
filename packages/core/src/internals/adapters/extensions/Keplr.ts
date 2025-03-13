@@ -22,7 +22,7 @@ import type WalletExtensionProvider from "../../../providers/extensions/WalletEx
 import AminoSigningClient from "../../../internals/cosmos/AminoSigningClient";
 import InjectiveEIP712SigningClient from "../../injective/InjectiveEIP712SigningClient";
 import OfflineDirectSigningClient from "../../../internals/cosmos/OfflineDirectSigningClient";
-import { ArbitrarySigningClient, BroadcastClient } from "../../../internals/cosmos";
+import { ArbitrarySigningClient, BroadcastClient, Fee } from "../../../internals/cosmos";
 import SignAndBroadcastClient from "../../../internals/cosmos/SignAndBroadcastClient";
 import { ExtensionProviderAdapter } from "./";
 
@@ -71,7 +71,15 @@ export type KeplrWindow = {
     signDoc: StdSignDoc,
     signOptions?: unknown,
   ): Promise<AminoSignResponse>;
-  signAmino(chainId: string, signer: string, signDoc: StdSignDoc, signOptions?: unknown): Promise<AminoSignResponse>;
+  signAmino(
+    chainId: string,
+    signer: string,
+    signDoc: StdSignDoc,
+    signOptions?: {
+      preferNoSetFee?: boolean;
+      preferNoSetMemo?: boolean;
+    },
+  ): Promise<AminoSignResponse>;
   getOfflineSigner(chainId: string): OfflineSigner & OfflineDirectSigner;
   signArbitrary(chainId: string, signer: string, data: string | Uint8Array): Promise<StdSignature>;
   verifyArbitrary(
@@ -213,6 +221,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -221,6 +230,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -238,13 +248,14 @@ export class Keplr implements ExtensionProviderAdapter {
     }
 
     if (wallet.account.isLedger) {
-      return await this.signLedger(provider, { network, wallet, messages, feeAmount, gasLimit, memo, overrides });
+      return await this.signLedger(provider, { network, wallet, messages, fee, feeAmount, gasLimit, memo, overrides });
     }
 
     return await OfflineDirectSigningClient.sign(this.keplr.getOfflineSigner(network.chainId), {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -258,6 +269,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -266,6 +278,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -291,6 +304,7 @@ export class Keplr implements ExtensionProviderAdapter {
         network,
         wallet,
         messages,
+        fee,
         feeAmount,
         gasLimit,
         memo,
@@ -317,24 +331,24 @@ export class Keplr implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
       overrides,
     });
-    console.log("signDoc", signDoc);
-
-    const signResponse = await this.keplr.signAmino(network.chainId, wallet.account.address, signDoc);
-
-    console.log("signResponse", signResponse);
+    const signResponse = await this.keplr.signAmino(network.chainId, wallet.account.address, signDoc, {
+      preferNoSetFee: true,
+      preferNoSetMemo: true,
+    });
 
     const result = await AminoSigningClient.finish({
       network,
       messages,
       signResponse,
+      memo,
     });
 
-    console.log("signLedger result", result);
     return result;
   }
 
@@ -344,6 +358,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -352,6 +367,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network: Network;
       messages: TransactionMsg<any>[];
       wallet: WalletConnection;
+      fee?: Fee | null;
       feeAmount?: string | null;
       gasLimit?: string | null;
       memo?: string | null;
@@ -373,12 +389,12 @@ export class Keplr implements ExtensionProviderAdapter {
         network,
         wallet,
         messages,
+        fee,
         feeAmount,
         gasLimit,
         memo,
         overrides,
       });
-      console.log(signResult);
 
       return await BroadcastClient.execute({ network, signResult, overrides });
     }
@@ -387,6 +403,7 @@ export class Keplr implements ExtensionProviderAdapter {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,

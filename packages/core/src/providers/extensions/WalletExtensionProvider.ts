@@ -4,6 +4,7 @@ import type { Network, NetworkCurrency } from "../../internals/network";
 import type { WalletConnection } from "../../internals/wallet";
 import SimulateClient from "../../internals/cosmos/SimulateClient";
 import { ExtensionProviderAdapter } from "../../internals/adapters/extensions";
+import { Fee } from "../../internals/cosmos";
 
 export abstract class WalletExtensionProvider {
   id: string;
@@ -127,6 +128,7 @@ export abstract class WalletExtensionProvider {
   async sign({
     messages,
     wallet,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -134,6 +136,7 @@ export abstract class WalletExtensionProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -165,6 +168,7 @@ export abstract class WalletExtensionProvider {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
@@ -175,6 +179,7 @@ export abstract class WalletExtensionProvider {
   async broadcast({
     messages,
     wallet,
+    fee,
     feeAmount,
     gasLimit,
     memo,
@@ -182,6 +187,7 @@ export abstract class WalletExtensionProvider {
   }: {
     messages: TransactionMsg[];
     wallet: WalletConnection;
+    fee?: Fee | null;
     feeAmount?: string | null;
     gasLimit?: string | null;
     memo?: string | null;
@@ -213,6 +219,7 @@ export abstract class WalletExtensionProvider {
       network,
       wallet,
       messages,
+      fee,
       feeAmount,
       gasLimit,
       memo,
