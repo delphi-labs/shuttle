@@ -2,6 +2,7 @@ import { MsgDepositForBurn as NobleMsgDepositForBurn } from "../../../externals/
 
 import { AminoMsg } from "@cosmjs/amino";
 import TransactionMsg, { ProtoMsg } from "./TransactionMsg";
+import { toBase64 } from "@cosmjs/encoding";
 
 export type MsgDepositForBurnValue = {
   from: string;
@@ -13,7 +14,7 @@ export type MsgDepositForBurnValue = {
 
 export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
   static override TYPE = "/circle.cctp.v1.MsgDepositForBurn";
-  static override AMINO_TYPE = "cosmos-sdk/MsgDepositForBurn";
+  static override AMINO_TYPE = "cctp/DepositForBurn";
 
   constructor({ from, amount, destinationDomain, mintRecipient, burnToken }: MsgDepositForBurnValue) {
     super(MsgDepositForBurn.TYPE, MsgDepositForBurn.AMINO_TYPE, {
@@ -31,7 +32,7 @@ export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
       from: this.value.from,
       amount: this.value.amount,
       destination_domain: this.value.destinationDomain,
-      mint_recipient: this.value.mintRecipient,
+      mint_recipient: toBase64(this.value.mintRecipient),
       burn_token: this.value.burnToken,
     });
   }
@@ -43,7 +44,7 @@ export class MsgDepositForBurn extends TransactionMsg<MsgDepositForBurnValue> {
         from: this.value.from,
         amount: this.value.amount,
         destination_domain: this.value.destinationDomain,
-        mint_recipient: this.value.mintRecipient,
+        mint_recipient: toBase64(this.value.mintRecipient),
         burn_token: this.value.burnToken,
       },
     };
