@@ -322,14 +322,20 @@ export class Keplr implements ExtensionProviderAdapter {
       memo,
       overrides,
     });
+    console.log("signDoc", signDoc);
 
     const signResponse = await this.keplr.signAmino(network.chainId, wallet.account.address, signDoc);
 
-    return await AminoSigningClient.finish({
+    console.log("signResponse", signResponse);
+
+    const result = await AminoSigningClient.finish({
       network,
       messages,
       signResponse,
     });
+
+    console.log("signLedger result", result);
+    return result;
   }
 
   async signAndBroadcast(
@@ -372,6 +378,7 @@ export class Keplr implements ExtensionProviderAdapter {
         memo,
         overrides,
       });
+      console.log(signResult);
 
       return await BroadcastClient.execute({ network, signResult, overrides });
     }
